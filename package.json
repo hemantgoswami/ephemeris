@@ -1,0 +1,29 @@
+{
+  "name": "ephemeris",
+  "version": "0.0.1-dev",
+  "description": "Javascript implementation of Moshier's ephemeris calculations for sun, planets, comets, asteroids and stars.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hemantgoswami/ephemeris"
+  },
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "scripts/build.js",
+    "test": "node test/index.js"
+  },
+  "keywords": [
+    "ephemeris",
+    "Moshier",
+    "astronomy",
+    "astrology",
+    "planet",
+    "planets"
+  ],
+  "author": "Hemantkumar Goswami",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "path": "^0.12.7",
+    "tape": "^4.9.0"
+  },
+  "dependencies": {}
+}
