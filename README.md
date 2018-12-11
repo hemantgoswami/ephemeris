@@ -22,6 +22,7 @@ const ephemeris = require('ephemeris');
 const Moment = require('moment-timezone');
 const dateObj = new Moment.tz('10.08.2015 17:09:01', 'DD.MM.YYYY HH:mm:ss', 'UTC')
 
+// parameters: ephemeris.getAllPlanets(dateObj, longitude, latitude, height);
 var result = ephemeris.getAllPlanets(dateObj, 10.0014, 53.5653, 0);
 
 /* Check out the namespaces: date, observer and observed:
