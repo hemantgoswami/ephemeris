@@ -2,38 +2,26 @@
 
 var eph = require('./build/')
 
-function setUp (iDate, geodeticalLongitude, geodeticalLatitude, height) {
-  var date
-
+function setUp (date, geodeticalLongitude, geodeticalLatitude, height) {
+  var d = !date ? new Date() : date;
   eph.const.tlong = geodeticalLongitude
   eph.const.glat = geodeticalLatitude
   eph.const.height = height
-
-  eph.const.date = iDate.format('DD.MM.YYYY HH:mm:ss')
-
-  if (eph.const.date) {
-    var tokens = eph.const.date.split(' ')
-
-    tokens[0] = tokens[0].split('.')
-    tokens[1] = tokens[1].split(':')
-
-    date = {
-      day: parseFloat(tokens[0][0]), // parseFloat strips leading zeros
-      month: parseFloat(tokens[0][1]),
-      year: parseFloat(tokens[0][2]),
-      hours: parseFloat(tokens[1][0]),
-      minutes: parseFloat(tokens[1][1]),
-      seconds: parseFloat(tokens[1][2])
-    }
-    eph.const.date = date
+  eph.const.date = {
+    day: d.getUTCDate(),
+    month: d.getUTCMonth()+1,
+    year: d.getUTCFullYear(),
+    hours: d.getUTCHours(),
+    minutes: d.getUTCMinutes(),
+    seconds: d.getUTCSeconds()
   }
   eph.processor.init()
 }
 
-// Example call: getAllPlanets(momentDateObj, 10.0014, 53.5653, 0);
-function getAllPlanets (iDate, geodeticalLongitude, geodeticalLatitude, height) {
+// Example call: getAllPlanets(new Date(), 10.0014, 53.5653, 0);
+function getAllPlanets (date, geodeticalLongitude, geodeticalLatitude, height) {
 
-  setUp(iDate, geodeticalLongitude, geodeticalLatitude, height)
+  setUp(date, geodeticalLongitude, geodeticalLatitude, height)
 
   var ret = {
     date: undefined,
@@ -93,10 +81,10 @@ function getAllPlanets (iDate, geodeticalLongitude, geodeticalLatitude, height) 
   return ret
 }
 
-// Example call: getPlanet('moon', momentDateObj, 10.0014, 53.5653, 0);
-function getPlanet (planetName, iDate, geodeticalLongitude, geodeticalLatitude, height) {
+// Example call: getPlanet('moon', new Date(), 10.0014, 53.5653, 0);
+function getPlanet (planetName, date, geodeticalLongitude, geodeticalLatitude, height) {
 
-  setUp(iDate, geodeticalLongitude, geodeticalLatitude, height)
+  setUp(date, geodeticalLongitude, geodeticalLatitude, height)
 
   var ret = {
     date: undefined,

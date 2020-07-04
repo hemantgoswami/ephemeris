@@ -5,7 +5,7 @@ This is basically Javascript implementation of [Moshier's ephemeris](http://www.
 Which, initially written by [mivion](https://github.com/mivion/ephemeris), xerik converted it into a node module. This is a slight customized version with following changes:
 
 1. Changes the transit method to get standard sun/moon rise/set times as well as a custom horizon based
-1. Takes in Moment date object as opposed to a date time string
+1. Takes in javascript date object as opposed to a date time string
 1. Implements a method to just fetch in single planet as opposed to all of it
 1. Removes html, css bit to keep it focused to one task
 1. Reformats the code
@@ -19,8 +19,7 @@ Which, initially written by [mivion](https://github.com/mivion/ephemeris), xerik
 *app.js*
 ```javascript
 const ephemeris = require('ephemeris');
-const Moment = require('moment-timezone');
-const dateObj = new Moment.tz('10.08.2015 17:09:01', 'DD.MM.YYYY HH:mm:ss', 'UTC')
+const dateObj = new Date('2015-08-10T17:09:01.000+08:00');
 
 // parameters: ephemeris.getAllPlanets(dateObj, longitude, latitude, height);
 var result = ephemeris.getAllPlanets(dateObj, 10.0014, 53.5653, 0);
