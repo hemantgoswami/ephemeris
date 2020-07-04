@@ -84,15 +84,13 @@ $ns.star.reduce = function (body) {
   body.position = {}
   body.position.approxVisualMagnitude = body.magnitude
 
-  /* Report astrometric position
-   */
-  body.position.astrimetricJ2000 = $util.showrd(p, polar)
+  /* Report astrometric position */
+  body.position.astrometricJ2000 = $util.showrd(p, polar)
 
-  /* Also in 1950 coordinates
-   */
+  /* Also in 1950 coordinates */
   $moshier.precess.calc(temp, {julian: $const.b1950}, -1)
 
-  body.position.astrimetricB1950 = $util.showrd(temp, polar)
+  body.position.astrometricB1950 = $util.showrd(temp, polar)
 
   /* For equinox of date: */
   for (i = 0; i < 3; i++) {
@@ -100,12 +98,12 @@ $ns.star.reduce = function (body) {
   }
 
   $moshier.precess.calc(temp, $moshier.body.earth.position.date, -1)
-  body.position.astrimetricDate = $util.showrd(temp, polar)
+  body.position.astrometricDate = $util.showrd(temp, polar)
 
   /* Correct position for light deflection
    * relativity( p, q, e );
    */
-  body.position.deflectioon = $moshier.deflectioon.calc(p, p, e) // relativity
+  body.position.deflection = $moshier.deflection.calc(p, p, e) // relativity
 
   /* Correct for annual aberration
    */
@@ -116,9 +114,7 @@ $ns.star.reduce = function (body) {
    */
   $moshier.precess.calc(p, $moshier.body.earth.position.date, -1)
 
-  /* Ajust for nutation
-   * at current ecliptic.
-   */
+  /* Adjust for nutation at current ecliptic. */
   $moshier.epsilon.calc($moshier.body.earth.position.date)
   $moshier.nutation.calc($moshier.body.earth.position.date, p)
 

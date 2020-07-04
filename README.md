@@ -54,7 +54,7 @@ var result = ephemeris.getAllPlanets(dateObj, 10.0014, 53.5653, 0);
      julianDelta: 0.0007872354540628362 },
   observer:
    { name: 'earth',
-     longitueGeodetic: 10.0014,
+     longitudeGeodetic: 10.0014,
      longitudeGeodecentric: 10.0014,
      latitudeGeodetic: 53.5653,
      latitudeGeodecentric: 53.38123133267187,

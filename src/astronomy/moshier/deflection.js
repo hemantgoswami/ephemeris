@@ -1,6 +1,6 @@
-$ns.deflectioon = {}
+$ns.deflection = {}
 
-$ns.deflectioon.calc = function (p, q, e, result) {
+$ns.deflection.calc = function (p, q, e, result) {
   var C // double
   var i // int
 

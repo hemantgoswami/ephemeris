@@ -1,6 +1,6 @@
-$ns.siderial = {}
+$ns.sidereal = {}
 
-$ns.siderial.calc = function (date, tlong) {
+$ns.sidereal.calc = function (date, tlong) {
   var jd0 // double    /* Julian day at midnight Universal Time */
   var secs // double  /* Time of day, UT seconds since UT midnight */
   var eqeq, gmst, jd, T0, msday // double

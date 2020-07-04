@@ -90,7 +90,7 @@ $ns.planet.reduce = function (body, q, e) {
 
   /* Correct position for light deflection
    */
-  body.position.deflection = $moshier.deflectioon.calc(p, q, e) // relativity
+  body.position.deflection = $moshier.deflection.calc(p, q, e) // relativity
 
   /* Correct for annual aberration
    */
@@ -101,9 +101,7 @@ $ns.planet.reduce = function (body, q, e) {
    */
   $moshier.precess.calc(p, $moshier.body.earth.position.date, -1)
 
-  /* Ajust for nutation
-   * at current ecliptic.
-   */
+  /* Adjust for nutation at current ecliptic. */
   $moshier.epsilon.calc($moshier.body.earth.position.date)
   body.position.nutation = $moshier.nutation.calc($moshier.body.earth.position.date, p)
 

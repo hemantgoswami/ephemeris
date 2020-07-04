@@ -16,7 +16,7 @@ $ns.transit = {
 	f_trnsit: 0, // int
 	southern_hemisphere: 0, // int
 
-	/* Julian dates of rise, transet and set times.  */
+	/* Julian dates of rise, transit and set times. */
 	t_rise: 0.0,
 	t_trnsit: 0.0,
 	elevation_trnsit: 0.0,
