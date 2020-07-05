@@ -2662,16 +2662,14 @@ $ns.altaz.calc = function (pol, date, result) {
   dist = pol[2]
   TPI = 2.0 * Math.PI
 
-  /* local apparent sidereal time, seconds converted to radians
-   */
+  /* local apparent sidereal time, seconds converted to radians */
   last = $moshier.sidereal.calc(date, $const.tlong) * $const.DTR / 240.0
   lha = last - ra
   /* local hour angle, radians */
   result.dLocalApparentSiderealTime = last
   result.localApparentSiderealTime = $util.hms(last)
 
-  /* Display rate at which ra and dec are changing
-   */
+  /* Display rate at which ra and dec are changing */
   /*
    *if( prtflg )
    *	{
@@ -4318,7 +4316,8 @@ $ns.planet.reduce = function (body, q, e) {
   $moshier.precess.calc(temp, {julian: $const.b1950}, -1)
   body.position.astrometricB1950 = $util.showrd(temp, polar)
 
-  /* Correct position for light deflection */
+  /* Correct position for light deflection
+   */
   body.position.deflection = $moshier.deflection.calc(p, q, e) // relativity
 
   /* Correct for annual aberration

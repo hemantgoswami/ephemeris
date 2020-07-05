@@ -14,6 +14,17 @@ Which, initially written by [mivion](https://github.com/mivion/ephemeris), xerik
 
 `npm install ephemeris`
 
+### Changelog 
+#### 2.0,.0 Breaking Changes - Please read carefully
+* Released 5th July 2020
+* Removes dependency on Moment.js and uses JavaScript's default date object
+* Fixes names of a few variables as there were typo's (Thanks [Erik](https://github.com/stenflo) for these changes)
+  
+#### 1.0.0
+* Released 30th June 2020
+* updates test and fixes test 
+
+
 ### Usage
 
 *app.js*
