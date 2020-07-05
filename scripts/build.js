@@ -45,7 +45,7 @@ var jsFilesInOrder = [ // does fs.readFile adjust the separators if running on w
   'src/astronomy/moshier/nutation.js',
   'src/astronomy/moshier/planet.js',
   'src/astronomy/moshier/refraction.js',
-  'src/astronomy/moshier/siderial.js',
+  'src/astronomy/moshier/sidereal.js',
   'src/astronomy/moshier/star.js',
   'src/astronomy/moshier/transit.js',
   'src/astronomy/moshier/vearth.js',

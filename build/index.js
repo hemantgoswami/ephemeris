@@ -2509,7 +2509,7 @@ $ns.sun.calc = function () {
   $moshier.body.sun.position.equinoxEclipticLonLat = $moshier.lonlat.calc(ecr, $moshier.body.earth.position.date, pol, 1) // TDT
 
   /* Philosophical note: the light time correction really affects
-   * only the Sun's barymetric position; aberration is due to
+   * only the Sun's barycentric position; aberration is due to
    * the speed of the Earth.  In Newtonian terms the aberration
    * is the same if the Earth is standing still and the Sun moving
    * or vice versa.  Thus the following is actually wrong, but it
@@ -2664,11 +2664,11 @@ $ns.altaz.calc = function (pol, date, result) {
 
   /* local apparent sidereal time, seconds converted to radians
    */
-  last = $moshier.siderial.calc(date, $const.tlong) * $const.DTR / 240.0
+  last = $moshier.sidereal.calc(date, $const.tlong) * $const.DTR / 240.0
   lha = last - ra
   /* local hour angle, radians */
-  result.dLocalApparentSiderialTime = last
-  result.localApparentSiderialTime = $util.hms(last)
+  result.dLocalApparentSiderealTime = last
+  result.localApparentSiderealTime = $util.hms(last)
 
   /* Display rate at which ra and dec are changing
    */
@@ -2683,9 +2683,9 @@ $ns.altaz.calc = function (pol, date, result) {
    *	}
    */
 
-  result.diurnalAberation = $moshier.diurnal.aberration(last, ra, dec)
-  ra = result.diurnalAberation.ra
-  dec = result.diurnalAberation.dec
+  result.diurnalAberration = $moshier.diurnal.aberration(last, ra, dec)
+  ra = result.diurnalAberration.ra
+  dec = result.diurnalAberration.dec
 
   /* Do rise, set, and transit times
    trnsit.c takes diurnal parallax into account,
@@ -3314,9 +3314,9 @@ $ns.constellation.calc = function (pp, epoch) {
 }
 
 // deflection.js
-$ns.deflectioon = {}
+$ns.deflection = {}
 
-$ns.deflectioon.calc = function (p, q, e, result) {
+$ns.deflection.calc = function (p, q, e, result) {
   var C // double
   var i // int
 
@@ -4318,9 +4318,8 @@ $ns.planet.reduce = function (body, q, e) {
   $moshier.precess.calc(temp, {julian: $const.b1950}, -1)
   body.position.astrometricB1950 = $util.showrd(temp, polar)
 
-  /* Correct position for light deflection
-   */
-  body.position.deflection = $moshier.deflectioon.calc(p, q, e) // relativity
+  /* Correct position for light deflection */
+  body.position.deflection = $moshier.deflection.calc(p, q, e) // relativity
 
   /* Correct for annual aberration
    */
@@ -4331,9 +4330,7 @@ $ns.planet.reduce = function (body, q, e) {
    */
   $moshier.precess.calc(p, $moshier.body.earth.position.date, -1)
 
-  /* Ajust for nutation
-   * at current ecliptic.
-   */
+  /* Adjust for nutation at current ecliptic. */
   $moshier.epsilon.calc($moshier.body.earth.position.date)
   body.position.nutation = $moshier.nutation.calc($moshier.body.earth.position.date, p)
 
@@ -4438,10 +4435,10 @@ $ns.refraction.calc = function (alt) {
   return D
 }
 
-// siderial.js
-$ns.siderial = {}
+// sidereal.js
+$ns.sidereal = {}
 
-$ns.siderial.calc = function (date, tlong) {
+$ns.sidereal.calc = function (date, tlong) {
   var jd0 // double    /* Julian day at midnight Universal Time */
   var secs // double  /* Time of day, UT seconds since UT midnight */
   var eqeq, gmst, jd, T0, msday // double
@@ -4582,15 +4579,13 @@ $ns.star.reduce = function (body) {
   body.position = {}
   body.position.approxVisualMagnitude = body.magnitude
 
-  /* Report astrometric position
-   */
-  body.position.astrimetricJ2000 = $util.showrd(p, polar)
+  /* Report astrometric position */
+  body.position.astrometricJ2000 = $util.showrd(p, polar)
 
-  /* Also in 1950 coordinates
-   */
+  /* Also in 1950 coordinates */
   $moshier.precess.calc(temp, {julian: $const.b1950}, -1)
 
-  body.position.astrimetricB1950 = $util.showrd(temp, polar)
+  body.position.astrometricB1950 = $util.showrd(temp, polar)
 
   /* For equinox of date: */
   for (i = 0; i < 3; i++) {
@@ -4598,12 +4593,12 @@ $ns.star.reduce = function (body) {
   }
 
   $moshier.precess.calc(temp, $moshier.body.earth.position.date, -1)
-  body.position.astrimetricDate = $util.showrd(temp, polar)
+  body.position.astrometricDate = $util.showrd(temp, polar)
 
   /* Correct position for light deflection
    * relativity( p, q, e );
    */
-  body.position.deflectioon = $moshier.deflectioon.calc(p, p, e) // relativity
+  body.position.deflection = $moshier.deflection.calc(p, p, e) // relativity
 
   /* Correct for annual aberration
    */
@@ -4614,9 +4609,7 @@ $ns.star.reduce = function (body) {
    */
   $moshier.precess.calc(p, $moshier.body.earth.position.date, -1)
 
-  /* Ajust for nutation
-   * at current ecliptic.
-   */
+  /* Adjust for nutation at current ecliptic. */
   $moshier.epsilon.calc($moshier.body.earth.position.date)
   $moshier.nutation.calc($moshier.body.earth.position.date, p)
 
@@ -4733,7 +4726,7 @@ $ns.transit = {
 	f_trnsit: 0, // int
 	southern_hemisphere: 0, // int
 
-	/* Julian dates of rise, transet and set times.  */
+	/* Julian dates of rise, transit and set times. */
 	t_rise: 0.0,
 	t_trnsit: 0.0,
 	elevation_trnsit: 0.0,
@@ -5234,7 +5227,7 @@ $ns.processor.calc = function (date, body) {
     (date.universalDate.seconds + date.universalDate.milliseconds / 1000)
 
 
-  // First to calculate the erath
+  // First calculate the earth
   $moshier.kepler.calc(date, $moshier.body.earth)
 
   switch (body.key) {
@@ -5308,8 +5301,8 @@ $ns.processor.test = function () {
   $assert(body.position.apparent.dRA, 2.7844808512258266)
   $assert(body.position.apparent.dDec, 0.23362556081599462)
 
-  $assert(body.position.altaz.diurnalAberation.ra, 2.7844805966970942)
-  $assert(body.position.altaz.diurnalAberation.dec, 0.23362530162522877)
+  $assert(body.position.altaz.diurnalAberration.ra, 2.7844805966970942)
+  $assert(body.position.altaz.diurnalAberration.dec, 0.23362530162522877)
 
   $assert(body.position.altaz.diurnalParallax.ra, 2.7967931740378766)
   $assert(body.position.altaz.diurnalParallax.dec, 0.2221893682125501)
@@ -5359,7 +5352,7 @@ $ns.processor.test = function () {
   $assert(body.position.altaz.topocentric.dec, -0.4006666463910222)
   $assert(body.position.altaz.topocentric.azimuth, 179.48488458374226)
 
-  // test the sirius
+  // test sirius
   date = {year: 1986, month: 1, day: 1, hours: 0, minutes: 0, seconds: 0}
   body = $moshier.body.sirius
   this.calc(date, body)
@@ -5370,15 +5363,15 @@ $ns.processor.test = function () {
   $assert(body.position.apparent.dRA, 1.7651675096112047)
   $assert(body.position.apparent.dDec, -0.29137543179606207)
 
-  $assert(body.position.astrimetricDate.dRA, 1.7651002655957506)
-  $assert(body.position.astrimetricDate.dDec, -0.29140596467162816)
+  $assert(body.position.astrometricDate.dRA, 1.7651002655957506)
+  $assert(body.position.astrometricDate.dDec, -0.29140596467162816)
 
   $assert(body.position.altaz.topocentric.altitude, 1.7060953673767152)
   $assert(body.position.altaz.topocentric.ra, -4.522192086886859)
   $assert(body.position.altaz.topocentric.dec, -0.2873401996237649)
   $assert(body.position.altaz.topocentric.azimuth, 114.21923743994829)
 
-  // test the sirius
+  // test sirius
   date = {year: 1986, month: 1, day: 1, hours: 0, minutes: 0, seconds: 0}
   body = $moshier.body.sirius
   this.calc(date, body)
@@ -5389,8 +5382,8 @@ $ns.processor.test = function () {
   $assert(body.position.apparent.dRA, 1.7651675096112047)
   $assert(body.position.apparent.dDec, -0.29137543179606207)
 
-  $assert(body.position.astrimetricDate.dRA, 1.7651002655957506)
-  $assert(body.position.astrimetricDate.dDec, -0.29140596467162816)
+  $assert(body.position.astrometricDate.dRA, 1.7651002655957506)
+  $assert(body.position.astrometricDate.dDec, -0.29140596467162816)
 
   $assert(body.position.altaz.topocentric.altitude, 1.7060953673767152)
   $assert(body.position.altaz.topocentric.ra, -4.522192086886859)

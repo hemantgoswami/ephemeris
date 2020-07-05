@@ -69,7 +69,7 @@ function getAllPlanets (iDate, geodeticalLongitude, geodeticalLatitude, height) 
     if (ret.observer === undefined) {
       ret.observer = {
         name: 'earth',
-        longitueGeodetic: (eph.const.tlong),
+        longitudeGeodetic: (eph.const.tlong),
         longitudeGeodecentric: (eph.const.tlong),
         latitudeGeodetic: (eph.const.glat),
         latitudeGeodecentric: (eph.const.tlat),
@@ -124,7 +124,7 @@ function getPlanet (planetName, iDate, geodeticalLongitude, geodeticalLatitude, 
   if (ret.observer === undefined) {
     ret.observer = {
       name: 'earth',
-      longitueGeodetic: (eph.const.tlong),
+      longitudeGeodetic: (eph.const.tlong),
       longitudeGeodecentric: (eph.const.tlong),
       latitudeGeodetic: (eph.const.glat),
       latitudeGeodecentric: (eph.const.tlat),

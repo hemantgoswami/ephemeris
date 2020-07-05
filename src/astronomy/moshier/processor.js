@@ -19,7 +19,7 @@ $ns.processor.calc = function (date, body) {
     (date.universalDate.seconds + date.universalDate.milliseconds / 1000)
 
 
-  // First to calculate the erath
+  // First calculate the earth
   $moshier.kepler.calc(date, $moshier.body.earth)
 
   switch (body.key) {
@@ -93,8 +93,8 @@ $ns.processor.test = function () {
   $assert(body.position.apparent.dRA, 2.7844808512258266)
   $assert(body.position.apparent.dDec, 0.23362556081599462)
 
-  $assert(body.position.altaz.diurnalAberation.ra, 2.7844805966970942)
-  $assert(body.position.altaz.diurnalAberation.dec, 0.23362530162522877)
+  $assert(body.position.altaz.diurnalAberration.ra, 2.7844805966970942)
+  $assert(body.position.altaz.diurnalAberration.dec, 0.23362530162522877)
 
   $assert(body.position.altaz.diurnalParallax.ra, 2.7967931740378766)
   $assert(body.position.altaz.diurnalParallax.dec, 0.2221893682125501)
@@ -144,7 +144,7 @@ $ns.processor.test = function () {
   $assert(body.position.altaz.topocentric.dec, -0.4006666463910222)
   $assert(body.position.altaz.topocentric.azimuth, 179.48488458374226)
 
-  // test the sirius
+  // test sirius
   date = {year: 1986, month: 1, day: 1, hours: 0, minutes: 0, seconds: 0}
   body = $moshier.body.sirius
   this.calc(date, body)
@@ -155,15 +155,15 @@ $ns.processor.test = function () {
   $assert(body.position.apparent.dRA, 1.7651675096112047)
   $assert(body.position.apparent.dDec, -0.29137543179606207)
 
-  $assert(body.position.astrimetricDate.dRA, 1.7651002655957506)
-  $assert(body.position.astrimetricDate.dDec, -0.29140596467162816)
+  $assert(body.position.astrometricDate.dRA, 1.7651002655957506)
+  $assert(body.position.astrometricDate.dDec, -0.29140596467162816)
 
   $assert(body.position.altaz.topocentric.altitude, 1.7060953673767152)
   $assert(body.position.altaz.topocentric.ra, -4.522192086886859)
   $assert(body.position.altaz.topocentric.dec, -0.2873401996237649)
   $assert(body.position.altaz.topocentric.azimuth, 114.21923743994829)
 
-  // test the sirius
+  // test sirius
   date = {year: 1986, month: 1, day: 1, hours: 0, minutes: 0, seconds: 0}
   body = $moshier.body.sirius
   this.calc(date, body)
@@ -174,8 +174,8 @@ $ns.processor.test = function () {
   $assert(body.position.apparent.dRA, 1.7651675096112047)
   $assert(body.position.apparent.dDec, -0.29137543179606207)
 
-  $assert(body.position.astrimetricDate.dRA, 1.7651002655957506)
-  $assert(body.position.astrimetricDate.dDec, -0.29140596467162816)
+  $assert(body.position.astrometricDate.dRA, 1.7651002655957506)
+  $assert(body.position.astrometricDate.dDec, -0.29140596467162816)
 
   $assert(body.position.altaz.topocentric.altitude, 1.7060953673767152)
   $assert(body.position.altaz.topocentric.ra, -4.522192086886859)

@@ -19,7 +19,7 @@ $ns.sun.calc = function () {
   $moshier.body.sun.position.equinoxEclipticLonLat = $moshier.lonlat.calc(ecr, $moshier.body.earth.position.date, pol, 1) // TDT
 
   /* Philosophical note: the light time correction really affects
-   * only the Sun's barymetric position; aberration is due to
+   * only the Sun's barycentric position; aberration is due to
    * the speed of the Earth.  In Newtonian terms the aberration
    * is the same if the Earth is standing still and the Sun moving
    * or vice versa.  Thus the following is actually wrong, but it

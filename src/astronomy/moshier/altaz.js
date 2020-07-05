@@ -16,16 +16,14 @@ $ns.altaz.calc = function (pol, date, result) {
   dist = pol[2]
   TPI = 2.0 * Math.PI
 
-  /* local apparent sidereal time, seconds converted to radians
-   */
-  last = $moshier.siderial.calc(date, $const.tlong) * $const.DTR / 240.0
+  /* local apparent sidereal time, seconds converted to radians */
+  last = $moshier.sidereal.calc(date, $const.tlong) * $const.DTR / 240.0
   lha = last - ra
   /* local hour angle, radians */
-  result.dLocalApparentSiderialTime = last
-  result.localApparentSiderialTime = $util.hms(last)
+  result.dLocalApparentSiderealTime = last
+  result.localApparentSiderealTime = $util.hms(last)
 
-  /* Display rate at which ra and dec are changing
-   */
+  /* Display rate at which ra and dec are changing */
   /*
    *if( prtflg )
    *	{
@@ -37,9 +35,9 @@ $ns.altaz.calc = function (pol, date, result) {
    *	}
    */
 
-  result.diurnalAberation = $moshier.diurnal.aberration(last, ra, dec)
-  ra = result.diurnalAberation.ra
-  dec = result.diurnalAberation.dec
+  result.diurnalAberration = $moshier.diurnal.aberration(last, ra, dec)
+  ra = result.diurnalAberration.ra
+  dec = result.diurnalAberration.dec
 
   /* Do rise, set, and transit times
    trnsit.c takes diurnal parallax into account,
