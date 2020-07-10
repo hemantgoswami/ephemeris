@@ -1,11 +1,11 @@
 This source is modified version of [xerik](https://www.npmjs.com/package/ephemeris-moshier). Thank you for such a brilliant piece of work.
 
-This is basically Javascript implementation of [Moshier's ephemeris](http://www.moshier.net) calculations for sun, planets, comets, asteroids and stars.
+This is basically JavaScript implementation of [Moshier's ephemeris](http://www.moshier.net) calculations for sun, planets, comets, asteroids and stars.
 
 Which, initially written by [mivion](https://github.com/mivion/ephemeris), xerik converted it into a node module. This is a slight customized version with following changes:
 
 1. Changes the transit method to get standard sun/moon rise/set times as well as a custom horizon based
-1. Takes in javascript date object as opposed to a date time string
+1. Takes in JavaScript date object as opposed to a date time string
 1. Implements a method to just fetch in single planet as opposed to all of it
 1. Removes html, css bit to keep it focused to one task
 1. Reformats the code
@@ -18,7 +18,7 @@ Which, initially written by [mivion](https://github.com/mivion/ephemeris), xerik
 #### 2.0,.0 Breaking Changes - Please read carefully
 * Released 5th July 2020
 * Removes dependency on Moment.js and uses JavaScript's default date object
-* Fixes names of a few variables as there were typo's (Thanks [Erik](https://github.com/stenflo) for these changes)
+* Fixes names of a few variables as there were typos (Thanks [Erik](https://github.com/stenflo) for these changes)
   
 #### 1.0.0
 * Released 30th June 2020
@@ -65,11 +65,11 @@ var result = ephemeris.getAllPlanets(dateObj, 10.0014, 53.5653, 0);
   observer:
    { name: 'earth',
      longitudeGeodetic: 10.0014,
-     longitudeGeodecentric: 10.0014,
+     longitudeGeocentric: 10.0014,
      latitudeGeodetic: 53.5653,
-     latitudeGeodecentric: 53.38123133267187,
+     latitudeGeocentric: 53.38123133267187,
      heightGeodetic: 0,
-     heightGeodecentric: 6364.336264644461 },
+     heightGeocentric: 6364.336264644461 },
   observed:
    { sun:
       { name: 'sun',
@@ -158,11 +158,11 @@ var result = ephemeris.getAllPlanets(dateObj, 10.0014, 53.5653, 0);
 */
 ```
 
-### Contributers
+### Contributors
 
 This implementation based on code by [Steve Moshier](http://www.moshier.net).
 
-The inital Javascript code has been written by [xerik](https://github.com/xErik/ephemeris-moshier).
+The initial JavaScript code has been written by [xerik](https://github.com/xErik/ephemeris-moshier).
 
 
 ### License

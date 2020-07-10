@@ -46,33 +46,33 @@ function getAllPlanets (date, geodeticalLongitude, geodeticalLatitude, height) {
       ret.date = {
         gregorianTerrestrial: [date.day, date.month, date.year].join('.') + ' ' + [date.hours, date.minutes, date.seconds].join(':'),
         gregorianTerrestrialRaw: date,
-        gregorianUniversal: (eph.const.date.universalDateString),
-        gregorianDelta: ('00:00:' + (eph.const.date.delta)),
-        julianTerrestrial: (eph.const.date.julian),
-        julianUniversal: (eph.const.date.universal),
-        julianDelta: (eph.const.date.delta / 86400)
+        gregorianUniversal: eph.const.date.universalDateString,
+        gregorianDelta: '00:00:' + eph.const.date.delta,
+        julianTerrestrial: eph.const.date.julian,
+        julianUniversal: eph.const.date.universal,
+        julianDelta: eph.const.date.delta / 86400
       }
     }
 
     if (ret.observer === undefined) {
       ret.observer = {
         name: 'earth',
-        longitudeGeodetic: (eph.const.tlong),
-        longitudeGeodecentric: (eph.const.tlong),
-        latitudeGeodetic: (eph.const.glat),
-        latitudeGeodecentric: (eph.const.tlat),
-        heightGeodetic: (eph.const.height),
-        heightGeodecentric: (eph.const.trho * eph.const.aearth / 1000),
+        longitudeGeodetic: eph.const.tlong,
+        longitudeGeocentric: eph.const.tlong,
+        latitudeGeodetic: eph.const.glat,
+        latitudeGeocentric: eph.const.tlat,
+        heightGeodetic: eph.const.height,
+        heightGeocentric: eph.const.trho * eph.const.aearth / 1000
       }
     }
 
     var body = {
       name: eph.const.body.key,
       raw: eph.const.body,
-      apparentLongitudeDms30: (eph.const.body.position.apparentLongitude30String),
-      apparentLongitudeDms360: (eph.const.body.position.apparentLongitudeString),
-      apparentLongitudeDd: (eph.const.body.position.apparentLongitude),
-      geocentricDistanceKm: (eph.const.body.position.geocentricDistance)
+      apparentLongitudeDms30: eph.const.body.position.apparentLongitude30String,
+      apparentLongitudeDms360: eph.const.body.position.apparentLongitudeString,
+      apparentLongitudeDd: eph.const.body.position.apparentLongitude,
+      geocentricDistanceKm: eph.const.body.position.geocentricDistance
     }
     ret.observed[body.name] = body
 
@@ -101,33 +101,33 @@ function getPlanet (planetName, date, geodeticalLongitude, geodeticalLatitude, h
     ret.date = {
       gregorianTerrestrial: [date.day, date.month, date.year].join('.') + ' ' + [date.hours, date.minutes, date.seconds].join(':'),
       gregorianTerrestrialRaw: date,
-      gregorianUniversal: (eph.const.date.universalDateString),
-      gregorianDelta: ('00:00:' + (eph.const.date.delta)),
-      julianTerrestrial: (eph.const.date.julian),
-      julianUniversal: (eph.const.date.universal),
-      julianDelta: (eph.const.date.delta / 86400)
+      gregorianUniversal: eph.const.date.universalDateString,
+      gregorianDelta: '00:00:' + eph.const.date.delta,
+      julianTerrestrial: eph.const.date.julian,
+      julianUniversal: eph.const.date.universal,
+      julianDelta: eph.const.date.delta / 86400
     }
   }
 
   if (ret.observer === undefined) {
     ret.observer = {
       name: 'earth',
-      longitudeGeodetic: (eph.const.tlong),
-      longitudeGeodecentric: (eph.const.tlong),
-      latitudeGeodetic: (eph.const.glat),
-      latitudeGeodecentric: (eph.const.tlat),
-      heightGeodetic: (eph.const.height),
-      heightGeodecentric: (eph.const.trho * eph.const.aearth / 1000),
+      longitudeGeodetic: eph.const.tlong,
+      longitudeGeocentric: eph.const.tlong,
+      latitudeGeodetic: eph.const.glat,
+      latitudeGeocentric: eph.const.tlat,
+      heightGeodetic: eph.const.height,
+      heightGeocentric: eph.const.trho * eph.const.aearth / 1000
     }
   }
 
   var body = {
     name: eph.const.body.key,
     raw: eph.const.body,
-    apparentLongitudeDms30: (eph.const.body.position.apparentLongitude30String),
-    apparentLongitudeDms360: (eph.const.body.position.apparentLongitudeString),
-    apparentLongitudeDd: (eph.const.body.position.apparentLongitude),
-    geocentricDistanceKm: (eph.const.body.position.geocentricDistance)
+    apparentLongitudeDms30: eph.const.body.position.apparentLongitude30String,
+    apparentLongitudeDms360: eph.const.body.position.apparentLongitudeString,
+    apparentLongitudeDd: eph.const.body.position.apparentLongitude,
+    geocentricDistanceKm: eph.const.body.position.geocentricDistance
   }
   ret.observed[body.name] = body
 

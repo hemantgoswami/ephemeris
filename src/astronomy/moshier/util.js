@@ -236,7 +236,7 @@ $ns.util.showrd = function (p, pol, result) {
 }
 
 /*
- * Convert change in rectangular coordinatates to change
+ * Convert change in rectangular coordinates to change
  * in right ascension and declination.
  * For changes greater than about 0.1 degree, the
  * coordinates are converted directly to R.A. and Dec.
@@ -343,7 +343,7 @@ $ns.util.angles = function (p, q, e) {
   /* Sun - object */
   $const.SE = Math.sqrt($const.SE)
   /* Sun - earth */
-  /* Avoid fatality: if object equals sun, SO is zero.  */
+  /* Avoid fatality: if object equals sun, SO is zero. */
   if ($const.SO > 1.0e-12) {
     $const.pq /= $const.EO * $const.SO
     /* cosine of sun-object-earth */

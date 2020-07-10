@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// This beauty concatenates Javascript files and prepares the resulting
+// This beauty concatenates JavaScript files and prepares the resulting
 // file for node, by adding "module.exports = {...}".
 //
 // The resulting file will be written to the folder: build/ .
@@ -67,14 +67,16 @@ var jsFilesInOrder = [ // does fs.readFile adjust the separators if running on w
   'src/shortcut.js'
 ]
 
-var targetPath = path.join(__dirname, '..', 'build', 'index.js')
+var buildDir = path.join(__dirname, '..', 'build')
+if (!fs.existsSync(buildDir)) {
+  fs.mkdirSync(buildDir);
+}
+var targetPath = path.join(buildDir, 'index.js')
 var shortcut = fs.readFileSync(path.join(__dirname, '..', 'src', 'shortcut.js'), 'utf-8')
 shortcut = shortcut.replace(/=/g, ':').replace(/;/g, ',').replace(/(^|\n)\$/g, '\n')
 
 for (var i = 0; i < jsFilesInOrder.length; i++) {
-
   var file = jsFilesInOrder[i]
-
   concat += '\n// ' + path.basename(file) + '\n' // Add a comment
   concat += fs.readFileSync(file, 'utf-8') // Add content of file
 }
