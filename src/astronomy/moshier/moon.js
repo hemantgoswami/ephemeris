@@ -102,12 +102,10 @@ $ns.moon.calc = function () {
     dmsLongitude.minutes + '\'' +
     Math.floor(dmsLongitude.seconds) + '"'
 
-
   $moshier.body.moon.position.apparentLongitude30String =
     $util.mod30(dmsLongitude.degree) + '\u00B0' +
     dmsLongitude.minutes + '\'' +
     Math.floor(dmsLongitude.seconds) + '"'
-
 
   $moshier.body.moon.position.geocentricDistance = moonpol [2] / $const.Rearth
 
@@ -121,7 +119,7 @@ $ns.moon.calc = function () {
   $moshier.body.moon.position.Semidiameter = $util.dms(x)
 
   x = $const.RTD * Math.acos(-$const.ep)
-  /*	x = 180.0 - RTD * arcdot (re, pp); */
+  /* x = 180.0 - RTD * arcdot (re, pp); */
   $moshier.body.moon.position.sunElongation = x
   x = 0.5 * (1.0 + $const.pq)
   $moshier.body.moon.position.illuminatedFraction = x
@@ -163,8 +161,7 @@ $ns.moon.calc = function () {
     dec: $util.dms(this.dec)
   }
 
-  /* Compute and display topocentric position (altaz.c)
-   */
+  /* Compute and display topocentric position (altaz.js) */
   pp[0] = this.ra
   pp[1] = this.dec
   pp[2] = moonpol[2]
@@ -181,9 +178,9 @@ $ns.moon.calcll = function (date, rect, pol, result) {
 
   result = result || {}
 
-  /* Compute obliquity of the ecliptic, coseps, and sineps.  */
+  /* Compute obliquity of the ecliptic, coseps, and sineps. */
   $moshier.epsilon.calc(date)
-  /* Get geometric coordinates of the Moon.  */
+  /* Get geometric coordinates of the Moon. */
   $moshier.gplan.moon(date, rect, pol)
   /* Post the geometric ecliptic longitude and latitude, in radians,
    * and the radius in au.
