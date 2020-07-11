@@ -9,8 +9,7 @@ $ns.sun.calc = function () {
 
   $moshier.body.sun.position = $moshier.body.sun.position || {}
 
-  /* Display ecliptic longitude and latitude.
-   */
+  /* Display ecliptic longitude and latitude. */
   for (i = 0; i < 3; i++) {
     ecr[i] = -$moshier.body.earth.position.rect [i]//-rearth[i];
   }
@@ -66,16 +65,14 @@ $ns.sun.calc = function () {
    * AA page B39.
    */
 
-  /* precess to equinox of date
-   */
+  /* precess to equinox of date */
   $moshier.precess.calc(ecr, $moshier.body.earth.position.date, -1)
 
   for (i = 0; i < 3; i++) {
     rec[i] = ecr[i]
   }
 
-  /* Nutation.
-   */
+  /* Nutation */
   $moshier.epsilon.calc($moshier.body.earth.position.date)
   $moshier.nutation.calc($moshier.body.earth.position.date, ecr)
 
@@ -96,16 +93,13 @@ $ns.sun.calc = function () {
     dmsLongitude.minutes + '\'' +
     Math.floor(dmsLongitude.seconds) + '"'
 
-
   $moshier.body.sun.position.apparentLongitude30String =
     $util.mod30(dmsLongitude.degree) + '\u00B0' +
     dmsLongitude.minutes + '\'' +
     Math.floor(dmsLongitude.seconds) + '"'
 
-
   $moshier.body.sun.position.geocentricDistance = -1
 
-  /* Report altitude and azimuth
-   */
+  /* Report altitude and azimuth */
   $moshier.body.sun.position.altaz = $moshier.altaz.calc(pol, $moshier.body.earth.position.date)
 }

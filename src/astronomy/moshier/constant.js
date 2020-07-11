@@ -7,7 +7,6 @@ $ns.constant = {
   j1900: 2415020.0, /* 1900 January 0, 12h UT */
   RTOH: 12.0 / Math.PI, /* Radians to hours, minutes, seconds */
 
-
   /* Conversion factors between degrees and radians */
   DTR: 1.7453292519943295769e-2,
   RTD: 5.7295779513082320877e1,

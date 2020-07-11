@@ -40,7 +40,7 @@ $ns.altaz.calc = function (pol, date, result) {
   dec = result.diurnalAberration.dec
 
   /* Do rise, set, and transit times
-   trnsit.js takes diurnal parallax into account,
+   transit.js takes diurnal parallax into account,
    but not diurnal aberration. */
   lha = last - ra
   result.transit = $moshier.transit.calc(date, lha, dec)
@@ -51,7 +51,7 @@ $ns.altaz.calc = function (pol, date, result) {
   dec = result.diurnalParallax.dec
 
   /* Diurnal aberration */
-  /*diurab( last, &ra, &dec );*/
+  /* diurab( last, &ra, &dec ); */
 
   /* Convert ra and dec to altitude and azimuth */
   cosdec = Math.cos(dec)
