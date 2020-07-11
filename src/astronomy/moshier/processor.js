@@ -18,7 +18,6 @@ $ns.processor.calc = function (date, body) {
     date.universalDate.minutes + ':' +
     (date.universalDate.seconds + date.universalDate.milliseconds / 1000)
 
-
   // First calculate the earth
   $moshier.kepler.calc(date, $moshier.body.earth)
 
@@ -42,8 +41,7 @@ $ns.processor.calc = function (date, body) {
 $ns.processor.ecliptic = function (date, observer, body) {
   this.calc(date, observer)
   this.calc(date, body)
-
-  //this.reduce (observer, body);
+  // this.reduce (observer, body);
 }
 
 $ns.processor.init = function () {

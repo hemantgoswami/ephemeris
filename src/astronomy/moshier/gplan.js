@@ -123,12 +123,12 @@ $ns.gplan.calc = function (date, body_ptable, polar) {
         if (j < 0)
           su = -su
         cu = this.cc[m][k]
-        if (k1 == 0) {    /* set first angle */
+        if (k1 == 0) { /* set first angle */
           sv = su
           cv = cu
           k1 = 1
         }
-        else {    /* combine angles */
+        else { /* combine angles */
           t = su * cv + cu * sv
           cv = cu * cv - su * sv
           sv = t
@@ -222,7 +222,7 @@ $ns.gplan.meanElements = function (date) {
     + 0.0059381) * T2
   this.Args[1] = $const.STR * x
 
-  /* Earth  */
+  /* Earth */
   x = $util.mods3600(129597742.283429 * T + 361679.198)
   x += (-5.23e-6 * T
     - 2.04411e-2) * T2
@@ -399,14 +399,14 @@ $ns.gplan.calc3 = function (date, body_ptable, polar, body_number) {
     np = p [p_i++] //*p++;
     if (np < 0)
       break
-    if (np == 0) {      /* It is a polynomial term.  */
+    if (np == 0) { /* It is a polynomial term.  */
       nt = p [p_i++] //*p++;
       /* "Longitude" polynomial (phi). */
       cu = pl [pl_i++] //*pl++;
       for (ip = 0; ip < nt; ip++) {
         cu = cu * T + pl [pl_i++] //*pl++;
       }
-      /*	  sl +=  mods3600 (cu); */
+      /* sl += mods3600 (cu); */
       sl += cu
       /* "Latitude" polynomial (theta). */
       cu = pb [pb_i++] //*pb++;
@@ -431,7 +431,7 @@ $ns.gplan.calc3 = function (date, body_ptable, polar, body_number) {
       /* Which planet.  */
       m = p [p_i++] - 1 //*p++ - 1;
       if (j) {
-        /*	      k = abs (j); */
+        /* k = abs (j); */
         if (j < 0)
           k = -j
         else
@@ -442,12 +442,12 @@ $ns.gplan.calc3 = function (date, body_ptable, polar, body_number) {
         if (j < 0)
           su = -su
         cu = this.cc[m][k]
-        if (k1 == 0) {    /* set first angle */
+        if (k1 == 0) { /* set first angle */
           sv = su
           cv = cu
           k1 = 1
         }
-        else {    /* combine angles */
+        else { /* combine angles */
           t = su * cv + cu * sv
           cv = cu * cv - su * sv
           sv = t
@@ -529,14 +529,14 @@ $ns.gplan.calc2 = function (date, body_ptable, polar) {
     np = p [p_i++] //*p++;
     if (np < 0)
       break
-    if (np == 0) {      /* It is a polynomial term.  */
+    if (np == 0) { /* It is a polynomial term. */
       nt = p [p_i++] //*p++;
       /* Longitude polynomial. */
       cu = pl [pl_i++] //*pl++;
       for (ip = 0; ip < nt; ip++) {
         cu = cu * T + pl [pl_i++] //*pl++;
       }
-      /*	  sl +=  mods3600 (cu); */
+      /* sl += mods3600 (cu); */
       sl += cu
       /* Radius polynomial. */
       cu = pr [pr_i++] //*pr++;
@@ -555,7 +555,7 @@ $ns.gplan.calc2 = function (date, body_ptable, polar) {
       /* Which planet.  */
       m = p [p_i++] - 1 //*p++ - 1;
       if (j) {
-        /*	      k = abs (j); */
+        /* k = abs (j); */
         if (j < 0)
           k = -j
         else
@@ -566,12 +566,12 @@ $ns.gplan.calc2 = function (date, body_ptable, polar) {
         if (j < 0)
           su = -su
         cu = this.cc[m][k]
-        if (k1 == 0) {    /* set first angle */
+        if (k1 == 0) { /* set first angle */
           sv = su
           cv = cu
           k1 = 1
         }
-        else {    /* combine angles */
+        else { /* combine angles */
           t = su * cv + cu * sv
           cv = cu * cv - su * sv
           sv = t
@@ -637,13 +637,13 @@ $ns.gplan.calc1 = function (date, body_ptable) {
     np = p [p_i++] //*p++;
     if (np < 0)
       break
-    if (np == 0) {      /* It is a polynomial term.  */
+    if (np == 0) { /* It is a polynomial term.  */
       nt = p [p_i++] //*p++;
       cu = pl [pl_i++] //*pl++;
       for (ip = 0; ip < nt; ip++) {
         cu = cu * T + pl [pl_i++] //*pl++;
       }
-      /*	  sl +=  mods3600 (cu); */
+      /* sl += mods3600 (cu); */
       sl += cu
       continue
     }
@@ -651,12 +651,12 @@ $ns.gplan.calc1 = function (date, body_ptable) {
     cv = 0.0
     sv = 0.0
     for (ip = 0; ip < np; ip++) {
-      /* What harmonic.  */
+      /* What harmonic. */
       j = p [p_i++] //*p++;
-      /* Which planet.  */
+      /* Which planet. */
       m = p [p_i++] - 1 //*p++ - 1;
       if (j) {
-        /*	      k = abs (j); */
+        /* k = abs (j); */
         if (j < 0)
           k = -j
         else
@@ -667,12 +667,12 @@ $ns.gplan.calc1 = function (date, body_ptable) {
         if (j < 0)
           su = -su
         cu = this.cc[m][k]
-        if (k1 == 0) {    /* set first angle */
+        if (k1 == 0) { /* set first angle */
           sv = su
           cv = cu
           k1 = 1
         }
-        else {    /* combine angles */
+        else { /* combine angles */
           t = su * cv + cu * sv
           cv = cu * cv - su * sv
           sv = t

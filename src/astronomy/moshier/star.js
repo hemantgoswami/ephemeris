@@ -16,7 +16,6 @@ $ns.star.reduce = function (body) {
 
   /* Convert from RA and Dec to equatorial rectangular direction
    */
-// loop:
   do {
     cosdec = Math.cos(body.dec)
     sindec = Math.sin(body.dec)
@@ -44,7 +43,7 @@ $ns.star.reduce = function (body) {
     /* Convert FK4 to FK5 catalogue */
     if (epoch == $const.b1950) {
       $moshier.fk4fk5.calc(q, m, body)
-      //goto loop;
+      // continue;
     }
   } while (epoch == $const.b1950)
 
@@ -55,8 +54,7 @@ $ns.star.reduce = function (body) {
   /* precess the earth to the star epoch */
   $moshier.precess.calc(e, {julian: epoch}, -1)
 
-  /* Correct for proper motion and parallax
-   */
+  /* Correct for proper motion and parallax */
   T = ($moshier.body.earth.position.date.julian - epoch) / 36525.0
   for (i = 0; i < 3; i++) {
     p[i] = q[i] + T * m[i] - body.parallax * e[i]
@@ -74,8 +72,7 @@ $ns.star.reduce = function (body) {
    */
   $util.angles(p, p, e)
 
-  /* Find unit vector from earth in direction of object
-   */
+  /* Find unit vector from earth in direction of object */
   for (i = 0; i < 3; i++) {
     p[i] /= $const.EO
     temp[i] = p[i]
@@ -105,8 +102,7 @@ $ns.star.reduce = function (body) {
    */
   body.position.deflection = $moshier.deflection.calc(p, p, e) // relativity
 
-  /* Correct for annual aberration
-   */
+  /* Correct for annual aberration */
   body.position.aberration = $moshier.aberration.calc(p)
 
   /* Precession of the equinox and ecliptic
@@ -131,17 +127,14 @@ $ns.star.reduce = function (body) {
     dmsLongitude.minutes + '\'' +
     Math.floor(dmsLongitude.seconds) + '"'
 
-
   body.position.apparentLongitude30String =
     $util.mod30(dmsLongitude.degree) + '\u00B0' +
     dmsLongitude.minutes + '\'' +
     Math.floor(dmsLongitude.seconds) + '"'
 
-
   body.position.geocentricDistance = 7777
 
-  /* Go do topocentric reductions.
-   */
+  /* Go do topocentric reductions. */
   $const.dradt = 0.0
   $const.ddecdt = 0.0
   polar [2] = 1.0e38
@@ -157,11 +150,10 @@ $ns.star.prepare = function (body) {
   var p // char array
   var i // int
 
-  /* Read in the ASCII string data and name of the object
-   */
-//	sscanf( s, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %s",
-//		&body->epoch, &rh, &rm, &rs, &dd, &dm, &ds,
-//	&body->mura, &body->mudec, &body->v, &body->px, &body->mag, &body->obname[0] );
+  /* Read in the ASCII string data and name of the object */
+  // sscanf( s, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %s",
+  //   &body->epoch, &rh, &rm, &rs, &dd, &dm, &ds,
+  //   &body->mura, &body->mudec, &body->v, &body->px, &body->mag, &body->obname[0] );
 
   x = body.epoch
   if (x == 2000.0) {
