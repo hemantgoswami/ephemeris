@@ -20,7 +20,7 @@
     "planets"
   ],
   "author": "Hemantkumar Goswami",
-  "license": "GPL-2.0",
+  "license": "GPL-3.0",
   "devDependencies": {
     "path": "^0.12.7",
     "tape": "^4.13.3"
