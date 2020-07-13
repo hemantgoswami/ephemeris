@@ -81,7 +81,7 @@ $ns.delta.dt = [
 $ns.delta.demo = 0
 $ns.delta.TABSTART = 1620
 $ns.delta.TABEND = 2011
-$ns.delta.TABSIZ = ($ns.delta.TABEND - $ns.delta.TABSTART + 1)
+$ns.delta.TABSIZ = $ns.delta.TABEND - $ns.delta.TABSTART + 1
 
 $ns.delta.calc = function (date) {
   var p, B // double
@@ -91,16 +91,16 @@ $ns.delta.calc = function (date) {
   if ($const.dtgiven) {
     date.delta = $const.dtgiven
   } else if (date.j2000 > this.TABEND) {
-    /* Extrapolate future values beyond the lookup table.  */
-    if (date.j2000 > (this.TABEND + 100.0)) {
-      /* Morrison & Stephenson (2004) long-term curve fit.  */
+    /* Extrapolate future values beyond the lookup table. */
+    if (date.j2000 > this.TABEND + 100.0) {
+      /* Morrison & Stephenson (2004) long-term curve fit. */
       B = (date.j2000 - 1820.0) / 100
       date.delta = 32.0 * B * B - 20.0
     } else {
       var a, b, c, d, m0, m1 // double
 
       /* Cubic interpolation between last tabulated value
-       and long-term curve evaluated at 100 years later.  */
+       and long-term curve evaluated at 100 years later. */
 
       /* Last tabulated delta T value. */
       a = this.dt [this.TABSIZ - 1] / 100
@@ -134,10 +134,10 @@ $ns.delta.calc = function (date) {
       date.delta = a + p * (b + p * (c + p * d))
     }
   } else {
-    /* Use Morrison and Stephenson (2004) prior to the year 1700.  */
+    /* Use Morrison and Stephenson (2004) prior to the year 1700. */
     if (date.j2000 < 1700.0) {
       if (date.j2000 <= -1000.0) {
-        /* Morrison and Stephenson long-term fit.  */
+        /* Morrison and Stephenson long-term fit. */
         B = (date.j2000 - 1820.0) / 100
         date.delta = 32.0 * B * B - 20.0
       } else {
@@ -147,7 +147,7 @@ $ns.delta.calc = function (date) {
         iy = Math.floor((iy + 1000) / 100)
         /* Integer index into the table. */
         B = -1000 + 100 * iy
-        /* Starting year of tabulated interval.  */
+        /* Starting year of tabulated interval. */
         p = this.m_s [iy]
         date.delta = p + (date.j2000 - B) * (this.m_s [iy + 1] - p) / 100
       }
@@ -157,27 +157,24 @@ $ns.delta.calc = function (date) {
        * See AA page K11.
        */
 
-      /* Index into the table.
-       */
+      /* Index into the table. */
       p = Math.floor(date.j2000)
       iy = Math.floor(p - this.TABSTART)
       /* Zeroth order estimate is value at start of year
        */
       date.delta = this.dt [iy]
       k = iy + 1
-      if (!(k >= this.TABSIZ)) {
-        /* The fraction of tabulation interval
-         */
+      if (k < this.TABSIZ) {
+        /* The fraction of tabulation interval */
         p = date.j2000 - p
 
-        /* First order interpolated value
-         */
+        /* First order interpolated value */
         date.delta += p * (this.dt [k] - this.dt [iy])
-        if (!((iy - 1 < 0) || (iy + 2 >= this.TABSIZ))) {
+        if (iy - 1 >= 0 && iy + 2 < this.TABSIZ) {
           // make table of first differences
           k = iy - 2
           for (i = 0; i < 5; i++) {
-            if ((k < 0) || (k + 1 >= this.TABSIZ)) {
+            if (k < 0 || k + 1 >= this.TABSIZ) {
               diff[i] = 0
             } else {
               diff[i] = this.dt[k + 1] - this.dt[k]
@@ -192,14 +189,14 @@ $ns.delta.calc = function (date) {
           B = 0.25 * p * (p - 1.0)
           date.delta += B * (diff[1] + diff[2])
 
-          if (!(iy + 2 >= this.TABSIZ)) {
+          if (iy + 2 < this.TABSIZ) {
             // Compute third differences
             for (i = 0; i < 3; i++) {
               diff[i] = diff[i + 1] - diff[i]
             }
             B = 2.0 * B / 3.0
             date.delta += (p - 0.5) * B * diff[1]
-            if (!((iy - 2 < 0) || (iy + 3 > this.TABSIZ))) {
+            if (iy - 2 >= 0 && iy + 3 <= this.TABSIZ) {
               // Compute fourth differences
               for (i = 0; i < 2; i++) {
                 diff[i] = diff[i + 1] - diff[i]
