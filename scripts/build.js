@@ -17,7 +17,6 @@ var concat = ''
 var jsFilesInOrder = [ // does fs.readFile adjust the separators if running on windows?
   'src/index.js',
   'src/common.js',
-  'src/load.js',
 
   'src/astronomy/index.js',
 
