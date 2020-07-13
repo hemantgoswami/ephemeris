@@ -1,6 +1,5 @@
 $ns.nutation = {
-  /* The answers are posted here by nutlo():
-   */
+  /* The answers are posted here by nutlo(): */
   jdnut: {}, /* time to which the nutation applies */
   nutl: 0.0, /* nutation in longitude (radians) */
   nuto: 0.0, /* nutation in obliquity (radians) */
@@ -217,7 +216,7 @@ $ns.nutation.calclo = function (date) {
   var p // short array
 
   if (this.jdnut.julian == date.julian)
-    return (0)
+    return 0
   this.jdnut = date
 
   /* Julian centuries from 2000 January 1.5,
@@ -227,7 +226,7 @@ $ns.nutation.calclo = function (date) {
   T2 = T * T
   T10 = T / 10.0
 
-  /* Fundamental arguments in the FK5 reference system.  */
+  /* Fundamental arguments in the FK5 reference system. */
 
   /* longitude of the mean ascending node of the lunar orbit
    * on the ecliptic, measured from the mean equinox of date
@@ -253,13 +252,11 @@ $ns.nutation.calclo = function (date) {
   FF = ($util.mods3600(1739527263.137 * T + 335778.877) + (0.011 * T - 13.257) * T2)
     * $const.STR
 
-  /* mean elongation of the Moon from the Sun.
-   */
+  /* mean elongation of the Moon from the Sun. */
   DD = ($util.mods3600(1602961601.328 * T + 1072261.307) + (0.019 * T - 6.891) * T2)
     * $const.STR
 
-  /* Calculate sin( i*MM ), etc. for needed multiple angles
-   */
+  /* Calculate sin( i*MM ), etc. for needed multiple angles */
   this.sscc(0, MM, 3)
   this.sscc(1, MS, 2)
   this.sscc(2, FF, 4)

@@ -14,8 +14,7 @@ $ns.star.reduce = function (body) {
   var cosdec, sindec, cosra, sinra // double
   var i // int
 
-  /* Convert from RA and Dec to equatorial rectangular direction
-   */
+  /* Convert from RA and Dec to equatorial rectangular direction */
   do {
     cosdec = Math.cos(body.dec)
     sindec = Math.sin(body.dec)
@@ -177,7 +176,7 @@ $ns.star.prepare = function (body) {
     sign = 1
 
     /* the '-' sign may appaer at any part of hmsDec */
-    if ((body.hmsDec.hours < 0.0) || (body.hmsDec.minutes < 0.0) || (body.hmsDec.seconds < 0.0)) {
+    if (body.hmsDec.hours < 0.0 || body.hmsDec.minutes < 0.0 || body.hmsDec.seconds < 0.0) {
       sign = -1
     }
     z = (3600.0 * Math.abs(body.hmsDec.hours) + 60.0 * Math.abs(body.hmsDec.minutes) + Math.abs(body.hmsDec.seconds)) / $const.RTS

@@ -13,8 +13,8 @@ $ns.transit = {
   r_set: 0.0,
   elevation_threshold: 0.0,
   semidiameter: 0.0,
-  f_trnsit: 0, // int
-  southern_hemisphere: 0, // int
+  f_trnsit: false, // boolean
+  southern_hemisphere: false, // boolean
 
   /* Julian dates of rise, transit and set times. */
   t_rise: 0.0,
@@ -35,7 +35,7 @@ $ns.transit.calc = function (date, lha, dec, result) {
 
   result = result || {};
 
-  this.f_trnsit = 0;
+  this.f_trnsit = false;
   /* Initialize to no-event flag value. */
   this.r_rise = -10.0;
   this.r_set = -10.0;
@@ -47,11 +47,7 @@ $ns.transit.calc = function (date, lha, dec, result) {
   cosdec = Math.cos(dec);
   sindec = Math.sin(dec);
 
-  if (sinlat < 0) {
-    this.southern_hemisphere = 1;
-  } else {
-    this.southern_hemisphere = 0;
-  }
+  this.southern_hemisphere = sinlat < 0;
 
   /* Refer to same start of date as iter_trnsit,
    so r_trnsit means the same thing in both programs. */
@@ -60,10 +56,10 @@ $ns.transit.calc = function (date, lha, dec, result) {
   /* adjust local hour angle */
   y = lha;
   /* printf ("%.7f,", lha); */
-  while( y < -Math.PI ) {
+  while (y < -Math.PI) {
     y += $const.TPI;
   }
-  while( y > Math.PI ) {
+  while (y > Math.PI) {
     y -= $const.TPI;
   }
   lhay = y;
@@ -74,11 +70,11 @@ $ns.transit.calc = function (date, lha, dec, result) {
   result.approxLocalMeridian = $util.hms (this.r_trnsit);
   result.UTdate = this.r_trnsit/$const.TPI;
 
-  if( !(coslat == 0.0 || cosdec == 0.0) ) {
+  if (coslat != 0.0 && cosdec != 0.0) {
     /* The time at which the upper limb of the body meets the
      * horizon depends on the body's angular diameter.
      */
-    switch( $const.body.key ) {
+    switch ($const.body.key) {
       /* Sun */
       case 'sun':
         nArr[0] = this.COSSUN;
@@ -114,9 +110,9 @@ $ns.transit.calc = function (date, lha, dec, result) {
     YR[0] = (NR[0] - sinlat*sindec)/(coslat*cosdec);
     YR[1] = (NR[1] - sinlat*sindec)/(coslat*cosdec);
 
-    if( YR[0] < 1.0 && YR[0] > -1.0 && YR[1] < 1.0 && YR[1] > -1.0 )
+    if (YR[0] < 1.0 && YR[0] > -1.0 && YR[1] < 1.0 && YR[1] > -1.0)
     {
-      this.f_trnsit = 1;
+      this.f_trnsit = true;
 
       /* Derivative of y with respect to declination
        * times rate of change of declination:
@@ -165,7 +161,6 @@ $ns.transit.iterator = function (julian, callback) {
 
 /* Iterative computation of rise, transit, and set times. */
 $ns.transit.iterateTransit = function (callback, result) {
-  // var JDsave, TDTsave, UTsave; // double
   var date, date_trnsit, t0, t1; // double
   var rise1, set1, trnsit1, loopctr, retry; // double
   var isPrtrnsit = false;
@@ -173,9 +168,6 @@ $ns.transit.iterateTransit = function (callback, result) {
   result = result || {};
 
   loopctr = 0;
-  // JDsave = JD;
-  // TDTsave = TDT;
-  // UTsave = UT;
   retry = 0;
   /* Start iteration at time given by the user. */
   t1 = $moshier.body.earth.position.date.universal; // UT
@@ -192,12 +184,12 @@ $ns.transit.iterateTransit = function (callback, result) {
     }
   } while (Math.abs (t1 - t0) > .0001);
 
-  if (!(loopctr > 10)) {
+  if (loopctr <= 10) {
     this.t_trnsit = t1;
     this.elevation_trnsit = $moshier.altaz.elevation;
     trnsit1 = this.r_trnsit;
     set1 = this.r_set;
-    if (this.f_trnsit == 0) {
+    if (!this.f_trnsit) {
       /* Rise or set time not found. Apply a search technique to
        check near inferior transit if object is above horizon now. */
       this.t_rise = -1.0;
@@ -220,31 +212,28 @@ $ns.transit.iterateTransit = function (callback, result) {
         t0 = t1;
         this.iterator (t0, callback);
         /* Skip out if no event found. */
-        if (this.f_trnsit == 0) {
+        if (!this.f_trnsit) {
           /* Rise or set time not found. Apply search technique. */
           this.t_rise = -1.0;
           this.t_set = -1.0;
           this.noRiseSet (this.t_trnsit, callback);
           isPrtrnsit = true;
           // goto prtrnsit;
+        } else if (++loopctr > 10) {
+          // Rise time did not converge
+          this.f_trnsit = false;
+          isPrtrnsit = true;
+          // goto prtrnsit;
         } else {
-          if (++loopctr > 10) {
-            // Rise time did not converge
-            this.f_trnsit = 0;
-            isPrtrnsit = true;
-            // goto prtrnsit;
-          } else {
+          t1 = date + this.r_rise / $const.TPI;
+          if (t1 > this.t_trnsit) {
+            date -= 1;
             t1 = date + this.r_rise / $const.TPI;
-            if (t1 > this.t_trnsit) {
-              date -= 1;
-              t1 = date + this.r_rise / $const.TPI;
-            }
           }
         }
       } while (Math.abs (t1 - t0) > .0001);
 
       if (!isPrtrnsit) {
-        isPrtrnsit = false;
         rise1 = this.r_rise;
         this.t_rise = t1;
 
@@ -261,25 +250,23 @@ $ns.transit.iterateTransit = function (callback, result) {
         do {
           t0 = t1;
           this.iterator (t0, callback);
-          if (this.f_trnsit == 0) {
+          if (!this.f_trnsit) {
             /* Rise or set time not found. Apply search technique. */
             this.t_rise = -1.0;
             this.t_set = -1.0;
             this.noRiseSet (this.t_trnsit, callback);
             isPrtrnsit = true;
-            //goto prtrnsit;
+            // goto prtrnsit;
+          } else if (++loopctr > 10) {
+            // Set time did not converge
+            this.f_trnsit = false;
+            isPrtrnsit = true;
+            // goto prtrnsit;
           } else {
-            if (++loopctr > 10) {
-              // Set time did not converge
-              this.f_trnsit = 0;
-              isPrtrnsit = true;
-              //goto prtrnsit;
-            } else {
+            t1 = date + this.r_set / $const.TPI;
+            if (t1 < this.t_trnsit) {
+              date += 1.0;
               t1 = date + this.r_set / $const.TPI;
-              if (t1 < this.t_trnsit) {
-                date += 1.0;
-                t1 = date + this.r_set / $const.TPI;
-              }
             }
           }
         } while (fabs(t1 - t0) > .0001);
@@ -300,29 +287,24 @@ $ns.transit.iterateTransit = function (callback, result) {
       result.setDate = $moshier.julian.toGregorian ({julian: this.t_set});
       if (this.t_rise != -1.0) {
         t0 = this.t_set - this.t_rise;
-        if ((t0 > 0.0) && (t0 < 1.0)) {
+        if (t0 > 0.0 && t0 < 1.0) {
           result.visibleHaours = 24.0 * t0;
         }
       }
     }
 
     if (
-      (Math.abs($moshier.body.earth.position.date.julian - this.t_rise) > 0.5) &&
-      (Math.abs($moshier.body.earth.position.date.julian - this.t_trnsit) > 0.5) &&
-      (Math.abs($moshier.body.earth.position.date.julian - this.t_set) > 0.5)
+      Math.abs($moshier.body.earth.position.date.julian - this.t_rise) > 0.5 &&
+      Math.abs($moshier.body.earth.position.date.julian - this.t_trnsit) > 0.5 &&
+      Math.abs($moshier.body.earth.position.date.julian - this.t_set) > 0.5
     ) {
       // wrong event date
       result.wrongEventDate = true;
     }
   }
 // no_trnsit:
-  // JD = JDsave;
-  // TDT = TDTsave;
-  // UT = UTsave;
-  /* Reset to original input date entry. */
-  // update();
   // prtflg = prtsave;
-  this.f_trnsit = 1;
+  this.f_trnsit = true;
   return result;
 };
 
@@ -359,32 +341,31 @@ $ns.transit.noRiseSet = function (t0, callback) {
     }
     /* Step time by an amount proportional to the azimuth deviation. */
     e = azimuth/360.0;
-    if (azimuth < 180.0)
-    {
-      if (this.southern_hemisphere == 0) {
-        t -= this.STEP_SCALE * e;
-      } else {
+    if (azimuth < 180.0) {
+      if (this.southern_hemisphere) {
         t += this.STEP_SCALE * e;
+      } else {
+        t -= this.STEP_SCALE * e;
       }
     } else {
       e = 1.0 - e;
-      if (this.southern_hemisphere == 0) {
-        t += this.STEP_SCALE * e;
-      } else {
+      if (this.southern_hemisphere) {
         t -= this.STEP_SCALE * e;
+      } else {
+        t += this.STEP_SCALE * e;
       }
     }
   }
 
   /* No rise event detected. */
   if ($moshier.altaz.elevation > this.elevation_threshold) {
-    /* printf ("Previous inferior transit is above horizon.\n"); */
+    /* Previous inferior transit is above horizon. */
     this.t_rise = -1.0;
   } else {
-  /* Find missed rise time. */
+    /* Find missed rise time. */
 // search_rise:
     this.t_rise = this.searchHalve (t_below, el_below, t_above, el_above, callback);
-    this.f_trnsit = 1;
+    this.f_trnsit = true;
   }
 
   /* Step forward in time toward the next inferior transit. */
@@ -410,30 +391,30 @@ $ns.transit.noRiseSet = function (t0, callback) {
     /* Step time by an amount proportional to the azimuth deviation. */
     e = $moshier.altaz.azimuth/360.0;
     if ($moshier.altaz.azimuth < 180.0) {
-      if (this.southern_hemisphere == 0) {
-        t -= this.STEP_SCALE * e;
-      } else {
+      if (this.southern_hemisphere) {
         t += this.STEP_SCALE * e; /* Southern hemisphere observer. */
+      } else {
+        t -= this.STEP_SCALE * e;
       }
     } else {
       e = 1.0 - e;
-      if (this.southern_hemisphere == 0) {
-        t += this.STEP_SCALE * e;
-      } else {
+      if (this.southern_hemisphere) {
         t -= this.STEP_SCALE * e;
+      } else {
+        t += this.STEP_SCALE * e;
       }
     }
   }
 
   if ($moshier.altaz.elevation > this.elevation_threshold) {
-    /* printf ("Next inferior transit is above horizon.\n"); */
+    /* Next inferior transit is above horizon. */
     this.t_set = -1.0;
     // return 0;
   } else {
-  /* Find missed set time. */
+    /* Find missed set time. */
 // search_set:
     this.t_set = search_halve (t, elevation, this.t_trnsit, this.elevation_trnsit, callback);
-    this.f_trnsit = 1;
+    this.f_trnsit = true;
   }
 };
 
@@ -446,14 +427,14 @@ $ns.transit.searchHalve = function (t1, y1, t2, y2, callback) {
   e1 = y1 - this.elevation_threshold;
   tm = 0.5 * (t1 + t2);
 
-  while( Math.abs(t2 - t1) > .00001 ) {
+  while (Math.abs(t2 - t1) > .00001) {
     /* Evaluate at middle of current interval. */
     tm = 0.5 * (t1 + t2);
     this.iterator (tm, callback);
     ym = $moshier.altaz.elevation;
     em = ym - this.elevation_threshold;
     /* Replace the interval boundary whose error has the same sign as em. */
-    if( em * e2 > 0 ) {
+    if (em * e2 > 0) {
       y2 = ym;
       t2 = tm;
       e2 = em;
