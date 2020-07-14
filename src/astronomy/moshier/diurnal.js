@@ -8,68 +8,57 @@ $ns.diurnal = {
  * annual aberration.  However, the correction is small.
  */
 $ns.diurnal.aberration = function (last, ra, dec, result) {
-  var lha, coslha, sinlha, cosdec, sindec // double
-  var coslat, N, D // double
+  var lha = last - ra
+  var coslha = Math.cos(lha)
+  var sinlha = Math.sin(lha)
+  var cosdec = Math.cos(dec)
+  var sindec = Math.sin(dec)
+  var coslat = Math.cos($const.DTR * $const.tlat)
+
+  var N = cosdec != 0.0 ? 1.5472e-6 * $const.trho * coslat * coslha / cosdec : 0.0
+  var D = 1.5472e-6 * $const.trho * coslat * sinlha * sindec
 
   result = result || {}
   result.ra = ra
   result.dec = dec
-
-  lha = last - result.ra
-  coslha = Math.cos(lha)
-  sinlha = Math.sin(lha)
-  cosdec = Math.cos(result.dec)
-  sindec = Math.sin(result.dec)
-  coslat = Math.cos($const.DTR * $const.tlat)
-
-  if (cosdec != 0.0)
-    N = 1.5472e-6 * $const.trho * coslat * coslha / cosdec
-  else
-    N = 0.0
   result.ra += N
-
-  D = 1.5472e-6 * $const.trho * coslat * sinlha * sindec
   result.dec += D
-
   result.dRA = $const.RTS * N / 15.0
   result.dDec = $const.RTS * D
 
   return result
 }
 
-/* Diurnal parallax, AA page D3
- */
+/* Diurnal parallax, AA page D3 */
 $ns.diurnal.parallax = function (last, ra, dec, dist, result) {
-  var cosdec, sindec, coslat, sinlat // double
-  var p = [], dp = [], x, y, z, D // double
+  var p = [], dp = [] // double
 
   result = result || {}
-  result.ra = ra
-  result.dec = dec
 
   /* Don't bother with this unless the equatorial horizontal parallax
    * is at least 0.005"
    */
   if (dist > 1758.8) {
+    result.ra = ra
+    result.dec = dec
     return result
   }
 
   this.DISFAC = $const.au / (0.001 * $const.aearth)
-  cosdec = Math.cos(result.dec)
-  sindec = Math.sin(result.dec)
+  var cosdec = Math.cos(dec)
+  var sindec = Math.sin(dec)
 
-  /* Observer's astronomical latitude
-   */
-  x = $const.tlat * $const.DTR
-  coslat = Math.cos(x)
-  sinlat = Math.sin(x)
+  /* Observer's astronomical latitude */
+  var x = $const.tlat * $const.DTR
+  var coslat = Math.cos(x)
+  var sinlat = Math.sin(x)
 
   /* Convert to equatorial rectangular coordinates
    * in which unit distance = earth radius
    */
-  D = dist * this.DISFAC
-  p[0] = D * cosdec * Math.cos(result.ra)
-  p[1] = D * cosdec * Math.sin(result.ra)
+  var D = dist * this.DISFAC
+  p[0] = D * cosdec * Math.cos(ra)
+  p[1] = D * cosdec * Math.sin(ra)
   p[2] = D * sindec
 
   dp[0] = -$const.trho * coslat * Math.cos(last)
@@ -77,13 +66,12 @@ $ns.diurnal.parallax = function (last, ra, dec, dist, result) {
   dp[2] = -$const.trho * sinlat
 
   x = p[0] + dp[0]
-  y = p[1] + dp[1]
-  z = p[2] + dp[2]
+  var y = p[1] + dp[1]
+  var z = p[2] + dp[2]
   D = x * x + y * y + z * z
   D = Math.sqrt(D)
   /* topocentric distance */
 
-  /* recompute ra and dec */
   result.ra = $util.zatan2(x, y)
   result.dec = Math.asin(z / D)
   $util.showcor(p, dp, result)

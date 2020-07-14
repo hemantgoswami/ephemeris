@@ -29,9 +29,7 @@ $ns.transit = {
  * assuming RA and Dec change uniformly with time
  */
 $ns.transit.calc = function (date, lha, dec, result) {
-  var x, y, N, z, D; // double
-  var lhay, cosdec, sindec, coslat, sinlat; // double
-  var nArr = [], NR = [], NS = [], YR = [], YS = [], zArr = []
+  var NR = [], YR = [];
 
   result = result || {};
 
@@ -40,12 +38,11 @@ $ns.transit.calc = function (date, lha, dec, result) {
   this.r_rise = -10.0;
   this.r_set = -10.0;
   /* observer's geodetic latitude, in radians */
-  x = $const.glat * $const.DTR;
-  coslat = Math.cos(x);
-  sinlat = Math.sin(x);
-
-  cosdec = Math.cos(dec);
-  sindec = Math.sin(dec);
+  var x = $const.glat * $const.DTR;
+  var coslat = Math.cos(x);
+  var sinlat = Math.sin(x);
+  var cosdec = Math.cos(dec);
+  var sindec = Math.sin(dec);
 
   this.southern_hemisphere = sinlat < 0;
 
@@ -54,7 +51,7 @@ $ns.transit.calc = function (date, lha, dec, result) {
   x = Math.floor(date.universal - 0.5) + 0.5; // UT
   x = (date.universal - x) * $const.TPI; // UT
   /* adjust local hour angle */
-  y = lha;
+  var y = lha;
   /* printf ("%.7f,", lha); */
   while (y < -Math.PI) {
     y += $const.TPI;
@@ -62,7 +59,7 @@ $ns.transit.calc = function (date, lha, dec, result) {
   while (y > Math.PI) {
     y -= $const.TPI;
   }
-  lhay = y;
+  var lhay = y;
   y = y/( -$const.dradt/$const.TPI + 1.00273790934);
   this.r_trnsit = x - y;
   /* printf ("rt %.7f ", r_trnsit); */
@@ -77,20 +74,18 @@ $ns.transit.calc = function (date, lha, dec, result) {
     switch ($const.body.key) {
       /* Sun */
       case 'sun':
-        nArr[0] = this.COSSUN;
-        nArr[1] = $const.COSSUN;
         this.semidiameter = 0.2666666666666667;
         this.elevation_threshold = -0.8333333333333333;
-        NR[0] = nArr[0]
-        NR[1] = nArr[1]
+        NR[0] = this.COSSUN
+        NR[1] = $const.COSSUN
         break;
 
       /* Moon, elevation = -34' - semidiameter + parallax
        * semidiameter = 0.272453 * parallax + 0.0799"
        */
       case 'moon':
-        N = 1.0/(this.DISFAC*$const.body.position.polar [2]);
-        D = Math.asin( N ); /* the parallax */
+        var N = 1.0/(this.DISFAC*$const.body.position.polar[2]);
+        var D = Math.asin(N); /* the parallax */
         this.semidiameter = 0.2725076*D + 3.874e-7;
         NR[0] = NR[1] = -9.890199094634534e-3 - this.semidiameter + D;
         this.semidiameter *= $const.RTD;
@@ -100,8 +95,7 @@ $ns.transit.calc = function (date, lha, dec, result) {
 
       /* Other object */
       default:
-        nArr[0] = this.COSZEN;
-        NR[0] = NR[1] = nArr[0]
+        NR[0] = NR[1] = this.COSZEN
         this.semidiameter = 0.0;
         this.elevation_threshold = -0.5666666666666666;
         break;
@@ -117,11 +111,12 @@ $ns.transit.calc = function (date, lha, dec, result) {
       /* Derivative of y with respect to declination
        * times rate of change of declination:
        */
-      z = -$const.ddecdt*(sinlat + this.COSZEN*sindec);
+      var z = -$const.ddecdt*(sinlat + this.COSZEN*sindec);
       z /= $const.TPI*coslat*cosdec*cosdec;
       /* Derivative of acos(y): */
-      zArr[0] = z / Math.sqrt( 1.0 - YR[0]*YR[0]);
-      zArr[1] = z / Math.sqrt( 1.0 - YR[1]*YR[1]);
+      var zArr = [];
+      zArr[0] = z / Math.sqrt(1.0 - YR[0]*YR[0]);
+      zArr[1] = z / Math.sqrt(1.0 - YR[1]*YR[1]);
       YR[0] = Math.acos(YR[0]);
       YR[1] = Math.acos(YR[1]);
       D = -$const.dradt/$const.TPI + 1.00273790934;
@@ -161,16 +156,12 @@ $ns.transit.iterator = function (julian, callback) {
 
 /* Iterative computation of rise, transit, and set times. */
 $ns.transit.iterateTransit = function (callback, result) {
-  var date, date_trnsit, t0, t1; // double
-  var rise1, set1, trnsit1, loopctr, retry; // double
+  var date, t0; // double
   var isPrtrnsit = false;
-
-  result = result || {};
-
-  loopctr = 0;
-  retry = 0;
+  var loopctr = 0;
+  // var retry = 0;
   /* Start iteration at time given by the user. */
-  t1 = $moshier.body.earth.position.date.universal; // UT
+  var t1 = $moshier.body.earth.position.date.universal; // UT
 
   /* Find transit time. */
   do {
@@ -187,8 +178,8 @@ $ns.transit.iterateTransit = function (callback, result) {
   if (loopctr <= 10) {
     this.t_trnsit = t1;
     this.elevation_trnsit = $moshier.altaz.elevation;
-    trnsit1 = this.r_trnsit;
-    set1 = this.r_set;
+    var trnsit1 = this.r_trnsit;
+    var set1 = this.r_set;
     if (!this.f_trnsit) {
       /* Rise or set time not found. Apply a search technique to
        check near inferior transit if object is above horizon now. */
@@ -200,7 +191,7 @@ $ns.transit.iterateTransit = function (callback, result) {
       // goto prtrnsit;
     } else {
       /* Set current date to be that of the transit just found. */
-      date_trnsit = date;
+      var date_trnsit = date;
       t1 = date + this.r_rise / $const.TPI;
       /* Choose rising no later than transit. */
       if (t1 >= this.t_trnsit) {
@@ -234,7 +225,7 @@ $ns.transit.iterateTransit = function (callback, result) {
       } while (Math.abs (t1 - t0) > .0001);
 
       if (!isPrtrnsit) {
-        rise1 = this.r_rise;
+        var rise1 = this.r_rise;
         this.t_rise = t1;
 
         /* Set current date to be that of the transit. */
@@ -279,6 +270,7 @@ $ns.transit.iterateTransit = function (callback, result) {
       }
     }
 // prtrnsit:
+    result = result || {};
     result.localMeridianTransit = $moshier.julian.toGregorian ({julian: this.t_trnsit});
     if (this.t_rise != -1.0) {
       result.riseDate = $moshier.julian.toGregorian ({julian: this.t_rise});
@@ -314,18 +306,16 @@ $ns.transit.iterateTransit = function (callback, result) {
 $ns.transit.noRiseSet = function (t0, callback) {
   var t_trnsit0 = this.t_trnsit; // double
   var el_trnsit0 = this.elevation_trnsit; // double
-  var t, e; // double
-  var t_above, el_above, t_below, el_below; // double
 
   /* Step time toward previous inferior transit to find
    whether a rise event was missed. The step size is a function
    of the azimuth and decreases near the transit time. */
-  t_above = t_trnsit0;
-  el_above = el_trnsit0;
-  t_below = -1.0;
-  el_below = el_above;
-  t = t_trnsit0 - 0.25;
-  e = 1.0;
+  var t_above = t_trnsit0;
+  var el_above = el_trnsit0;
+  var t_below = -1.0;
+  var el_below = el_above;
+  var t = t_trnsit0 - 0.25;
+  var e = 1.0;
   while (e > 0.005) {
     this.iterator (t, callback);
     if ($moshier.altaz.elevation > this.elevation_threshold) {
@@ -421,18 +411,16 @@ $ns.transit.noRiseSet = function (t0, callback) {
 /* Search rise or set time by simple interval halving
  after the event has been bracketed in time. */
 $ns.transit.searchHalve = function (t1, y1, t2, y2, callback) {
-  var e2, e1, em, tm, ym; // double
-
-  e2 = y2 - this.elevation_threshold;
-  e1 = y1 - this.elevation_threshold;
-  tm = 0.5 * (t1 + t2);
+  var e2 = y2 - this.elevation_threshold;
+  // var e1 = y1 - this.elevation_threshold;
+  var tm = 0.5 * (t1 + t2);
 
   while (Math.abs(t2 - t1) > .00001) {
     /* Evaluate at middle of current interval. */
     tm = 0.5 * (t1 + t2);
     this.iterator (tm, callback);
-    ym = $moshier.altaz.elevation;
-    em = ym - this.elevation_threshold;
+    var ym = $moshier.altaz.elevation;
+    var em = ym - this.elevation_threshold;
     /* Replace the interval boundary whose error has the same sign as em. */
     if (em * e2 > 0) {
       y2 = ym;
@@ -441,7 +429,7 @@ $ns.transit.searchHalve = function (t1, y1, t2, y2, callback) {
     } else {
       y1 = ym;
       t1 = tm;
-      e1 = em;
+      // e1 = em;
     }
   }
   return tm;

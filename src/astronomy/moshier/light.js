@@ -2,26 +2,25 @@ $ns.light = {}
 
 $ns.light.calc = function (body, q, e) {
   var p = [], p0 = [], ptemp = [] // double
-  var P, Q, E, t, x, y // double
-  var i, k // int
+  var t // double
 
   /* save initial q-e vector for display */
-  for (i = 0; i < 3; i++) {
+  for (var i = 0; i < 3; i++) {
     p0[i] = q[i] - e[i]
   }
 
-  E = 0.0
-  for (i = 0; i < 3; i++) {
+  var E = 0.0
+  for (var i = 0; i < 3; i++) {
     E += e[i] * e[i]
   }
   E = Math.sqrt(E)
 
-  for (k = 0; k < 2; k++) {
-    P = 0.0
-    Q = 0.0
-    for (i = 0; i < 3; i++) {
-      y = q[i]
-      x = y - e[i]
+  for (var k = 0; k < 2; k++) {
+    var P = 0.0
+    var Q = 0.0
+    for (var i = 0; i < 3; i++) {
+      var y = q[i]
+      var x = y - e[i]
       p[i] = x
       Q += y * y
       P += x * x
@@ -35,12 +34,11 @@ $ns.light.calc = function (body, q, e) {
 
   body.lightTime = 1440.0 * t
 
-  /* Final object-earth vector and the amount by which it changed.
-   */
-  for (i = 0; i < 3; i++) {
-    x = q[i] - e[i]
+  /* Final object-earth vector and the amount by which it changed. */
+  for (var i = 0; i < 3; i++) {
+    var x = q[i] - e[i]
     p[i] = x
-    $const.dp [i] = x - p0[i]
+    $const.dp[i] = x - p0[i]
   }
   body.aberration = $util.showcor(p0, $const.dp)
 
@@ -56,8 +54,8 @@ $ns.light.calc = function (body, q, e) {
    */
   $moshier.vearth.calc($moshier.body.earth.position.date)
 
-  for (i = 0; i < 3; i++) {
-    p[i] += $moshier.vearth.vearth [i] * t
+  for (var i = 0; i < 3; i++) {
+    p[i] += $moshier.vearth.vearth[i] * t
   }
 
   var d = $util.deltap(p, p0)

@@ -9,12 +9,10 @@ $ns.epsilon = {
 }
 
 $ns.epsilon.calc = function (date) {
-  var T // double
-
   if (date.julian == this.jdeps) {
     return
   }
-  T = (date.julian - 2451545.0) / 36525.0
+  var T = (date.julian - 2451545.0) / 36525.0
 
   /* DE403 values. */
   T /= 10.0

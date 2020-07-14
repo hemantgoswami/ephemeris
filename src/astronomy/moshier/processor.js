@@ -41,7 +41,7 @@ $ns.processor.calc = function (date, body) {
 $ns.processor.ecliptic = function (date, observer, body) {
   this.calc(date, observer)
   this.calc(date, body)
-  // this.reduce (observer, body);
+  // this.reduce(observer, body)
 }
 
 $ns.processor.init = function () {
@@ -112,9 +112,9 @@ $ns.processor.test = function () {
   $assert(date.julian, 2446432.199305556)
   $assert(date.delta, 54.87089572485891)
 
-  $assert(body.position.equinoxEclipticLonLat [0], 4.90413951369789)
-  $assert(body.position.equinoxEclipticLonLat [1], 0.000002184617423267333)
-  $assert(body.position.equinoxEclipticLonLat [2], 0.9832794756330766)
+  $assert(body.position.equinoxEclipticLonLat[0], 4.90413951369789)
+  $assert(body.position.equinoxEclipticLonLat[1], 0.000002184617423267333)
+  $assert(body.position.equinoxEclipticLonLat[2], 0.9832794756330766)
 
   $assert(body.position.lightTime, 8.177686171897745)
 

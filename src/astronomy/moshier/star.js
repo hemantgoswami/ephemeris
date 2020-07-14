@@ -10,22 +10,20 @@ $ns.star.calc = function (body) {
 
 $ns.star.reduce = function (body) {
   var p = [], q = [], e = [], m = [], temp = [], polar = [] // double
-  var T, vpi, epoch // double
-  var cosdec, sindec, cosra, sinra // double
-  var i // int
+  var epoch // double
 
   /* Convert from RA and Dec to equatorial rectangular direction */
   do {
-    cosdec = Math.cos(body.dec)
-    sindec = Math.sin(body.dec)
-    cosra = Math.cos(body.ra)
-    sinra = Math.sin(body.ra)
+    var cosdec = Math.cos(body.dec)
+    var sindec = Math.sin(body.dec)
+    var cosra = Math.cos(body.ra)
+    var sinra = Math.sin(body.ra)
     q[0] = cosra * cosdec
     q[1] = sinra * cosdec
     q[2] = sindec
 
     /* space motion */
-    vpi = 21.094952663 * body.velocity * body.parallax
+    var vpi = 21.094952663 * body.velocity * body.parallax
     m[0] = -body.raMotion * cosdec * sinra
       - body.decMotion * sindec * cosra
       + vpi * q[0]
@@ -46,7 +44,7 @@ $ns.star.reduce = function (body) {
     }
   } while (epoch == $const.b1950)
 
-  for (i = 0; i < 3; i++) {
+  for (var i = 0; i < 3; i++) {
     e[i] = $moshier.body.earth.position.rect[i]
   }
 
@@ -54,16 +52,16 @@ $ns.star.reduce = function (body) {
   $moshier.precess.calc(e, {julian: epoch}, -1)
 
   /* Correct for proper motion and parallax */
-  T = ($moshier.body.earth.position.date.julian - epoch) / 36525.0
-  for (i = 0; i < 3; i++) {
+  var T = ($moshier.body.earth.position.date.julian - epoch) / 36525.0
+  for (var i = 0; i < 3; i++) {
     p[i] = q[i] + T * m[i] - body.parallax * e[i]
   }
 
   /* precess the star to J2000 */
   $moshier.precess.calc(p, {julian: epoch}, 1)
   /* reset the earth to J2000 */
-  for (i = 0; i < 3; i++) {
-    e[i] = $moshier.body.earth.position.rect [i]
+  for (var i = 0; i < 3; i++) {
+    e[i] = $moshier.body.earth.position.rect[i]
   }
 
   /* Find Euclidean vectors between earth, object, and the sun
@@ -72,7 +70,7 @@ $ns.star.reduce = function (body) {
   $util.angles(p, p, e)
 
   /* Find unit vector from earth in direction of object */
-  for (i = 0; i < 3; i++) {
+  for (var i = 0; i < 3; i++) {
     p[i] /= $const.EO
     temp[i] = p[i]
   }
@@ -89,7 +87,7 @@ $ns.star.reduce = function (body) {
   body.position.astrometricB1950 = $util.showrd(temp, polar)
 
   /* For equinox of date: */
-  for (i = 0; i < 3; i++) {
+  for (var i = 0; i < 3; i++) {
     temp[i] = p[i]
   }
 
@@ -136,25 +134,19 @@ $ns.star.reduce = function (body) {
   /* Go do topocentric reductions. */
   $const.dradt = 0.0
   $const.ddecdt = 0.0
-  polar [2] = 1.0e38
+  polar[2] = 1.0e38
   /* make it ignore diurnal parallax */
 
   body.position.altaz = $moshier.altaz.calc(polar, $moshier.body.earth.position.date)
 }
 
 $ns.star.prepare = function (body) {
-  var sign // int
-  var s // char array
-  var x, z // double
-  var p // char array
-  var i // int
-
   /* Read in the ASCII string data and name of the object */
   // sscanf( s, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %s",
   //   &body->epoch, &rh, &rm, &rs, &dd, &dm, &ds,
   //   &body->mura, &body->mudec, &body->v, &body->px, &body->mag, &body->obname[0] );
 
-  x = body.epoch
+  var x = body.epoch
   if (x == 2000.0) {
     x = $const.j2000
   } else if (x == 1950.0) {
@@ -173,13 +165,12 @@ $ns.star.prepare = function (body) {
 
   /* read the declination */
   if (!body.dec) {
-    sign = 1
-
+    var sign = 1
     /* the '-' sign may appaer at any part of hmsDec */
     if (body.hmsDec.hours < 0.0 || body.hmsDec.minutes < 0.0 || body.hmsDec.seconds < 0.0) {
       sign = -1
     }
-    z = (3600.0 * Math.abs(body.hmsDec.hours) + 60.0 * Math.abs(body.hmsDec.minutes) + Math.abs(body.hmsDec.seconds)) / $const.RTS
+    var z = (3600.0 * Math.abs(body.hmsDec.hours) + 60.0 * Math.abs(body.hmsDec.minutes) + Math.abs(body.hmsDec.seconds)) / $const.RTS
     if (sign < 0) {
       z = -z
     }

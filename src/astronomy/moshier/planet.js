@@ -15,33 +15,30 @@ $ns.planet.calc = function (body) {
  * right ascension and declination.
  */
 $ns.planet.reduce = function (body, q, e) {
-  var p = [], temp = [], polar = [] // double
-  var a, b, s // double
-  var i // int
+  var p = [], temp = [] // double
 
   /* Save the geometric coordinates at TDT */
-  for (i = 0; i < 3; i++) {
+  for (var i = 0; i < 3; i++) {
     temp[i] = q[i]
   }
 
   /* Display ecliptic longitude and latitude, precessed to equinox
    of date. */
-  body.equinoxEclipticLonLat = $moshier.lonlat.calc(q, $moshier.body.earth.position.date, polar, 1)
+  var polar = body.equinoxEclipticLonLat = $moshier.lonlat.calc(q, $moshier.body.earth.position.date, true)
 
   /* Adjust for light time (planetary aberration) */
   $moshier.light.calc(body, q, e)
 
-  /* Find Euclidean vectors between earth, object, and the sun
-   */
-  for (i = 0; i < 3; i++) {
+  /* Find Euclidean vectors between earth, object, and the sun */
+  for (var i = 0; i < 3; i++) {
     p[i] = q[i] - e[i]
   }
 
   $util.angles(p, q, e)
 
-  a = 0.0
-  for (i = 0; i < 3; i++) {
-    b = temp[i] - e[i]
+  var a = 0.0
+  for (var i = 0; i < 3; i++) {
+    var b = temp[i] - e[i]
     a += b * b
   }
   a = Math.sqrt(a)
@@ -63,16 +60,15 @@ $ns.planet.reduce = function (body, q, e) {
    * Note this phase term estimate does not reflect reality well.
    * Calculated magnitudes of Mercury and Venus are inaccurate.
    */
-  b = 0.5 * (1.01 + 0.99 * $const.pq)
-  s = body.magnitude + 2.1715 * Math.log($const.EO * $const.SO) - 1.085 * Math.log(b)
+  var b = 0.5 * (1.01 + 0.99 * $const.pq)
+  var s = body.magnitude + 2.1715 * Math.log($const.EO * $const.SO) - 1.085 * Math.log(b)
   body.position.approxVisual = {
     magnitude: s,
     phase: a
   }
 
-  /* Find unit vector from earth in direction of object
-   */
-  for (i = 0; i < 3; i++) {
+  /* Find unit vector from earth in direction of object */
+  for (var i = 0; i < 3; i++) {
     p[i] /= $const.EO
     temp[i] = p[i]
   }
@@ -106,20 +102,20 @@ $ns.planet.reduce = function (body, q, e) {
   body.position.apparent = $util.showrd(p, polar)
 
   /* Geocentric ecliptic longitude and latitude. */
-  for (i = 0; i < 3; i++) {
+  for (var i = 0; i < 3; i++) {
     p[i] *= $const.EO
   }
-  body.position.apparentGeocentric = $moshier.lonlat.calc(p, $moshier.body.earth.position.date, temp, 0)
-  body.position.apparentLongitude = body.position.apparentGeocentric [0] * $const.RTD
+  body.position.apparentGeocentric = $moshier.lonlat.calc(p, $moshier.body.earth.position.date, false)
+  body.position.apparentLongitude = body.position.apparentGeocentric[0] * $const.RTD
   body.position.apparentLongitudeString =
-    body.position.apparentGeocentric [3].degree + '\u00B0' +
-    body.position.apparentGeocentric [3].minutes + '\'' +
-    Math.floor(body.position.apparentGeocentric [3].seconds) + '"'
+    body.position.apparentGeocentric[3].degree + '\u00B0' +
+    body.position.apparentGeocentric[3].minutes + '\'' +
+    Math.floor(body.position.apparentGeocentric[3].seconds) + '"'
 
   body.position.apparentLongitude30String =
-    $util.mod30(body.position.apparentGeocentric [3].degree) + '\u00B0' +
-    body.position.apparentGeocentric [3].minutes + '\'' +
-    Math.floor(body.position.apparentGeocentric [3].seconds) + '"'
+    $util.mod30(body.position.apparentGeocentric[3].degree) + '\u00B0' +
+    body.position.apparentGeocentric[3].minutes + '\'' +
+    Math.floor(body.position.apparentGeocentric[3].seconds) + '"'
 
   body.position.geocentricDistance = -1
 

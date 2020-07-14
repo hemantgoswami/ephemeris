@@ -1,21 +1,17 @@
 $ns.sun = {}
 
 $ns.sun.calc = function () {
-  var r, x, y, t // double
-  var ecr = [], rec = [], pol = [] // double
-  var i // int
-  var d
-  //double asin(), modtp(), sqrt(), cos(), sin();
+  var t, ecr = [], rec = [] // double
 
   $moshier.body.sun.position = $moshier.body.sun.position || {}
 
   /* Display ecliptic longitude and latitude. */
-  for (i = 0; i < 3; i++) {
-    ecr[i] = -$moshier.body.earth.position.rect [i]//-rearth[i];
+  for (var i = 0; i < 3; i++) {
+    ecr[i] = -$moshier.body.earth.position.rect[i] // -rearth[i];
   }
-  r = $moshier.body.earth.position.polar [2] //eapolar [2];
+  var r = $moshier.body.earth.position.polar[2] // eapolar[2];
 
-  $moshier.body.sun.position.equinoxEclipticLonLat = $moshier.lonlat.calc(ecr, $moshier.body.earth.position.date, pol, 1) // TDT
+  var pol = $moshier.body.sun.position.equinoxEclipticLonLat = $moshier.lonlat.calc(ecr, $moshier.body.earth.position.date, true) // TDT
 
   /* Philosophical note: the light time correction really affects
    * only the Sun's barycentric position; aberration is due to
@@ -26,17 +22,17 @@ $ns.sun.calc = function () {
    * It should be done the same way as the corresponding planetary
    * correction, however.
    */
-  pol [2] = r
-  for (i = 0; i < 2; i++) {
-    t = pol [2] / 173.1446327
+  pol[2] = r
+  for (var i = 0; i < 2; i++) {
+    t = pol[2] / 173.1446327
     /* Find the earth at time TDT - t */
     $moshier.kepler.calc({julian: $moshier.body.earth.position.date.julian - t}, $moshier.body.earth, ecr, pol)
   }
-  r = pol [2]
+  r = pol[2]
 
-  for (i = 0; i < 3; i++) {
-    x = -ecr[i]
-    y = -$moshier.body.earth.position.rect [i] //-rearth[i];
+  for (var i = 0; i < 3; i++) {
+    var x = -ecr[i]
+    var y = -$moshier.body.earth.position.rect[i] // -rearth[i];
     ecr[i] = x
     /* position t days ago */
     rec[i] = y
@@ -54,7 +50,7 @@ $ns.sun.calc = function () {
   /* Estimate rate of change of RA and Dec
    * for use by altaz().
    */
-  d = $util.deltap(ecr, rec)
+  var d = $util.deltap(ecr, rec)
   /* see dms.c */
   $const.dradt = d.dr
   $const.ddecdt = d.dd
@@ -68,7 +64,7 @@ $ns.sun.calc = function () {
   /* precess to equinox of date */
   $moshier.precess.calc(ecr, $moshier.body.earth.position.date, -1)
 
-  for (i = 0; i < 3; i++) {
+  for (var i = 0; i < 3; i++) {
     rec[i] = ecr[i]
   }
 

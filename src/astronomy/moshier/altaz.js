@@ -5,20 +5,16 @@ $ns.altaz = {
 }
 
 $ns.altaz.calc = function (pol, date, result) {
-  var dec, cosdec, sindec, lha, coslha, sinlha // double
-  var ra, dist, last, alt, az, coslat, sinlat // double
-  var N, D, x, y, z, TPI // double
-
   result = result || {}
 
-  ra = pol[0]
-  dec = pol[1]
-  dist = pol[2]
-  TPI = 2.0 * Math.PI
+  var ra = pol[0]
+  var dec = pol[1]
+  var dist = pol[2]
+  // var TPI = 2.0 * Math.PI
 
   /* local apparent sidereal time, seconds converted to radians */
-  last = $moshier.sidereal.calc(date, $const.tlong) * $const.DTR / 240.0
-  lha = last - ra
+  var last = $moshier.sidereal.calc(date, $const.tlong) * $const.DTR / 240.0
+  var lha = last - ra
   /* local hour angle, radians */
   result.dLocalApparentSiderealTime = last
   result.localApparentSiderealTime = $util.hms(last)
@@ -54,21 +50,21 @@ $ns.altaz.calc = function (pol, date, result) {
   /* diurab( last, &ra, &dec ); */
 
   /* Convert ra and dec to altitude and azimuth */
-  cosdec = Math.cos(dec)
-  sindec = Math.sin(dec)
+  var cosdec = Math.cos(dec)
+  var sindec = Math.sin(dec)
   lha = last - ra
-  coslha = Math.cos(lha)
-  sinlha = Math.sin(lha)
+  var coslha = Math.cos(lha)
+  var sinlha = Math.sin(lha)
 
   /* Use the geodetic latitude for altitude and azimuth */
   x = $const.DTR * $const.glat
-  coslat = Math.cos(x)
-  sinlat = Math.sin(x)
+  var coslat = Math.cos(x)
+  var sinlat = Math.sin(x)
 
-  N = -cosdec * sinlha
-  D = sindec * coslat - cosdec * coslha * sinlat
-  az = $const.RTD * $util.zatan2(D, N)
-  alt = sindec * sinlat + cosdec * coslha * coslat
+  var N = -cosdec * sinlha
+  var D = sindec * coslat - cosdec * coslha * sinlat
+  var az = $const.RTD * $util.zatan2(D, N)
+  var alt = sindec * sinlat + cosdec * coslha * coslat
   alt = $const.RTD * Math.asin(alt)
 
   /* Store results */
@@ -84,9 +80,9 @@ $ns.altaz.calc = function (pol, date, result) {
   this.refracted_elevation = alt
 
   /* Convert back to R.A. and Dec. */
-  y = Math.sin($const.DTR * alt)
-  x = Math.cos($const.DTR * alt)
-  z = Math.cos($const.DTR * az)
+  var x = Math.cos($const.DTR * alt)
+  var y = Math.sin($const.DTR * alt)
+  var z = Math.cos($const.DTR * az)
   sinlha = -x * Math.sin($const.DTR * az)
   coslha = y * coslat - x * z * sinlat
   sindec = y * sinlat + x * z * coslat
