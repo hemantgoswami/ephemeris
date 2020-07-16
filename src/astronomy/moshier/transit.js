@@ -84,12 +84,12 @@ $ns.transit.calc = function (date, lha, dec, result) {
        * semidiameter = 0.272453 * parallax + 0.0799"
        */
       case 'moon':
-        var N = 1.0/(this.DISFAC*$const.body.position.polar[2]);
+        var N = 1/(this.DISFAC*$const.body.position.polar[2]);
         var D = Math.asin(N); /* the parallax */
         this.semidiameter = 0.2725076*D + 3.874e-7;
         NR[0] = NR[1] = -9.890199094634534e-3 - this.semidiameter + D;
         this.semidiameter *= $const.RTD;
-        this.elevation_threshold = -34.0/60.0 - this.semidiameter;
+        this.elevation_threshold = -34/60 - this.semidiameter;
         NR[0] = NR[1] = Math.sin(NR[0]);
         break;
 
@@ -104,8 +104,7 @@ $ns.transit.calc = function (date, lha, dec, result) {
     YR[0] = (NR[0] - sinlat*sindec)/(coslat*cosdec);
     YR[1] = (NR[1] - sinlat*sindec)/(coslat*cosdec);
 
-    if (YR[0] < 1.0 && YR[0] > -1.0 && YR[1] < 1.0 && YR[1] > -1.0)
-    {
+    if (YR[0] < 1 && YR[0] > -1 && YR[1] < 1 && YR[1] > -1) {
       this.f_trnsit = true;
 
       /* Derivative of y with respect to declination
@@ -115,15 +114,15 @@ $ns.transit.calc = function (date, lha, dec, result) {
       z /= $const.TPI*coslat*cosdec*cosdec;
       /* Derivative of acos(y): */
       var zArr = [];
-      zArr[0] = z / Math.sqrt(1.0 - YR[0]*YR[0]);
-      zArr[1] = z / Math.sqrt(1.0 - YR[1]*YR[1]);
+      zArr[0] = z / Math.sqrt(1 - YR[0]*YR[0]);
+      zArr[1] = z / Math.sqrt(1 - YR[1]*YR[1]);
       YR[0] = Math.acos(YR[0]);
       YR[1] = Math.acos(YR[1]);
       D = -$const.dradt/$const.TPI + 1.00273790934;
-      this.r_rise = x - (lhay + YR[0])*(1.0 + zArr[0])/D;
-      this.r_set = x - (lhay - YR[0])*(1.0 - zArr[0])/D;
-      this.r_sanatan_rise = x - (lhay + YR[1])*(1.0 + zArr[1])/D;
-      this.r_sanatan_set = x - (lhay - YR[1])*(1.0 - zArr[1])/D;
+      this.r_rise = x - (lhay + YR[0])*(1 + zArr[0])/D;
+      this.r_set = x - (lhay - YR[0])*(1 - zArr[0])/D;
+      this.r_sanatan_rise = x - (lhay + YR[1])*(1 + zArr[1])/D;
+      this.r_sanatan_set = x - (lhay - YR[1])*(1 - zArr[1])/D;
       /* Ordinarily never print here. */
 
       result.dApproxRiseUT = this.r_rise;
@@ -195,7 +194,7 @@ $ns.transit.iterateTransit = function (callback, result) {
       t1 = date + this.r_rise / $const.TPI;
       /* Choose rising no later than transit. */
       if (t1 >= this.t_trnsit) {
-        date -= 1.0;
+        date -= 1;
         t1 = date + this.r_rise / $const.TPI;
       }
       loopctr = 0;
@@ -234,7 +233,7 @@ $ns.transit.iterateTransit = function (callback, result) {
         /* Choose setting no earlier than transit. */
         t1 = date + this.r_set / $const.TPI;
         if (t1 <= this.t_trnsit) {
-          date += 1.0;
+          date += 1;
           t1 = date + this.r_set / $const.TPI;
         }
         loopctr = 0;
@@ -256,7 +255,7 @@ $ns.transit.iterateTransit = function (callback, result) {
           } else {
             t1 = date + this.r_set / $const.TPI;
             if (t1 < this.t_trnsit) {
-              date += 1.0;
+              date += 1;
               t1 = date + this.r_set / $const.TPI;
             }
           }
@@ -279,8 +278,8 @@ $ns.transit.iterateTransit = function (callback, result) {
       result.setDate = $moshier.julian.toGregorian ({julian: this.t_set});
       if (this.t_rise != -1.0) {
         t0 = this.t_set - this.t_rise;
-        if (t0 > 0.0 && t0 < 1.0) {
-          result.visibleHaours = 24.0 * t0;
+        if (t0 > 0 && t0 < 1) {
+          result.visibleHaours = 24 * t0;
         }
       }
     }
@@ -330,15 +329,15 @@ $ns.transit.noRiseSet = function (t0, callback) {
       break; // goto search_rise;
     }
     /* Step time by an amount proportional to the azimuth deviation. */
-    e = azimuth/360.0;
-    if (azimuth < 180.0) {
+    e = azimuth/360;
+    if (azimuth < 180) {
       if (this.southern_hemisphere) {
         t += this.STEP_SCALE * e;
       } else {
         t -= this.STEP_SCALE * e;
       }
     } else {
-      e = 1.0 - e;
+      e = 1 - e;
       if (this.southern_hemisphere) {
         t -= this.STEP_SCALE * e;
       } else {
@@ -379,15 +378,15 @@ $ns.transit.noRiseSet = function (t0, callback) {
       break; // goto search_set;
     }
     /* Step time by an amount proportional to the azimuth deviation. */
-    e = $moshier.altaz.azimuth/360.0;
-    if ($moshier.altaz.azimuth < 180.0) {
+    e = $moshier.altaz.azimuth/360;
+    if ($moshier.altaz.azimuth < 180) {
       if (this.southern_hemisphere) {
         t += this.STEP_SCALE * e; /* Southern hemisphere observer. */
       } else {
         t -= this.STEP_SCALE * e;
       }
     } else {
-      e = 1.0 - e;
+      e = 1 - e;
       if (this.southern_hemisphere) {
         t -= this.STEP_SCALE * e;
       } else {

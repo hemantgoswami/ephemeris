@@ -8,7 +8,7 @@ $ns.moon = {
  * phase of the Moon, etc. for AA.ARC.
  */
 $ns.moon.calc = function () {
-  var pp = [], qq = [], re = [], moonpp = [], moonpol = [] // double
+  var qq = [], re = [], moonpp = [], moonpol = [] // double
 
   $moshier.body.moon.position = {
     polar: [],
@@ -44,17 +44,19 @@ $ns.moon.calc = function () {
    * correct the time of rising, transit, and setting.
    */
   $const.dradt = this.ra - ra0
-  if ($const.dradt >= Math.PI)
-    $const.dradt = $const.dradt - 2.0 * Math.PI
-  if ($const.dradt <= -Math.PI)
-    $const.dradt = $const.dradt + 2.0 * Math.PI
-  $const.dradt = 1000.0 * $const.dradt
-  $const.ddecdt = 1000.0 * (this.dec - dec0)
+  if ($const.dradt >= Math.PI) {
+    $const.dradt = $const.dradt - 2 * Math.PI
+  }
+  if ($const.dradt <= -Math.PI) {
+    $const.dradt = $const.dradt + 2 * Math.PI
+  }
+  $const.dradt = 1000 * $const.dradt
+  $const.ddecdt = 1000 * (this.dec - dec0)
 
   /* Rate of change in longitude, degrees per day
    * used for phase of the moon
    */
-  lon0 = 1000.0 * $const.RTD * (moonpol[0] - lon0)
+  lon0 = 1000 * $const.RTD * (moonpol[0] - lon0)
 
   /* Get apparent coordinates for the earth. */
   var z = Math.sqrt(re[0] * re[0] + re[1] * re[1] + re[2] * re[2])
@@ -114,7 +116,7 @@ $ns.moon.calc = function () {
   x = $const.RTD * Math.acos(-$const.ep)
   /* x = 180.0 - RTD * arcdot (re, pp); */
   $moshier.body.moon.position.sunElongation = x
-  x = 0.5 * (1.0 + $const.pq)
+  x = 0.5 * (1 + $const.pq)
   $moshier.body.moon.position.illuminatedFraction = x
 
   /* Find phase of the Moon by comparing Moon's longitude
@@ -128,24 +130,22 @@ $ns.moon.calc = function () {
   x = moonpol[0] - pe[0]
   x = $util.modtp(x) * $const.RTD
   /* difference in longitude */
-  i = Math.floor(x / 90)
+  var y = Math.floor(x / 90)
   /* number of quarters */
-  x = (x - i * 90.0)
+  x = x - y * 90
   /* phase angle mod 90 degrees */
 
   /* days per degree of phase angle */
   z = moonpol[2] / (12.3685 * 0.00257357)
 
-  if (x > 45.0) {
-    var y = -(x - 90.0) * z
-    $moshier.body.moon.position.phaseDaysBefore = y
-    i = (i + 1) & 3
+  if (x > 45) {
+    $moshier.body.moon.position.phaseDaysBefore = -(x - 90) * z
+    y = (y + 1) & 3
   } else {
-    var y = x * z
-    $moshier.body.moon.position.phaseDaysPast = y
+    $moshier.body.moon.position.phaseDaysPast = x * z
   }
 
-  $moshier.body.moon.position.phaseQuarter = i
+  $moshier.body.moon.position.phaseQuarter = y
 
   $moshier.body.moon.position.apparent = {
     dRA: this.ra,
@@ -155,9 +155,7 @@ $ns.moon.calc = function () {
   }
 
   /* Compute and display topocentric position (altaz.js) */
-  pp[0] = this.ra
-  pp[1] = this.dec
-  pp[2] = moonpol[2]
+  var pp = [ this.ra, this.dec, moonpol[2] ]
   $moshier.body.moon.position.altaz = $moshier.altaz.calc(pp, $moshier.body.earth.position.date)
 }
 

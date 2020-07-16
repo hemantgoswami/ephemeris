@@ -78,7 +78,7 @@ $ns.fk4fk5.calc = function (p, m, el) {
   el.raMotion = (p[0] * m[1] - p[1] * m[0]) / ($const.RTS * b)
   el.decMotion = (m[2] * b - p[2] * (p[0] * m[0] + p[1] * m[1])) / ($const.RTS * c * Math.sqrt(b))
 
-  if (el.parallax > 0.0) {
+  if (el.parallax > 0) {
     c = 0.0
     for (var i = 0; i < 3; i++) {
       c += p[i] * m[i]

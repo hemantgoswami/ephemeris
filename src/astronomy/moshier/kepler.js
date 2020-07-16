@@ -1,9 +1,8 @@
 $ns.kepler = {}
 
 $ns.kepler.calc = function (date, body, rect, polar) {
-  var alat // double
+  var alat, E, M, W, r // double
 
-  rect = rect || []
   polar = polar || []
 
   /* Call program to compute position, if one is supplied. */
@@ -13,12 +12,12 @@ $ns.kepler.calc = function (date, body, rect, polar) {
     } else {
       $moshier.gplan.calc(date, body.ptable, polar)
     }
-    var E = polar[0]
+    E = polar[0]
     /* longitude */
     body.longitude = E
-    var W = polar[1]
+    W = polar[1]
     /* latitude */
-    var r = polar[2]
+    r = polar[2]
     /* radius */
     body.distance = r
     body.epoch = date.julian
@@ -45,42 +44,42 @@ $ns.kepler.calc = function (date, body, rect, polar) {
       /* The constant above is 3 k / sqrt(2),
        * k = Gaussian gravitational constant = 0.01720209895 */
       E = 0.0
-      var M = 1.0
+      M = 1.0
       while (Math.abs(M) > 1.0e-11) {
         temp = E * E
-        temp = (2.0 * E * temp + W) / (3.0 * (1.0 + temp))
+        temp = (2 * E * temp + W) / (3 * (1 + temp))
         M = temp - E
         if (temp != 0.0) {
           M /= temp
         }
         E = temp
       }
-      r = meandistance * (1.0 + E * E)
+      r = meandistance * (1 + E * E)
       M = Math.atan(E)
-      M = 2.0 * M
+      M = 2 * M
       alat = M + $const.DTR * argperih
       // goto parabcon;
     } else {
-      if (eccent > 1.0) {
+      if (eccent > 1) {
         /* The equation of the hyperbola in polar coordinates r, theta
          * is r = a(e^2 - 1)/(1 + e cos(theta))
          * so the perihelion distance q = a(e-1),
          * the "mean distance"  a = q/(e-1).
          */
-        meandistance = meandistance / (eccent - 1.0)
-        temp = meandistance * Math.sqrt(meandistance)
+        meandistance = meandistance / (eccent - 1)
+        var temp = meandistance * Math.sqrt(meandistance)
         W = (date.julian - epoch) * 0.01720209895 / temp
         /* solve M = -E + e sinh E */
-        E = W / (eccent - 1.0)
+        E = W / (eccent - 1)
         M = 1.0
         while (Math.abs(M) > 1.0e-11) {
           M = -E + eccent * $util.sinh(E) - W
-          E += M / (1.0 - eccent * $util.cosh(E))
+          E += M / (1 - eccent * $util.cosh(E))
         }
-        r = meandistance * (-1.0 + eccent * $util.cosh(E))
-        temp = (eccent + 1.0) / (eccent - 1.0)
+        r = meandistance * (-1 + eccent * $util.cosh(E))
+        temp = (eccent + 1) / (eccent - 1)
         M = Math.sqrt(temp) * $util.tanh(0.5 * E)
-        M = 2.0 * Math.atan(M)
+        M = 2 * Math.atan(M)
         alat = M + $const.DTR * argperih
         // goto parabcon;
       } else {
@@ -125,7 +124,7 @@ $ns.kepler.calc = function (date, body, rect, polar) {
 
         E = M
         /* Initial guess is same as circular orbit. */
-        temp = 1.0
+        var temp = 1.0
         do {
           /* The approximate area swept out in the ellipse */
           temp = E - eccent * Math.sin(E)
@@ -134,7 +133,7 @@ $ns.kepler.calc = function (date, body, rect, polar) {
           /* ...should be zero.  Use the derivative of the error
            * to converge to solution by Newton's method.
            */
-          E -= temp / (1.0 - eccent * Math.cos(E))
+          E -= temp / (1 - eccent * Math.cos(E))
         } while (Math.abs(temp) > 1.0e-11)
 
         /* The exact formula for the area in the ellipse is
@@ -145,8 +144,8 @@ $ns.kepler.calc = function (date, body, rect, polar) {
          * Substituting the following value of W
          * yields the exact solution.
          */
-        temp = Math.sqrt((1.0 + eccent) / (1.0 - eccent))
-        W = 2.0 * Math.atan(temp * Math.tan(0.5 * E))
+        temp = Math.sqrt((1 + eccent) / (1 - eccent))
+        W = 2 * Math.atan(temp * Math.tan(0.5 * E))
 
         /* The true anomaly. */
         W = $util.modtp(W)
@@ -156,7 +155,7 @@ $ns.kepler.calc = function (date, body, rect, polar) {
          * (argument of latitude)
          */
         if (body.longitude) {
-          alat = (body.longitude) * $const.DTR + W - meananomaly - ascnode
+          alat = body.longitude * $const.DTR + W - meananomaly - ascnode
         } else {
           alat = W + $const.DTR * argperih
           /* mean longitude not given */
@@ -165,13 +164,13 @@ $ns.kepler.calc = function (date, body, rect, polar) {
         /* From the equation of the ellipse, get the
          * radius from central focus to the object.
          */
-        r = meandistance * (1.0 - eccent * eccent) / (1.0 + eccent * Math.cos(W))
+        r = meandistance * (1 - eccent * eccent) / (1 + eccent * Math.cos(W))
       }
     }
 // parabcon:
     /* The heliocentric ecliptic longitude of the object
      * is given by
-     *   tan( longitude - ascnode )  =  cos( inclination ) * tan( alat ).
+     *   tan(longitude - ascnode) = cos(inclination) * tan(alat)
      */
     var coso = Math.cos(alat)
     var sino = Math.sin(alat)
@@ -179,8 +178,7 @@ $ns.kepler.calc = function (date, body, rect, polar) {
     W = sino * Math.cos(inclination)
     E = $util.zatan2(coso, W) + ascnode
 
-    /* The ecliptic latitude of the object
-     */
+    /* The ecliptic latitude of the object */
     W = sino * Math.sin(inclination)
     W = Math.asin(W)
   }
@@ -189,6 +187,7 @@ $ns.kepler.calc = function (date, body, rect, polar) {
   /* Convert to rectangular coordinates,
    * using the perturbed latitude.
    */
+  rect = rect || []
   rect[2] = r * Math.sin(W)
   var cosa = Math.cos(W)
   rect[1] = r * cosa * Math.sin(E)
@@ -218,7 +217,7 @@ $ns.kepler.calc = function (date, body, rect, polar) {
     /* see below */
   }
 
-  /* Rotate back into the ecliptic.  */
+  /* Rotate back into the ecliptic. */
   $moshier.epsilon.calc({julian: $const.j2000})
   W = $moshier.epsilon.coseps * rect[1] + $moshier.epsilon.sineps * rect[2]
   M = -$moshier.epsilon.sineps * rect[1] + $moshier.epsilon.coseps * rect[2]
@@ -264,7 +263,7 @@ $ns.kepler.embofs = function (date, ea) {
   $moshier.precess.calc(pm, date, 1)
 
   /* Adjust the coordinates of the Earth */
-  var a = 1.0 / ($const.emrat + 1.0)
+  var a = 1 / ($const.emrat + 1)
   var b = 0.0
   for (var i = 0; i < 3; i++) {
     ea[i] = ea[i] - a * pm[i]
@@ -282,15 +281,15 @@ $ns.kepler.init = function () {
    */
   var co = Math.cos(u)
   var si = Math.sin(u)
-  var fl = 1.0 - 1.0 / $const.flat
+  var fl = 1 - 1 / $const.flat
   fl = fl * fl
   si = si * si
-  u = 1.0 / Math.sqrt(co * co + fl * si)
+  u = 1 / Math.sqrt(co * co + fl * si)
   var a = $const.aearth * u + $const.height
   var b = $const.aearth * fl * u + $const.height
   $const.trho = Math.sqrt(a * a * co * co + b * b * si)
   $const.tlat = $const.RTD * Math.acos(a * co / $const.trho)
-  if ($const.glat < 0.0) {
+  if ($const.glat < 0) {
     $const.tlat = -$const.tlat
   }
   $const.trho /= $const.aearth
@@ -304,16 +303,16 @@ $ns.kepler.init = function () {
    + 0.00032314 * sin(4.0*u)
    - 0.00000072 * sin(6.0*u);
 
-   trho =    0.998327073
+   trho = 0.998327073
    + 0.001676438 * cos(2.0*u)
    - 0.000003519 * cos(4.0*u)
    + 0.000000008 * cos(6.0*u);
    trho += height/6378160.;
    */
 
-  $const.Clightaud = 86400.0 * $const.Clight / $const.au
+  $const.Clightaud = 86400 * $const.Clight / $const.au
   /* Radius of the earth in au
    Thanks to Min He <Min.He@businessobjects.com> for pointing out
-   this needs to be initialized early.  */
+   this needs to be initialized early. */
   $const.Rearth = 0.001 * $const.aearth / $const.au
 }

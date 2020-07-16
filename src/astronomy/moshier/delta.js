@@ -90,10 +90,10 @@ $ns.delta.calc = function (date) {
     date.delta = $const.dtgiven
   } else if (date.j2000 > this.TABEND) {
     /* Extrapolate future values beyond the lookup table. */
-    if (date.j2000 > this.TABEND + 100.0) {
+    if (date.j2000 > this.TABEND + 100) {
       /* Morrison & Stephenson (2004) long-term curve fit. */
-      var B = (date.j2000 - 1820.0) / 100
-      date.delta = 32.0 * B * B - 20.0
+      var B = (date.j2000 - 1820) / 100
+      date.delta = 32 * B * B - 20
     } else {
       /* Cubic interpolation between last tabulated value
        and long-term curve evaluated at 100 years later. */
@@ -104,16 +104,16 @@ $ns.delta.calc = function (date) {
       var b = (this.dt[this.TABSIZ - 1] - this.dt[this.TABSIZ - 11]) / 1000
 
       /* Long-term curve 100 years hence. */
-      var B = (this.TABEND + 100.0 - 1820.0) / 100
-      var m0 = 32.0 * B * B - 20.0
+      var B = (this.TABEND + 100 - 1820) / 100
+      var m0 = 32 * B * B - 20
       /* Its slope. */
       var m1 = 0.64 * B
 
       /* Solve for remaining coefficients of an interpolation polynomial
        that agrees in value and slope at both ends of the 100-year
        interval. */
-      var d = 2.0e-6 * (50.0 * (m1 + b) - m0 + a)
-      var c = 1.0e-4 * (m0 - a - 100.0 * b - 1.0e6 * d)
+      var d = 2.0e-6 * (50 * (m1 + b) - m0 + a)
+      var c = 1.0e-4 * (m0 - a - 100 * b - 1.0e6 * d)
 
       /* Note, the polynomial coefficients do not depend on Y.
        A given tabulation and long-term formula
@@ -131,11 +131,11 @@ $ns.delta.calc = function (date) {
     }
   } else {
     /* Use Morrison and Stephenson (2004) prior to the year 1700. */
-    if (date.j2000 < 1700.0) {
-      if (date.j2000 <= -1000.0) {
+    if (date.j2000 < 1700) {
+      if (date.j2000 <= -1000) {
         /* Morrison and Stephenson long-term fit. */
-        var B = (date.j2000 - 1820.0) / 100
-        date.delta = 32.0 * B * B - 20.0
+        var B = (date.j2000 - 1820) / 100
+        date.delta = 32 * B * B - 20
       } else {
         /* Morrison and Stephenson recommend linear interpolation
          between tabulations. */
@@ -180,7 +180,7 @@ $ns.delta.calc = function (date) {
           for (var i = 0; i < 4; i++) {
             diff[i] = diff[i + 1] - diff[i]
           }
-          var B = 0.25 * p * (p - 1.0)
+          var B = 0.25 * p * (p - 1)
           date.delta += B * (diff[1] + diff[2])
 
           if (iy + 2 < this.TABSIZ) {
@@ -188,25 +188,25 @@ $ns.delta.calc = function (date) {
             for (var i = 0; i < 3; i++) {
               diff[i] = diff[i + 1] - diff[i]
             }
-            B = 2.0 * B / 3.0
+            B = 2 * B / 3
             date.delta += (p - 0.5) * B * diff[1]
             if (iy - 2 >= 0 && iy + 3 <= this.TABSIZ) {
               // Compute fourth differences
               for (var i = 0; i < 2; i++) {
                 diff[i] = diff[i + 1] - diff[i]
               }
-              B = 0.125 * B * (p + 1.0) * (p - 2.0)
+              B = 0.125 * B * (p + 1) * (p - 2)
               date.delta += B * (diff[0] + diff[1])
             }
           }
         }
       }
     }
-    date.delta /= 100.0
+    date.delta /= 100
   }
 
   date.terrestrial = date.julian
-  date.universal = date.terrestrial - date.delta / 86400.0
+  date.universal = date.terrestrial - date.delta / 86400
 
   return date.delta
 }

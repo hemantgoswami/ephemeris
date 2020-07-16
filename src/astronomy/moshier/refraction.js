@@ -5,15 +5,15 @@ $ns.refraction = {}
  * to obtain apparent altitude.
  */
 $ns.refraction.calc = function (alt) {
-  if (alt < -2.0 || alt >= 90.0) {
-    return 0.0
+  if (alt < -2 || alt >= 90) {
+    return 0
   }
 
   /* For high altitude angle, AA page B61
    * Accuracy "usually about 0.1' ".
    */
   if (alt > 15.0) {
-    return 0.00452 * $const.atpress / ((273.0 + $const.attemp) * Math.tan($const.DTR * alt))
+    return 0.00452 * $const.atpress / ((273 + $const.attemp) * Math.tan($const.DTR * alt))
   }
 
   /* Formula for low altitude is from the Almanac for Computers.
@@ -26,15 +26,15 @@ $ns.refraction.calc = function (alt) {
   var y = alt
   var D = 0.0
   /* Invert Almanac for Computers formula numerically */
-  var P = ($const.atpress - 80.0) / 930.0
-  var Q = 4.8e-3 * ($const.attemp - 10.0)
+  var P = ($const.atpress - 80) / 930
+  var Q = 4.8e-3 * ($const.attemp - 10)
   var y0 = y
   var D0 = D
 
   for (var i = 0; i < 4; i++) {
     var N = y + (7.31 / (y + 4.4))
-    N = 1.0 / Math.tan($const.DTR * N)
-    D = N * P / (60.0 + Q * (N + 39.0))
+    N = 1 / Math.tan($const.DTR * N)
+    D = N * P / (60 + Q * (N + 39))
     N = y - y0
     y0 = D - D0 - N
     /* denominator of derivative */

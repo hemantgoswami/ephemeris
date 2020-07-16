@@ -44,7 +44,7 @@ $ns.planet.reduce = function (body, q, e) {
   a = Math.sqrt(a)
   body.position.trueGeocentricDistance = a
   /* was EO */
-  body.position.equatorialDiameter = 2.0 * body.semiDiameter / $const.EO
+  body.position.equatorialDiameter = 2 * body.semiDiameter / $const.EO
 
   /* Calculate visual magnitude.
    * "Visual" refers to the spectrum of visible light.
@@ -55,7 +55,7 @@ $ns.planet.reduce = function (body, q, e) {
    * where V(1,0) = elemnt->mag is the magnitude at 1au from
    * both earth and sun and 100% illumination.
    */
-  a = 0.5 * (1.0 + $const.pq)
+  a = 0.5 * (1 + $const.pq)
   /* Fudge the phase for light leakage in magnitude estimation.
    * Note this phase term estimate does not reflect reality well.
    * Calculated magnitudes of Mercury and Venus are inaccurate.

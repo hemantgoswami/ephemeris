@@ -52,7 +52,7 @@ $ns.star.reduce = function (body) {
   $moshier.precess.calc(e, {julian: epoch}, -1)
 
   /* Correct for proper motion and parallax */
-  var T = ($moshier.body.earth.position.date.julian - epoch) / 36525.0
+  var T = ($moshier.body.earth.position.date.julian - epoch) / 36525
   for (var i = 0; i < 3; i++) {
     p[i] = q[i] + T * m[i] - body.parallax * e[i]
   }
@@ -154,42 +154,32 @@ $ns.star.prepare = function (body) {
   } else if (x == 1900.0) {
     x = $const.j1900
   } else {
-    x = $const.j2000 + 365.25 * (x - 2000.0)
+    x = $const.j2000 + 365.25 * (x - 2000)
   }
   body.epoch = x
 
   /* read the right ascension */
   if (!body.ra) {
-    body.ra = 2.0 * Math.PI * (3600.0 * body.hmsRa.hours + 60.0 * body.hmsRa.minutes + body.hmsRa.seconds) / 86400.0
+    body.ra = 2 * Math.PI * (3600 * body.hmsRa.hours + 60 * body.hmsRa.minutes + body.hmsRa.seconds) / 86400
   }
 
   /* read the declination */
   if (!body.dec) {
-    var sign = 1
     /* the '-' sign may appaer at any part of hmsDec */
-    if (body.hmsDec.hours < 0.0 || body.hmsDec.minutes < 0.0 || body.hmsDec.seconds < 0.0) {
-      sign = -1
-    }
-    var z = (3600.0 * Math.abs(body.hmsDec.hours) + 60.0 * Math.abs(body.hmsDec.minutes) + Math.abs(body.hmsDec.seconds)) / $const.RTS
-    if (sign < 0) {
-      z = -z
-    }
-    body.dec = z
+    var sign = body.hmsDec.hours < 0 || body.hmsDec.minutes < 0 || body.hmsDec.seconds < 0 ? -1 : 1
+    var z = (3600 * Math.abs(body.hmsDec.hours) + 60 * Math.abs(body.hmsDec.minutes) + Math.abs(body.hmsDec.seconds)) / $const.RTS
+    body.dec = sign < 0 ? -z : z
   }
 
-  body.raMotion *= 15.0 / $const.RTS
+  body.raMotion *= 15 / $const.RTS
   /* s/century -> "/century -> rad/century */
   body.decMotion /= $const.RTS
-  z = body.parallax
-  if (z < 1.0) {
-    if (z <= 0.0) {
-      body.parallax = 0.0
-    } else {
-      body.parallax = $const.STR * z
-      /* assume px in arc seconds */
-    }
+  var p = body.parallax
+  if (p < 1) {
+    /* assume px in arc seconds */
+    body.parallax = p <= 0 ? 0 : $const.STR * p
   } else {
-    body.parallax = 1.0 / ($const.RTS * z)
+    body.parallax = 1 / ($const.RTS * p)
     /* parsecs -> radians */
   }
 }

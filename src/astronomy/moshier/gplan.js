@@ -98,7 +98,7 @@ $ns.gplan.calc = function (date, body_ptable, polar) {
       sr += cu
       continue
     }
-    var k1 = 0
+    var k1 = false
     var cv = 0.0
     var sv = 0.0
     for (var ip = 0; ip < np; ip++) {
@@ -114,10 +114,10 @@ $ns.gplan.calc = function (date, body_ptable, polar) {
         if (j < 0)
           su = -su
         var cu = this.cc[m][k]
-        if (k1 == 0) { /* set first angle */
+        if (!k1) { /* set first angle */
           sv = su
           cv = cu
-          k1 = 1
+          k1 = true
         }
         else { /* combine angles */
           var tmp = su * cv + cu * sv
@@ -171,7 +171,7 @@ $ns.gplan.sscc = function (k, arg, n) {
   /* sin(L) */
   this.cc[k][0] = cu
   /* cos(L) */
-  var sv = 2.0 * su * cu
+  var sv = 2 * su * cu
   var cv = cu * cu - su * su
   this.ss[k][1] = sv
   /* sin(2L) */
@@ -399,7 +399,7 @@ $ns.gplan.calc3 = function (date, body_ptable, polar, body_number) {
       sr += cu
       continue
     }
-    var k1 = 0
+    var k1 = false
     var cv = 0.0
     var sv = 0.0
     for (var ip = 0; ip < np; ip++) {
@@ -416,10 +416,10 @@ $ns.gplan.calc3 = function (date, body_ptable, polar, body_number) {
         if (j < 0)
           su = -su
         var cu = this.cc[m][k]
-        if (k1 == 0) { /* set first angle */
+        if (!k1) { /* set first angle */
           sv = su
           cv = cu
-          k1 = 1
+          k1 = true
         }
         else { /* combine angles */
           var tmp = su * cv + cu * sv
@@ -458,7 +458,7 @@ $ns.gplan.calc3 = function (date, body_ptable, polar, body_number) {
   var t = body_ptable.trunclvl
   polar[0] = this.Args[body_number - 1] + $const.STR * t * sl
   polar[1] = $const.STR * t * sb
-  polar[2] = body_ptable.distance * (1.0 + $const.STR * t * sr)
+  polar[2] = body_ptable.distance * (1 + $const.STR * t * sr)
 }
 
 /* Generic program to accumulate sum of trigonometric series
@@ -512,7 +512,7 @@ $ns.gplan.calc2 = function (date, body_ptable, polar) {
       sr += cu
       continue
     }
-    var k1 = 0
+    var k1 = false
     var cv = 0.0
     var sv = 0.0
     for (var ip = 0; ip < np; ip++) {
@@ -529,10 +529,10 @@ $ns.gplan.calc2 = function (date, body_ptable, polar) {
         if (j < 0)
           su = -su
         var cu = this.cc[m][k]
-        if (k1 == 0) { /* set first angle */
+        if (!k1) { /* set first angle */
           sv = su
           cv = cu
-          k1 = 1
+          k1 = true
         }
         else { /* combine angles */
           var tmp = su * cv + cu * sv
@@ -603,7 +603,7 @@ $ns.gplan.calc1 = function (date, body_ptable) {
       sl += cu
       continue
     }
-    var k1 = 0
+    var k1 = false
     var cv = 0.0
     var sv = 0.0
     for (var ip = 0; ip < np; ip++) {
@@ -620,10 +620,10 @@ $ns.gplan.calc1 = function (date, body_ptable) {
         if (j < 0)
           su = -su
         var cu = this.cc[m][k]
-        if (k1 == 0) { /* set first angle */
+        if (!k1) { /* set first angle */
           sv = su
           cv = cu
-          k1 = 1
+          k1 = true
         }
         else { /* combine angles */
           var tmp = su * cv + cu * sv
@@ -660,7 +660,7 @@ $ns.gplan.moon = function (date, rect, pol) {
   pol[0] = $const.STR * x
   x = this.calc1(date, $moshier.plan404.moonlat)
   pol[1] = $const.STR * x
-  x = (1.0 + $const.STR * pol[2]) * $moshier.plan404.moonlr.distance
+  x = (1 + $const.STR * pol[2]) * $moshier.plan404.moonlr.distance
   pol[2] = x
   /* Convert ecliptic polar to equatorial rectangular coordinates. */
   $moshier.epsilon.calc(date)

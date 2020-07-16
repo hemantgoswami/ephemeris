@@ -49,13 +49,13 @@ $ns.julian.calc = function (date) {
   date.julianDate = b + c + e + date.day - 32167.5
 
   // Add time
-  date.julianTime = (3600.0 * date.hours + 60.0 * date.minutes + date.seconds) / 86400.0
+  date.julianTime = (3600 * date.hours + 60 * date.minutes + date.seconds) / 86400
 
   date.julian = date.julianDate + date.julianTime
 
-  date.j2000 = 2000.0 + (date.julian - $const.j2000) / 365.25
-  date.b1950 = 1950.0 + (date.julian - $const.b1950) / 365.25
-  date.j1900 = 1900.0 + (date.julian - $const.j1900) / 365.25
+  date.j2000 = 2000 + (date.julian - $const.j2000) / 365.25
+  date.b1950 = 1950 + (date.julian - $const.b1950) / 365.25
+  date.j1900 = 1900 + (date.julian - $const.j1900) / 365.25
 
   return date.julian
 }
@@ -124,7 +124,7 @@ $ns.julian.toGregorian = function (date) {
    */
   a = Math.floor(dd)
   dd = dd - a
-  x = 2.0 * Math.PI * dd
+  x = 2 * Math.PI * dd
 
   $copy(date, $util.hms(x))
 

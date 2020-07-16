@@ -8,9 +8,8 @@ $ns.lonlat.calc = function (pp, date, ofdate) {
    */
   var r = 0.0
   for (var i = 0; i < 3; i++) {
-    var x = pp[i]
-    s[i] = x
-    r += x * x
+    s[i] = pp[i]
+    r += pp[i] * pp[i]
   }
   r = Math.sqrt(r)
 
@@ -21,14 +20,11 @@ $ns.lonlat.calc = function (pp, date, ofdate) {
 
   /* Convert from equatorial to ecliptic coordinates */
   $moshier.epsilon.calc(date)
-  var yy = s[1]
-  var zz = s[2]
-  var x = s[0]
-  var y = $moshier.epsilon.coseps * yy + $moshier.epsilon.sineps * zz
-  var z = -$moshier.epsilon.sineps * yy + $moshier.epsilon.coseps * zz
+  var y = $moshier.epsilon.coseps * s[1] + $moshier.epsilon.sineps * s[2]
+  var z = -$moshier.epsilon.sineps * s[1] + $moshier.epsilon.coseps * s[2]
 
-  yy = $util.zatan2(x, y)
-  zz = Math.asin(z / r)
+  var yy = $util.zatan2(s[0], y)
+  var zz = Math.asin(z / r)
 
   var result = {}
   // longitude and latitude in decimal

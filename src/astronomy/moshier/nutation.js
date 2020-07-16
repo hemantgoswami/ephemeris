@@ -182,10 +182,10 @@ $ns.nutation.calc = function (date, p) {
 
   p1[1] = sl * ce * p[0]
     + (cl * $moshier.epsilon.coseps * ce + $moshier.epsilon.sineps * se) * p[1]
-    - (sino + (1.0 - cl) * $moshier.epsilon.sineps * ce) * p[2]
+    - (sino + (1 - cl) * $moshier.epsilon.sineps * ce) * p[2]
 
   p1[2] = sl * se * p[0]
-    + (sino + (cl - 1.0) * se * $moshier.epsilon.coseps) * p[1]
+    + (sino + (cl - 1) * se * $moshier.epsilon.coseps) * p[1]
     + (cl * $moshier.epsilon.sineps * se + $moshier.epsilon.coseps * ce) * p[2]
 
   for (var i = 0; i < 3; i++) {
@@ -205,17 +205,18 @@ $ns.nutation.calc = function (date, p) {
  * computed at Julian date J.
  */
 $ns.nutation.calclo = function (date) {
-  if (this.jdnut.julian == date.julian)
+  if (this.jdnut.julian == date.julian) {
     return 0
+  }
 
   this.jdnut = date
 
   /* Julian centuries from 2000 January 1.5,
    * barycentric dynamical time
    */
-  var T = (date.julian - 2451545.0) / 36525.0
+  var T = (date.julian - 2451545) / 36525
   var T2 = T * T
-  var T10 = T / 10.0
+  var T10 = T / 10
 
   /* Fundamental arguments in the FK5 reference system. */
 
@@ -264,26 +265,23 @@ $ns.nutation.calclo = function (date) {
   for (var i = 0; i < 105; i++) {
     /* argument of sine and cosine */
     var k
-    var k1 = 0
+    var k1 = false
     var cv = 0.0
     var sv = 0.0
     for (var m = 0; m < 5; m++) {
       var j = p[p_i++] // *p++;
       if (j) {
-        k = j
-        if (j < 0) {
-          k = -k
-        }
+        k = j < 0 ? -j : j
         var su = this.ss[m][k - 1]
         /* sin(k*angle) */
         if (j < 0) {
           su = -su
         }
         var cu = this.cc[m][k - 1]
-        if (k1 == 0) { /* set first angle */
+        if (!k1) { /* set first angle */
           sv = su
           cv = cu
-          k1 = 1
+          k1 = true
         } else { /* combine angles */
           var sw = su * cv + cu * sv
           cv = cu * cv - su * sv
@@ -293,23 +291,26 @@ $ns.nutation.calclo = function (date) {
     }
     /* longitude coefficient */
     var f = p[p_i++] // *p++;
-    if ((k = p[p_i++] /* *p++ */) != 0) {
+    k = p[p_i++] /* *p++ */
+    if (k != 0) {
       f += T10 * k
     }
 
     /* obliquity coefficient */
     var g = p[p_i++] // *p++;
-    if ((k = p[p_i++] /* *p++ */) != 0)
+    k = p[p_i++] /* *p++ */
+    if (k != 0) {
       g += T10 * k
+    }
 
     /* accumulate the terms */
     C += f * sv
     D += g * cv
   }
   /* first terms, not in table: */
-  C += (-1742. * T10 - 171996.) * this.ss[4][0]
+  C += (-1742 * T10 - 171996) * this.ss[4][0]
   /* sin(OM) */
-  D += (89. * T10 + 92025.) * this.cc[4][0]
+  D += (89 * T10 + 92025) * this.cc[4][0]
   /* cos(OM) */
   /*
    printf( "nutation: in longitude %.3f\", in obliquity %.3f\"\n", C, D );

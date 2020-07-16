@@ -23,7 +23,7 @@ $ns.diurnal.aberration = function (last, ra, dec, result) {
   result.dec = dec
   result.ra += N
   result.dec += D
-  result.dRA = $const.RTS * N / 15.0
+  result.dRA = $const.RTS * N / 15
   result.dDec = $const.RTS * D
 
   return result

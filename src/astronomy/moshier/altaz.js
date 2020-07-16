@@ -10,10 +10,10 @@ $ns.altaz.calc = function (pol, date, result) {
   var ra = pol[0]
   var dec = pol[1]
   var dist = pol[2]
-  // var TPI = 2.0 * Math.PI
+  // var TPI = 2 * Math.PI
 
   /* local apparent sidereal time, seconds converted to radians */
-  var last = $moshier.sidereal.calc(date, $const.tlong) * $const.DTR / 240.0
+  var last = $moshier.sidereal.calc(date, $const.tlong) * $const.DTR / 240
   var lha = last - ra
   /* local hour angle, radians */
   result.dLocalApparentSiderealTime = last
@@ -101,7 +101,7 @@ $ns.altaz.calc = function (pol, date, result) {
   while (y > Math.PI) {
     y -= $const.TPI
   }
-  y = $const.RTS * y / 15.0
+  y = $const.RTS * y / 15
   z = $const.RTS * (dec - z)
 
   result.atmosphericRefraction = {

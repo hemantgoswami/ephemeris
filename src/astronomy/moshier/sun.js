@@ -32,18 +32,17 @@ $ns.sun.calc = function () {
 
   for (var i = 0; i < 3; i++) {
     var x = -ecr[i]
-    var y = -$moshier.body.earth.position.rect[i] // -rearth[i];
-    ecr[i] = x
     /* position t days ago */
-    rec[i] = y
+    ecr[i] = x
     /* position now */
-    pol[i] = y - x
+    rec[i] = -$moshier.body.earth.position.rect[i] // -rearth[i];
     /* change in position */
+    pol[i] = rec[i] - x
   }
 
   $copy($moshier.body.sun.position, {
     date: $moshier.body.earth.position.date,
-    lightTime: 1440.0 * t,
+    lightTime: 1440 * t,
     aberration: $util.showcor(ecr, pol)
   })
 
@@ -51,7 +50,7 @@ $ns.sun.calc = function () {
    * for use by altaz().
    */
   var d = $util.deltap(ecr, rec)
-  /* see dms.c */
+  /* see $util.dms() */
   $const.dradt = d.dr
   $const.ddecdt = d.dd
   $const.dradt /= t
@@ -80,7 +79,7 @@ $ns.sun.calc = function () {
   $moshier.body.sun.position.apparent = $util.showrd(ecr, pol)
 
   /* Show it in ecliptic coordinates */
-  y = $moshier.epsilon.coseps * rec[1] + $moshier.epsilon.sineps * rec[2]
+  var y = $moshier.epsilon.coseps * rec[1] + $moshier.epsilon.sineps * rec[2]
   y = $util.zatan2(rec[0], y) + $moshier.nutation.nutl
   $moshier.body.sun.position.apparentLongitude = $const.RTD * y
   var dmsLongitude = $util.dms(y)

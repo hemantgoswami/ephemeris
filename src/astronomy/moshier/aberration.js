@@ -13,10 +13,10 @@ $ns.aberration.calc = function (p, result) {
     pV += p[i] * A
   }
   /* Make the adjustment for aberration. */
-  betai = Math.sqrt(1.0 - betai)
-  var C = 1.0 + pV
+  betai = Math.sqrt(1 - betai)
+  var C = 1 + pV
   var A = betai / C
-  var B = (1.0 + pV / (1.0 + betai)) / C
+  var B = (1 + pV / (1 + betai)) / C
 
   for (var i = 0; i < 3; i++) {
     C = A * p[i] + B * V[i]

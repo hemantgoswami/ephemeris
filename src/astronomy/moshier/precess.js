@@ -46,7 +46,7 @@ $ns.precess.calc = function (R, date, direction) {
   /* Each precession angle is specified by a polynomial in
    * T = Julian centuries from J2000.0.  See AA page B18.
    */
-  var T = (date.julian - $const.j2000) / 36525.0
+  var T = (date.julian - $const.j2000) / 36525
 
   /* Implementation by elementary rotations using Laskar's expansions.
    * First rotate about the x axis from the initial equator
@@ -65,7 +65,7 @@ $ns.precess.calc = function (R, date, direction) {
   x[1] = z
 
   /* Precession in longitude */
-  T /= 10.0
+  T /= 10
   /* thousands of years */
   var p = this.pAcof
   var pA = p[p_i++] // *p++;

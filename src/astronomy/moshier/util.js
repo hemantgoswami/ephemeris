@@ -7,7 +7,7 @@ $ns.util.mods3600 = function (value) {
 /* Reduce x modulo 2 pi */
 $ns.util.modtp = function (x) {
   var y = x - Math.floor(x / $const.TPI) * $const.TPI
-  while (y < 0.0) {
+  while (y < 0) {
     y += $const.TPI
   }
   while (y >= $const.TPI) {
@@ -18,24 +18,24 @@ $ns.util.modtp = function (x) {
 
 /* Reduce x modulo 360 degrees */
 $ns.util.mod360 = function (x) {
-  var y = x - Math.floor(x / 360.0) * 360.0
-  while (y < 0.0) {
-    y += 360.0
+  var y = x - Math.floor(x / 360) * 360
+  while (y < 0) {
+    y += 360
   }
-  while (y > 360.0) {
-    y -= 360.0
+  while (y > 360) {
+    y -= 360
   }
   return y
 }
 
 /* Reduce x modulo 30 degrees */
 $ns.util.mod30 = function (x) {
-  var y = x - Math.floor(x / 30.0) * 30.0
-  while (y < 0.0) {
-    y += 30.0
+  var y = x - Math.floor(x / 30) * 30
+  while (y < 0) {
+    y += 30
   }
-  while (y > 30.0) {
-    y -= 30.0
+  while (y > 30) {
+    y -= 30
   }
   return y
 }
@@ -43,34 +43,34 @@ $ns.util.mod30 = function (x) {
 $ns.util.zatan2 = function (x, y) {
   var w = 0, code = 0
 
-  if (x < 0.0) {
+  if (x < 0) {
     code = 2
   }
-  if (y < 0.0) {
+  if (y < 0) {
     code |= 1
   }
 
-  if (x == 0.0) {
+  if (x == 0) {
     if (code & 1) {
       return 1.5 * Math.PI
     }
-    if (y == 0.0) {
-      return 0.0
+    if (y == 0) {
+      return 0
     }
     return 0.5 * Math.PI
   }
 
-  if (y == 0.0) {
+  if (y == 0) {
     if (code & 2) {
       return Math.PI
     }
-    return 0.0
+    return 0
   }
 
   switch (code) {
     default:
     case 0:
-      w = 0.0
+      w = 0
       break
     case 1:
       w = 2 * Math.PI
@@ -98,8 +98,8 @@ $ns.util.tanh = function (x) {
 
 $ns.util.hms = function (x) {
   var s = x * $const.RTOH
-  if (s < 0.0) {
-    s += 24.0
+  if (s < 0) {
+    s += 24
   }
   var h = Math.floor(s)
   s -= h
@@ -108,7 +108,7 @@ $ns.util.hms = function (x) {
   s -= m
   s *= 60
   /* Handle shillings and pence roundoff. */
-  var sfrac = Math.floor(1000.0 * s + 0.5)
+  var sfrac = Math.floor(1000 * s + 0.5)
   if (sfrac >= 60000) {
     sfrac -= 60000
     m += 1
@@ -130,7 +130,7 @@ $ns.util.hms = function (x) {
 
 $ns.util.dms = function (x) {
   var s = x * $const.RTD
-  if (s < 0.0) {
+  if (s < 0) {
     s = -s
   }
   var d = Math.floor(s)
@@ -160,7 +160,7 @@ $ns.util.showcor = function (p, dp, result) {
   var d = $util.deltap(p, p1)
 
   result = result || {}
-  result.dRA = $const.RTS * d.dr / 15.0
+  result.dRA = $const.RTS * d.dr / 15
   result.dDec = $const.RTS * d.dd
 
   return result
@@ -171,7 +171,7 @@ $ns.util.showcor = function (p, dp, result) {
  * Output vector pol[] contains R.A., Dec., and radius.
  */
 $ns.util.showrd = function (p, pol, result) {
-  var r = 0.0
+  var r = 0
   for (var i = 0; i < 3; i++) {
     r += p[i] * p[i]
   }
@@ -240,10 +240,10 @@ $ns.util.deltap = function (p0, p1, d) {
     Q = $util.zatan2(p1[0], p1[1])
     Q = Q - P
     while (Q < -Math.PI) {
-      Q += 2.0 * Math.PI
+      Q += 2 * Math.PI
     }
     while (Q > Math.PI) {
-      Q -= 2.0 * Math.PI
+      Q -= 2 * Math.PI
     }
     d.dr = Q
     P = Math.asin(p0[2] / A)
@@ -258,12 +258,12 @@ $ns.util.deltap = function (p0, p1, d) {
     d.dr = 1.0e38
   } else {
     Q = y / x
-    Q = (dp[1] - dp[0] * y / x) / (x * (1.0 + Q * Q))
+    Q = (dp[1] - dp[0] * y / x) / (x * (1 + Q * Q))
     d.dr = Q
   }
 
   x = p0[2] / A
-  P = Math.sqrt(1.0 - x * x)
+  P = Math.sqrt(1 - x * x)
   d.dd = (p1[2] / B - x) / P
 
   return d
@@ -291,19 +291,19 @@ $ns.util.angles = function (p, q, e) {
     $const.ep += a * s
     $const.qe += b * a
   }
-  $const.EO = Math.sqrt($const.EO)
   /* Distance between Earth and object */
-  $const.SO = Math.sqrt($const.SO)
+  $const.EO = Math.sqrt($const.EO)
   /* Sun - object */
-  $const.SE = Math.sqrt($const.SE)
+  $const.SO = Math.sqrt($const.SO)
   /* Sun - earth */
+  $const.SE = Math.sqrt($const.SE)
   /* Avoid fatality: if object equals sun, SO is zero. */
   if ($const.SO > 1.0e-12) {
-    $const.pq /= $const.EO * $const.SO
     /* cosine of sun-object-earth */
-    $const.qe /= $const.SO * $const.SE
+    $const.pq /= $const.EO * $const.SO
     /* cosine of earth-sun-object */
+    $const.qe /= $const.SO * $const.SE
   }
-  $const.ep /= $const.SE * $const.EO
   /* -cosine of sun-earth-object */
+  $const.ep /= $const.SE * $const.EO
 }
