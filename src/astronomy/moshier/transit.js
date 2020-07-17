@@ -28,10 +28,8 @@ $ns.transit = {
 /* Calculate time of transit
  * assuming RA and Dec change uniformly with time
  */
-$ns.transit.calc = function (date, lha, dec, result) {
+$ns.transit.calc = function (date, lha, dec) {
   var NR = [], YR = [];
-
-  result = result || {};
 
   this.f_trnsit = false;
   /* Initialize to no-event flag value. */
@@ -60,12 +58,14 @@ $ns.transit.calc = function (date, lha, dec, result) {
     y -= $const.TPI;
   }
   var lhay = y;
-  y = y/( -$const.dradt/$const.TPI + 1.00273790934);
+  y = y/(-$const.dradt/$const.TPI + 1.00273790934);
   this.r_trnsit = x - y;
   /* printf ("rt %.7f ", r_trnsit); */
   /* Ordinarily never print here. */
-  result.approxLocalMeridian = $util.hms (this.r_trnsit);
-  result.UTdate = this.r_trnsit/$const.TPI;
+  var result = {
+    approxLocalMeridian: $util.hms (this.r_trnsit),
+    UTdate: this.r_trnsit/$const.TPI
+  };
 
   if (coslat != 0.0 && cosdec != 0.0) {
     /* The time at which the upper limb of the body meets the
@@ -154,7 +154,7 @@ $ns.transit.iterator = function (julian, callback) {
 };
 
 /* Iterative computation of rise, transit, and set times. */
-$ns.transit.iterateTransit = function (callback, result) {
+$ns.transit.iterateTransit = function (callback) {
   var date, t0; // double
   var isPrtrnsit = false;
   var loopctr = 0;
@@ -185,7 +185,7 @@ $ns.transit.iterateTransit = function (callback, result) {
       this.t_rise = -1.0;
       this.t_set = -1.0;
       if ($moshier.altaz.elevation > this.elevation_threshold) {
-        this.noRiseSet (this.t_trnsit, callback);
+        this.noRiseSet (callback);
       }
       // goto prtrnsit;
     } else {
@@ -206,7 +206,7 @@ $ns.transit.iterateTransit = function (callback, result) {
           /* Rise or set time not found. Apply search technique. */
           this.t_rise = -1.0;
           this.t_set = -1.0;
-          this.noRiseSet (this.t_trnsit, callback);
+          this.noRiseSet (callback);
           isPrtrnsit = true;
           // goto prtrnsit;
         } else if (++loopctr > 10) {
@@ -244,7 +244,7 @@ $ns.transit.iterateTransit = function (callback, result) {
             /* Rise or set time not found. Apply search technique. */
             this.t_rise = -1.0;
             this.t_set = -1.0;
-            this.noRiseSet (this.t_trnsit, callback);
+            this.noRiseSet (callback);
             isPrtrnsit = true;
             // goto prtrnsit;
           } else if (++loopctr > 10) {
@@ -269,7 +269,7 @@ $ns.transit.iterateTransit = function (callback, result) {
       }
     }
 // prtrnsit:
-    result = result || {};
+    var result = {};
     result.localMeridianTransit = $moshier.julian.toGregorian ({julian: this.t_trnsit});
     if (this.t_rise != -1.0) {
       result.riseDate = $moshier.julian.toGregorian ({julian: this.t_rise});
@@ -302,7 +302,7 @@ $ns.transit.iterateTransit = function (callback, result) {
 /* If the initial approximation fails to locate a rise or set time,
  this function steps between the transit time and the previous
  or next inferior transits to find an event more reliably. */
-$ns.transit.noRiseSet = function (t0, callback) {
+$ns.transit.noRiseSet = function (callback) {
   var t_trnsit0 = this.t_trnsit; // double
   var el_trnsit0 = this.elevation_trnsit; // double
 

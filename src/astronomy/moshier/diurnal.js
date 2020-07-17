@@ -7,7 +7,7 @@ $ns.diurnal = {
  * This formula is less rigorous than the method used for
  * annual aberration.  However, the correction is small.
  */
-$ns.diurnal.aberration = function (last, ra, dec, result) {
+$ns.diurnal.aberration = function (last, ra, dec) {
   var lha = last - ra
   var coslha = Math.cos(lha)
   var sinlha = Math.sin(lha)
@@ -18,30 +18,25 @@ $ns.diurnal.aberration = function (last, ra, dec, result) {
   var N = cosdec != 0.0 ? 1.5472e-6 * $const.trho * coslat * coslha / cosdec : 0.0
   var D = 1.5472e-6 * $const.trho * coslat * sinlha * sindec
 
-  result = result || {}
-  result.ra = ra
-  result.dec = dec
-  result.ra += N
-  result.dec += D
-  result.dRA = $const.RTS * N / 15
-  result.dDec = $const.RTS * D
-
-  return result
+  return {
+    ra: ra,
+    dec: dec,
+    ra: N,
+    dec: D,
+    dRA: $const.RTS * N / 15,
+    dDec: $const.RTS * D
+  }
 }
 
 /* Diurnal parallax, AA page D3 */
-$ns.diurnal.parallax = function (last, ra, dec, dist, result) {
+$ns.diurnal.parallax = function (last, ra, dec, dist) {
   var p = [], dp = [] // double
-
-  result = result || {}
 
   /* Don't bother with this unless the equatorial horizontal parallax
    * is at least 0.005"
    */
-  if (dist > 1758.8) {
-    result.ra = ra
-    result.dec = dec
-    return result
+  if (dist > 1758.8) return {
+    ra: ra, dec: dec
   }
 
   this.DISFAC = $const.au / (0.001 * $const.aearth)
@@ -72,8 +67,11 @@ $ns.diurnal.parallax = function (last, ra, dec, dist, result) {
   D = Math.sqrt(D)
   /* topocentric distance */
 
-  result.ra = $util.zatan2(x, y)
-  result.dec = Math.asin(z / D)
-  $util.showcor(p, dp, result)
-  return result
+  var result = $util.showcor(p, dp)
+  return {
+    ra: $util.zatan2(x, y),
+    dec: Math.asin(z / D),
+    dRA: result.dRA,
+    dDec: result.dDec
+  }
 }

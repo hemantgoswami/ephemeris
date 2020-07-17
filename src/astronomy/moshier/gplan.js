@@ -37,9 +37,7 @@ $ns.gplan = {
 
 }
 
-/*
- Routines to chew through tables of perturbations.
-*/
+/* Routines to chew through tables of perturbations. */
 $ns.gplan.calc = function (date, body_ptable, polar) {
   var T = (date.julian - $const.j2000) / body_ptable.timescale
   var n = body_ptable.maxargs

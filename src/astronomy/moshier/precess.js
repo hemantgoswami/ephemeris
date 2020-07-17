@@ -53,11 +53,11 @@ $ns.precess.calc = function (R, date, direction) {
    * to the ecliptic. (The input is equatorial.)
    */
   if (direction == 1) {
-    $moshier.epsilon.calc(date)
     /* To J2000 */
+    $moshier.epsilon.calc(date)
   } else {
-    $moshier.epsilon.calc({julian: $const.j2000})
     /* From J2000 */
+    $moshier.epsilon.calc({julian: $const.j2000})
   }
   x[0] = R[0]
   var z = $moshier.epsilon.coseps * R[1] + $moshier.epsilon.sineps * R[2]

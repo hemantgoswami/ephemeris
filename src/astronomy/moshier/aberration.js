@@ -1,16 +1,15 @@
 $ns.aberration = {}
 
-$ns.aberration.calc = function (p, result) {
+$ns.aberration.calc = function (p) {
   var x = [], V = [] // double
 
   /* Calculate the velocity of the earth (see vearth.js). */
   $moshier.vearth.calc($moshier.body.earth.position.date)
   var betai = 0.0, pV = 0.0
   for (var i = 0; i < 3; i++) {
-    var A = $moshier.vearth.vearth[i] / $const.Clightaud
-    V[i] = A
-    betai += A * A
-    pV += p[i] * A
+    V[i] = $moshier.vearth.vearth[i] / $const.Clightaud
+    betai += V[i] * V[i]
+    pV += p[i] * V[i]
   }
   /* Make the adjustment for aberration. */
   betai = Math.sqrt(1 - betai)
@@ -19,14 +18,11 @@ $ns.aberration.calc = function (p, result) {
   var B = (1 + pV / (1 + betai)) / C
 
   for (var i = 0; i < 3; i++) {
-    C = A * p[i] + B * V[i]
-    x[i] = C
-    $const.dp[i] = C - p[i]
+    x[i] = A * p[i] + B * V[i]
+    $const.dp[i] = x[i] - p[i]
   }
 
-  result = result || {}
-
-  $util.showcor(p, $const.dp, result)
+  var result = $util.showcor(p, $const.dp)
   for (var i = 0; i < 3; i++) {
     p[i] = x[i]
   }

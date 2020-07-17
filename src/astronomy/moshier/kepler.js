@@ -12,13 +12,12 @@ $ns.kepler.calc = function (date, body, rect, polar) {
     } else {
       $moshier.gplan.calc(date, body.ptable, polar)
     }
-    E = polar[0]
     /* longitude */
-    body.longitude = E
-    W = polar[1]
+    body.longitude = E = polar[0]
     /* latitude */
-    r = polar[2]
+    W = polar[1]
     /* radius */
+    r = polar[2]
     body.distance = r
     body.epoch = date.julian
     body.equinox = {julian: $const.j2000}
@@ -29,8 +28,8 @@ $ns.kepler.calc = function (date, body, rect, polar) {
     var inclination = body.inclination
     var ascnode = body.node * $const.DTR
     var argperih = body.perihelion
-    var meandistance = body.semiAxis
     /* semimajor axis */
+    var meandistance = body.semiAxis
     var dailymotion = body.dailyMotion
     var eccent = body.eccentricity
     var meananomaly = body.anomaly
@@ -227,12 +226,12 @@ $ns.kepler.calc = function (date, body, rect, polar) {
   W = Math.asin(M / r)
 
   /* Output the polar cooordinates */
-  polar[0] = E
   /* longitude */
-  polar[1] = W
+  polar[0] = E
   /* latitude */
-  polar[2] = r
+  polar[1] = W
   /* radius */
+  polar[2] = r
 
   // fill the body.position only if rect and polar are
   // not defined
@@ -307,7 +306,7 @@ $ns.kepler.init = function () {
    + 0.001676438 * cos(2.0*u)
    - 0.000003519 * cos(4.0*u)
    + 0.000000008 * cos(6.0*u);
-   trho += height/6378160.;
+   trho += height/6378160;
    */
 
   $const.Clightaud = 86400 * $const.Clight / $const.au

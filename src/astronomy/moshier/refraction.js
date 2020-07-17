@@ -12,7 +12,7 @@ $ns.refraction.calc = function (alt) {
   /* For high altitude angle, AA page B61
    * Accuracy "usually about 0.1' ".
    */
-  if (alt > 15.0) {
+  if (alt > 15) {
     return 0.00452 * $const.atpress / ((273 + $const.attemp) * Math.tan($const.DTR * alt))
   }
 

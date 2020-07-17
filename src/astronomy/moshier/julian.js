@@ -122,8 +122,7 @@ $ns.julian.toGregorian = function (date) {
   /* Display fraction of calendar day
    * as clock time.
    */
-  a = Math.floor(dd)
-  dd = dd - a
+  dd = dd - Math.floor(dd)
   x = 2 * Math.PI * dd
 
   $copy(date, $util.hms(x))

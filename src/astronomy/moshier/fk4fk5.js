@@ -67,9 +67,8 @@ $ns.fk4fk5.calc = function (p, m, el) {
    * in radian measure.
    */
   b = p[0] * p[0] + p[1] * p[1]
-  a = b + p[2] * p[2]
-  var c = a
-  a = Math.sqrt(a)
+  var c = b + p[2] * p[2]
+  a = Math.sqrt(c)
 
   el.ra = $util.zatan2(p[0], p[1])
   el.dec = Math.asin(p[2] / a)

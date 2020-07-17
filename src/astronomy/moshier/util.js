@@ -150,7 +150,7 @@ $ns.util.dms = function (x) {
 /* Display magnitude of correction vector
  * in arc seconds
  */
-$ns.util.showcor = function (p, dp, result) {
+$ns.util.showcor = function (p, dp) {
   var p1 = [] // double
 
   for (var i = 0; i < 3; i++) {
@@ -159,18 +159,17 @@ $ns.util.showcor = function (p, dp, result) {
 
   var d = $util.deltap(p, p1)
 
-  result = result || {}
-  result.dRA = $const.RTS * d.dr / 15
-  result.dDec = $const.RTS * d.dd
-
-  return result
+  return {
+    dRA: $const.RTS * d.dr / 15,
+    dDec: $const.RTS * d.dd
+  }
 }
 
 /* Display Right Ascension and Declination
  * from input equatorial rectangular unit vector.
  * Output vector pol[] contains R.A., Dec., and radius.
  */
-$ns.util.showrd = function (p, pol, result) {
+$ns.util.showrd = function (p, pol) {
   var r = 0
   for (var i = 0; i < 3; i++) {
     r += p[i] * p[i]
@@ -181,7 +180,7 @@ $ns.util.showrd = function (p, pol, result) {
   pol[1] = Math.asin(p[2] / r)
   pol[2] = r
 
-  result = result || {}
+  var result = {}
 
   $copy(result, {
     dRA: pol[0],
@@ -214,10 +213,8 @@ $ns.util.showrd = function (p, pol, result) {
  * p1 is the vector after motion or aberration.
  *
  */
-$ns.util.deltap = function (p0, p1, d) {
-  var dp = [] // double
-
-  d = d || {}
+$ns.util.deltap = function (p0, p1) {
+  var dr, dp = [] // double
 
   var P = 0.0
   var Q = 0.0
@@ -245,28 +242,32 @@ $ns.util.deltap = function (p0, p1, d) {
     while (Q > Math.PI) {
       Q -= 2 * Math.PI
     }
-    d.dr = Q
+    dr = Q
     P = Math.asin(p0[2] / A)
     Q = Math.asin(p1[2] / B)
-    d.dd = Q - P
-    return d
+    return {
+      dd: Q - P,
+      dr: dr
+    }
   }
 
   var x = p0[0]
   var y = p0[1]
   if (x == 0.0) {
-    d.dr = 1.0e38
+    dr = 1.0e38
   } else {
     Q = y / x
     Q = (dp[1] - dp[0] * y / x) / (x * (1 + Q * Q))
-    d.dr = Q
+    dr = Q
   }
 
   x = p0[2] / A
   P = Math.sqrt(1 - x * x)
-  d.dd = (p1[2] / B - x) / P
 
-  return d
+  return {
+    dd: (p1[2] / B - x) / P,
+    dr: dr
+  }
 }
 
 /* Sun - object - earth angles and distances.

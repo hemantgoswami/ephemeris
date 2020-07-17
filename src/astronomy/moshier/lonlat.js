@@ -26,14 +26,10 @@ $ns.lonlat.calc = function (pp, date, ofdate) {
   var yy = $util.zatan2(s[0], y)
   var zz = Math.asin(z / r)
 
-  var result = {}
-  // longitude and latitude in decimal
-  result[0] = yy
-  result[1] = zz
-  result[2] = r
-  // longitude and latitude in h,m,s
-  result[3] = $util.dms(yy)
-  result[4] = $util.dms(zz)
-
-  return result
+  return [
+    // longitude and latitude in decimal
+    yy, zz, r,
+    // longitude and latitude in h,m,s
+    $util.dms(yy), $util.dms(zz)
+  ]
 }

@@ -4,9 +4,7 @@ $ns.altaz = {
   refracted_elevation: 0.0
 }
 
-$ns.altaz.calc = function (pol, date, result) {
-  result = result || {}
-
+$ns.altaz.calc = function (pol, date) {
   var ra = pol[0]
   var dec = pol[1]
   var dist = pol[2]
@@ -14,10 +12,13 @@ $ns.altaz.calc = function (pol, date, result) {
 
   /* local apparent sidereal time, seconds converted to radians */
   var last = $moshier.sidereal.calc(date, $const.tlong) * $const.DTR / 240
-  var lha = last - ra
   /* local hour angle, radians */
-  result.dLocalApparentSiderealTime = last
-  result.localApparentSiderealTime = $util.hms(last)
+  var lha = last - ra
+
+  var result = {
+    dLocalApparentSiderealTime: last,
+    localApparentSiderealTime: $util.hms(last)
+  }
 
   /* Display rate at which ra and dec are changing */
   /*
