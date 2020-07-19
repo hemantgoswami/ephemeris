@@ -204,7 +204,7 @@ $ns.util.showcor = function (p, dp, result) {
  * from input equatorial rectangular unit vector.
  * Output vector pol[] contains R.A., Dec., and radius.
  */
-$ns.util.showrd = function (p, pol, result) {
+$ns.util.showrd = function (p, pol) {
   var x, y, r // double
   var i // int
 
@@ -223,7 +223,7 @@ $ns.util.showrd = function (p, pol, result) {
 
   pol[2] = r
 
-  result = result || {}
+  var result = {}
 
   $copy(result, {
     dRA: x,
