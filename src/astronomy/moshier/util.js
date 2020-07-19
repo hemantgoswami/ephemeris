@@ -256,11 +256,11 @@ $ns.util.showrd = function (p, pol, result) {
  * p1 is the vector after motion or aberration.
  *
  */
-$ns.util.deltap = function (p0, p1, d) {
+$ns.util.deltap = function (p0, p1) {
   var dp = [], A, B, P, Q, x, y, z // double
   var i // int
 
-  d = d || {}
+  var d = {}
 
   P = 0.0
   Q = 0.0
