@@ -39,24 +39,23 @@ $ns.diurnal.aberration = function (last, ra, dec, result) {
 
 /* Diurnal parallax, AA page D3
  */
-$ns.diurnal.parallax = function (last, ra, dec, dist, result) {
+$ns.diurnal.parallax = function (last, ra, dec, dist) {
   var cosdec, sindec, coslat, sinlat // double
   var p = [], dp = [], x, y, z, D // double
-
-  result = result || {}
-  result.ra = ra
-  result.dec = dec
 
   /* Don't bother with this unless the equatorial horizontal parallax
    * is at least 0.005"
    */
   if (dist > 1758.8) {
-    return result
+    return {
+      ra: ra,
+      dec: dec
+    }
   }
 
   this.DISFAC = $const.au / (0.001 * $const.aearth)
-  cosdec = Math.cos(result.dec)
-  sindec = Math.sin(result.dec)
+  cosdec = Math.cos(dec)
+  sindec = Math.sin(dec)
 
   /* Observer's astronomical latitude
    */
@@ -84,6 +83,7 @@ $ns.diurnal.parallax = function (last, ra, dec, dist, result) {
   /* topocentric distance */
 
   /* recompute ra and dec */
+  var result = {}
   result.ra = $util.zatan2(x, y)
   result.dec = Math.asin(z / D)
   $util.showcor(p, dp, result)
