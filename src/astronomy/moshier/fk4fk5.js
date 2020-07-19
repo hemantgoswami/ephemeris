@@ -1,6 +1,5 @@
 $ns.fk4fk5 = {
-  /* Factors to eliminate E terms of aberration
-   */
+  /* Factors to eliminate E terms of aberration */
   A: [-1.62557e-6, -3.1919e-7, -1.3843e-7],
   Ad: [1.244e-3, -1.579e-3, -6.60e-4],
 
@@ -28,25 +27,21 @@ $ns.fk4fk5 = {
  * AA page B58.
  */
 $ns.fk4fk5.calc = function (p, m, el) {
-  var a, b, c // double
-  var u, v // double array
   var R = [] // double
-  var i, j // int
 
   /* Note the direction vector and motion vector
    * are already supplied by rstar.c.
    */
-  a = 0.0
-  b = 0.0
-  for (i = 0; i < 3; i++) {
+  var a = 0.0
+  var b = 0.0
+  for (var i = 0; i < 3; i++) {
     m[i] *= $const.RTS
     /* motion must be in arc seconds per century */
     a += this.A[i] * p[i]
     b += this.Ad[i] * p[i]
   }
-  /* Remove E terms of aberration from FK4
-   */
-  for (i = 0; i < 3; i++) {
+  /* Remove E terms of aberration from FK4 */
+  for (var i = 0; i < 3; i++) {
     R[i] = p[i] - this.A[i] + a * p[i]
     R[i + 3] = m[i] - this.Ad[i] + b * p[i]
   }
@@ -54,14 +49,12 @@ $ns.fk4fk5.calc = function (p, m, el) {
   var u_i = 0
   var v_i = 0
 
-  /* Perform matrix multiplication
-   */
-  v = this.Mat
-  for (i = 0; i < 6; i++) {
+  /* Perform matrix multiplication */
+  var v = this.Mat
+  for (var i = 0; i < 6; i++) {
     a = 0.0
-    u = R
-    for (j = 0; j < 6; j++) {
-      a += u [u_i++] * v [v_i++]//*u++ * *v++;
+    for (var j = 0; j < 6; j++) {
+      a += R[u_i++] * v[v_i++] // *u++ * *v++;
     }
     if (i < 3) {
       p[i] = a
@@ -74,9 +67,8 @@ $ns.fk4fk5.calc = function (p, m, el) {
    * in radian measure.
    */
   b = p[0] * p[0] + p[1] * p[1]
-  a = b + p[2] * p[2]
-  c = a
-  a = Math.sqrt(a)
+  var c = b + p[2] * p[2]
+  a = Math.sqrt(c)
 
   el.ra = $util.zatan2(p[0], p[1])
   el.dec = Math.asin(p[2] / a)
@@ -85,9 +77,9 @@ $ns.fk4fk5.calc = function (p, m, el) {
   el.raMotion = (p[0] * m[1] - p[1] * m[0]) / ($const.RTS * b)
   el.decMotion = (m[2] * b - p[2] * (p[0] * m[0] + p[1] * m[1])) / ($const.RTS * c * Math.sqrt(b))
 
-  if (el.parallax > 0.0) {
+  if (el.parallax > 0) {
     c = 0.0
-    for (i = 0; i < 3; i++) {
+    for (var i = 0; i < 3; i++) {
       c += p[i] * m[i]
     }
 

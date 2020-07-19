@@ -1,46 +1,40 @@
 $ns.light = {}
 
 $ns.light.calc = function (body, q, e) {
-  var p = [], p0 = [], ptemp = [] // double
-  var P, Q, E, t, x, y // double
-  var i, k // int
+  var p = [], p0 = [], t // double
 
   /* save initial q-e vector for display */
-  for (i = 0; i < 3; i++) {
+  for (var i = 0; i < 3; i++) {
     p0[i] = q[i] - e[i]
   }
 
-  E = 0.0
-  for (i = 0; i < 3; i++) {
+  var E = 0.0
+  for (var i = 0; i < 3; i++) {
     E += e[i] * e[i]
   }
   E = Math.sqrt(E)
 
-  for (k = 0; k < 2; k++) {
-    P = 0.0
-    Q = 0.0
-    for (i = 0; i < 3; i++) {
-      y = q[i]
-      x = y - e[i]
-      p[i] = x
-      Q += y * y
-      P += x * x
+  for (var k = 0; k < 2; k++) {
+    var P = 0.0
+    var Q = 0.0
+    for (var i = 0; i < 3; i++) {
+      p[i] = q[i] - e[i]
+      Q += q[i] * q[i]
+      P += p[i] * p[i]
     }
     P = Math.sqrt(P)
     Q = Math.sqrt(Q)
     /* Note the following blows up if object equals sun. */
     t = (P + 1.97e-8 * Math.log((E + P + Q) / (E - P + Q))) / 173.1446327
-    $moshier.kepler.calc({julian: $moshier.body.earth.position.date.julian - t}, body, q, ptemp)
+    $moshier.kepler.calc({julian: $moshier.body.earth.position.date.julian - t}, body, q, [])
   }
 
-  body.lightTime = 1440.0 * t
+  body.lightTime = 1440 * t
 
-  /* Final object-earth vector and the amount by which it changed.
-   */
-  for (i = 0; i < 3; i++) {
-    x = q[i] - e[i]
-    p[i] = x
-    $const.dp [i] = x - p0[i]
+  /* Final object-earth vector and the amount by which it changed. */
+  for (var i = 0; i < 3; i++) {
+    p[i] = q[i] - e[i]
+    $const.dp[i] = p[i] - p0[i]
   }
   body.aberration = $util.showcor(p0, $const.dp)
 
@@ -56,12 +50,12 @@ $ns.light.calc = function (body, q, e) {
    */
   $moshier.vearth.calc($moshier.body.earth.position.date)
 
-  for (i = 0; i < 3; i++) {
-    p[i] += $moshier.vearth.vearth [i] * t
+  for (var i = 0; i < 3; i++) {
+    p[i] += $moshier.vearth.vearth[i] * t
   }
 
   var d = $util.deltap(p, p0)
-  /* see dms.c */
+  /* see $util.dms() */
   $const.dradt = d.dr
   $const.ddecdt = d.dd
   $const.dradt /= t

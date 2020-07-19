@@ -1,6 +1,5 @@
 $ns.constellation = {
-  /* Constellation names
-   */
+  /* Constellation names */
   constel: [
     'And Andromedae',
     'Ant Antliae',
@@ -93,8 +92,7 @@ $ns.constellation = {
     'Vul Vulpeculae'
   ],
 
-  /* Greek letters
-   */
+  /* Greek letters */
   greek: [
     'alpha',
     'beta',
@@ -131,7 +129,7 @@ $ns.constellation = {
    Lower Right Ascension, Upper Right Ascension,
    both in units of hours times 3600;
    Lower Declination, in units of degrees times 3600;
-   and array index of constellation name.  */
+   and array index of constellation name. */
   bndries: [
     0, 86400, 316800, 84,
     28800, 52200, 311400, 84,
@@ -495,37 +493,34 @@ $ns.constellation = {
 
 /* Return the constellation name corresponding to a given mean equatorial
  position P.  EPOCH is the precessional equinox and ecliptic date
- of P.  */
+ of P. */
 $ns.constellation.calc = function (pp, epoch) {
-  var i, k // int
-  var ra, dec, d // double
   var p = [] // double
-
-  for (i = 0; i < 3; i++) {
+  for (var i = 0; i < 3; i++) {
     p[i] = pp[i]
   }
 
-  /* Precess from given epoch to J2000.  */
+  /* Precess from given epoch to J2000. */
   $moshier.precess.calc(p, epoch, 1)
-  /* Precess from J2000 to Besselian epoch 1875.0.  */
+  /* Precess from J2000 to Besselian epoch 1875.0. */
   $moshier.precess.calc(p, {julian: 2405889.25855}, -1)
-  d = p[0] * p[0] + p[1] * p[1] + p[2] * p[2]
+  var d = p[0] * p[0] + p[1] * p[1] + p[2] * p[2]
   d = Math.sqrt(d)
-  ra = Math.atan2(p[1], p[0]) * ($const.RTD * 3600. / 15.)
-  if (ra < 0.0) {
+  var ra = Math.atan2(p[1], p[0]) * ($const.RTD * 3600 / 15)
+  if (ra < 0) {
     ra += 86400.0
   }
-  dec = Math.asin(p[2] / d) * ($const.RTD * 3600.)
+  var dec = Math.asin(p[2] / d) * ($const.RTD * 3600)
 
   /* FIND CONSTELLATION SUCH THAT THE DECLINATION ENTERED IS HIGHER THAN
    THE LOWER BOUNDARY OF THE CONSTELLATION WHEN THE UPPER AND LOWER
    RIGHT ASCENSIONS FOR THE CONSTELLATION BOUND THE ENTERED RIGHT
    ASCENSION
    */
-  for (i = 0; i < this.bndries.length / 4; i++) {
-    k = i << 2
+  for (var i = 0; i < this.bndries.length / 4; i++) {
+    var k = i << 2
     if (ra >= this.bndries[k] && ra < this.bndries[k + 1] && dec > this.bndries[k + 2]) {
-      k = this.bndries [k + 3]
+      k = this.bndries[k + 3]
       return k
     }
   }
