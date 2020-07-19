@@ -269,7 +269,7 @@ $ns.transit.iterateTransit = function (callback, result) {
               t1 = date + this.r_set / $const.TPI;
             }
           }
-        } while (fabs(t1 - t0) > .0001);
+        } while (Math.abs(t1 - t0) > .0001);
 
         if (!isPrtrnsit) {
           this.t_set = t1;
