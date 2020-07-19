@@ -161,22 +161,4 @@ $ns.processor.test = function () {
   $assert(body.position.altaz.topocentric.dec, -0.2873401996237649)
   $assert(body.position.altaz.topocentric.azimuth, 114.21923743994829)
 
-  // test sirius
-  date = {year: 1986, month: 1, day: 1, hours: 0, minutes: 0, seconds: 0}
-  body = $moshier.body.sirius
-  this.calc(date, body)
-
-  $assert(date.julian, 2446431.5)
-  $assert(date.delta, 54.87)
-
-  $assert(body.position.apparent.dRA, 1.7651675096112047)
-  $assert(body.position.apparent.dDec, -0.29137543179606207)
-
-  $assert(body.position.astrometricDate.dRA, 1.7651002655957506)
-  $assert(body.position.astrometricDate.dDec, -0.29140596467162816)
-
-  $assert(body.position.altaz.topocentric.altitude, 1.7060953673767152)
-  $assert(body.position.altaz.topocentric.ra, -4.522192086886859)
-  $assert(body.position.altaz.topocentric.dec, -0.2873401996237649)
-  $assert(body.position.altaz.topocentric.azimuth, 114.21923743994829)
 }
