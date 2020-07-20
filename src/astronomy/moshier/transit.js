@@ -28,12 +28,12 @@ $ns.transit = {
 /* Calculate time of transit
  * assuming RA and Dec change uniformly with time
  */
-$ns.transit.calc = function (date, lha, dec, result) {
+$ns.transit.calc = function (date, lha, dec) {
   var x, y, N, z, D; // double
   var lhay, cosdec, sindec, coslat, sinlat; // double
-  var nArr = [], NR = [], NS = [], YR = [], YS = [], zArr = []
+  var nArr = [], NR = [], YR = [], zArr = []
 
-  result = result || {};
+  var result = {};
 
   this.f_trnsit = false;
   /* Initialize to no-event flag value. */
@@ -160,15 +160,15 @@ $ns.transit.iterator = function (julian, callback) {
 };
 
 /* Iterative computation of rise, transit, and set times. */
-$ns.transit.iterateTransit = function (callback, result) {
+$ns.transit.iterateTransit = function (callback) {
   var date, date_trnsit, t0, t1; // double
-  var rise1, set1, trnsit1, loopctr, retry; // double
+  var rise1, set1, trnsit1, loopctr; // double
   var isPrtrnsit = false;
 
-  result = result || {};
+  var result = {};
 
   loopctr = 0;
-  retry = 0;
+  // var retry = 0;
   /* Start iteration at time given by the user. */
   t1 = $moshier.body.earth.position.date.universal; // UT
 
@@ -195,7 +195,7 @@ $ns.transit.iterateTransit = function (callback, result) {
       this.t_rise = -1.0;
       this.t_set = -1.0;
       if ($moshier.altaz.elevation > this.elevation_threshold) {
-        this.noRiseSet (this.t_trnsit, callback);
+        this.noRiseSet (callback);
       }
       // goto prtrnsit;
     } else {
@@ -216,7 +216,7 @@ $ns.transit.iterateTransit = function (callback, result) {
           /* Rise or set time not found. Apply search technique. */
           this.t_rise = -1.0;
           this.t_set = -1.0;
-          this.noRiseSet (this.t_trnsit, callback);
+          this.noRiseSet (callback);
           isPrtrnsit = true;
           // goto prtrnsit;
         } else if (++loopctr > 10) {
@@ -254,7 +254,7 @@ $ns.transit.iterateTransit = function (callback, result) {
             /* Rise or set time not found. Apply search technique. */
             this.t_rise = -1.0;
             this.t_set = -1.0;
-            this.noRiseSet (this.t_trnsit, callback);
+            this.noRiseSet (callback);
             isPrtrnsit = true;
             // goto prtrnsit;
           } else if (++loopctr > 10) {
@@ -311,7 +311,7 @@ $ns.transit.iterateTransit = function (callback, result) {
 /* If the initial approximation fails to locate a rise or set time,
  this function steps between the transit time and the previous
  or next inferior transits to find an event more reliably. */
-$ns.transit.noRiseSet = function (t0, callback) {
+$ns.transit.noRiseSet = function (callback) {
   var t_trnsit0 = this.t_trnsit; // double
   var el_trnsit0 = this.elevation_trnsit; // double
   var t, e; // double
