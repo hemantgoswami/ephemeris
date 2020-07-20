@@ -169,12 +169,12 @@ $ns.moon.calc = function () {
 /* Calculate apparent latitude, longitude, and horizontal parallax
  * of the Moon at Julian date J.
  */
-$ns.moon.calcll = function (date, rect, pol, result) {
+$ns.moon.calcll = function (date, rect, pol) {
   var cosB, sinB, cosL, sinL, y, z // double
   var qq = [], pp = [] // double
   var i // int
 
-  result = result || {}
+  var result = {}
 
   /* Compute obliquity of the ecliptic, coseps, and sineps. */
   $moshier.epsilon.calc(date)
