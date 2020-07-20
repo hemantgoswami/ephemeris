@@ -16,7 +16,6 @@ $ns.planet.calc = function (body) {
  */
 $ns.planet.reduce = function (body, q, e) {
   var p = [], temp = [] // double
-  var a, b, s // double
   var i // int
 
   /* Save the geometric coordinates at TDT */
@@ -31,23 +30,21 @@ $ns.planet.reduce = function (body, q, e) {
   /* Adjust for light time (planetary aberration) */
   $moshier.light.calc(body, q, e)
 
-  /* Find Euclidean vectors between earth, object, and the sun
-   */
+  /* Find Euclidean vectors between earth, object, and the sun */
   for (i = 0; i < 3; i++) {
     p[i] = q[i] - e[i]
   }
 
   $util.angles(p, q, e)
 
-  a = 0.0
+  var a = 0.0
   for (i = 0; i < 3; i++) {
-    b = temp[i] - e[i]
+    var b = temp[i] - e[i]
     a += b * b
   }
-  a = Math.sqrt(a)
-  body.position.trueGeocentricDistance = a
+  body.position.trueGeocentricDistance = Math.sqrt(a)
   /* was EO */
-  body.position.equatorialDiameter = 2.0 * body.semiDiameter / $const.EO
+  body.position.equatorialDiameter = 2 * body.semiDiameter / $const.EO
 
   /* Calculate visual magnitude.
    * "Visual" refers to the spectrum of visible light.
@@ -58,20 +55,19 @@ $ns.planet.reduce = function (body, q, e) {
    * where V(1,0) = elemnt->mag is the magnitude at 1au from
    * both earth and sun and 100% illumination.
    */
-  a = 0.5 * (1.0 + $const.pq)
+  var phase = 0.5 * (1 + $const.pq)
   /* Fudge the phase for light leakage in magnitude estimation.
    * Note this phase term estimate does not reflect reality well.
    * Calculated magnitudes of Mercury and Venus are inaccurate.
    */
-  b = 0.5 * (1.01 + 0.99 * $const.pq)
-  s = body.magnitude + 2.1715 * Math.log($const.EO * $const.SO) - 1.085 * Math.log(b)
+  var x = 0.5 * (1.01 + 0.99 * $const.pq)
+  var magnitude = body.magnitude + 2.1715 * Math.log($const.EO * $const.SO) - 1.085 * Math.log(x)
   body.position.approxVisual = {
-    magnitude: s,
-    phase: a
+    magnitude: magnitude,
+    phase: phase
   }
 
-  /* Find unit vector from earth in direction of object
-   */
+  /* Find unit vector from earth in direction of object */
   for (i = 0; i < 3; i++) {
     p[i] /= $const.EO
     temp[i] = p[i]
@@ -110,16 +106,16 @@ $ns.planet.reduce = function (body, q, e) {
     p[i] *= $const.EO
   }
   body.position.apparentGeocentric = $moshier.lonlat.calc(p, $moshier.body.earth.position.date, false)
-  body.position.apparentLongitude = body.position.apparentGeocentric [0] * $const.RTD
+  body.position.apparentLongitude = body.position.apparentGeocentric[0] * $const.RTD
   body.position.apparentLongitudeString =
-    body.position.apparentGeocentric [3].degree + '\u00B0' +
-    body.position.apparentGeocentric [3].minutes + '\'' +
-    Math.floor(body.position.apparentGeocentric [3].seconds) + '"'
+    body.position.apparentGeocentric[3].degree + '\u00B0' +
+    body.position.apparentGeocentric[3].minutes + '\'' +
+    Math.floor(body.position.apparentGeocentric[3].seconds) + '"'
 
   body.position.apparentLongitude30String =
-    $util.mod30(body.position.apparentGeocentric [3].degree) + '\u00B0' +
-    body.position.apparentGeocentric [3].minutes + '\'' +
-    Math.floor(body.position.apparentGeocentric [3].seconds) + '"'
+    $util.mod30(body.position.apparentGeocentric[3].degree) + '\u00B0' +
+    body.position.apparentGeocentric[3].minutes + '\'' +
+    Math.floor(body.position.apparentGeocentric[3].seconds) + '"'
 
   body.position.geocentricDistance = -1
 
