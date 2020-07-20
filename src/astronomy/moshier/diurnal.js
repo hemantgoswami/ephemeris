@@ -7,34 +7,30 @@ $ns.diurnal = {
  * This formula is less rigorous than the method used for
  * annual aberration.  However, the correction is small.
  */
-$ns.diurnal.aberration = function (last, ra, dec, result) {
+$ns.diurnal.aberration = function (last, ra, dec) {
   var lha, coslha, sinlha, cosdec, sindec // double
   var coslat, N, D // double
 
-  result = result || {}
-  result.ra = ra
-  result.dec = dec
-
-  lha = last - result.ra
+  lha = last - ra
   coslha = Math.cos(lha)
   sinlha = Math.sin(lha)
-  cosdec = Math.cos(result.dec)
-  sindec = Math.sin(result.dec)
+  cosdec = Math.cos(dec)
+  sindec = Math.sin(dec)
   coslat = Math.cos($const.DTR * $const.tlat)
 
   if (cosdec != 0.0)
     N = 1.5472e-6 * $const.trho * coslat * coslha / cosdec
   else
     N = 0.0
-  result.ra += N
 
   D = 1.5472e-6 * $const.trho * coslat * sinlha * sindec
-  result.dec += D
 
-  result.dRA = $const.RTS * N / 15.0
-  result.dDec = $const.RTS * D
-
-  return result
+  return {
+    ra: ra + N,
+    dec: dec + D,
+    dRA: $const.RTS * N / 15,
+    dDec: $const.RTS * D
+  }
 }
 
 /* Diurnal parallax, AA page D3
