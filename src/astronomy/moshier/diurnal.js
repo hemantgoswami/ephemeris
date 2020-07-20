@@ -83,9 +83,11 @@ $ns.diurnal.parallax = function (last, ra, dec, dist) {
   /* topocentric distance */
 
   /* recompute ra and dec */
-  var result = {}
-  result.ra = $util.zatan2(x, y)
-  result.dec = Math.asin(z / D)
-  $util.showcor(p, dp, result)
-  return result
+  var result = $util.showcor(p, dp)
+  return {
+    ra: $util.zatan2(x, y),
+    dec: Math.asin(z / D),
+    dRA: result.dRA,
+    dDec: result.dDec
+  }
 }

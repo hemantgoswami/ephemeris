@@ -182,22 +182,19 @@ $ns.util.dms = function (x) {
 /* Display magnitude of correction vector
  * in arc seconds
  */
-$ns.util.showcor = function (p, dp, result) {
-  var p1 = [] // dr, dd; // double
-  var i // int
-  var d
+$ns.util.showcor = function (p, dp) {
+  var p1 = [] // double
 
-  for (i = 0; i < 3; i++) {
+  for (var i = 0; i < 3; i++) {
     p1[i] = p[i] + dp[i]
   }
 
-  d = $util.deltap(p, p1)
+  var d = $util.deltap(p, p1)
 
-  result = result || {}
-  result.dRA = $const.RTS * d.dr / 15.0
-  result.dDec = $const.RTS * d.dd
-
-  return result
+  return {
+    dRA: $const.RTS * d.dr / 15,
+    dDec: $const.RTS * d.dd
+  }
 }
 
 /* Display Right Ascension and Declination
