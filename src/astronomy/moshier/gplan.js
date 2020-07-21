@@ -15,14 +15,14 @@ $ns.gplan = {
 
   phases: [
     /* Arc sec. */
-    252.25090552 * 3600.,
-    181.97980085 * 3600.,
-    100.46645683 * 3600.,
-    355.43299958 * 3600.,
-    34.35151874 * 3600.,
-    50.07744430 * 3600.,
-    314.05500511 * 3600.,
-    304.34866548 * 3600.,
+    252.25090552 * 3600,
+    181.97980085 * 3600,
+    100.46645683 * 3600,
+    355.43299958 * 3600,
+    34.35151874 * 3600,
+    50.07744430 * 3600,
+    314.05500511 * 3600,
+    304.34866548 * 3600,
     860492.1546
   ],
 
@@ -38,7 +38,7 @@ $ns.gplan = {
 }
 
 /* Routines to chew through tables of perturbations. */
-$ns.gplan.calc = function (date, body_ptable, polar) {
+$ns.gplan.calc = function (date, body_ptable) {
   var j, ip, nt // int
   var su, cu // double
 
@@ -156,9 +156,11 @@ $ns.gplan.calc = function (date, body_ptable, polar) {
     sr += cu * cv + su * sv
   }
 
-  polar[0] = $const.STR * sl
-  polar[1] = $const.STR * sb
-  polar[2] = $const.STR * body_ptable.distance * sr + body_ptable.distance
+  return [
+    $const.STR * sl,
+    $const.STR * sb,
+    $const.STR * body_ptable.distance * sr + body_ptable.distance
+  ]
 }
 
 /* Prepare lookup table of sin and cos ( i*Lj )
@@ -343,7 +345,7 @@ $ns.gplan.meanElements = function (date) {
 /* Generic program to accumulate sum of trigonometric series
  in three variables (e.g., longitude, latitude, radius)
  of the same list of arguments. */
-$ns.gplan.calc3 = function (date, body_ptable, polar, body_number) {
+$ns.gplan.calc3 = function (date, body_ptable, body_number) {
   var j, ip, nt // int
   var su, cu // double
 
@@ -463,15 +465,17 @@ $ns.gplan.calc3 = function (date, body_ptable, polar, body_number) {
     sr += cu * cv + su * sv
   }
   var t = body_ptable.trunclvl
-  polar[0] = this.Args[body_number - 1] + $const.STR * t * sl
-  polar[1] = $const.STR * t * sb
-  polar[2] = body_ptable.distance * (1 + $const.STR * t * sr)
+  return [
+    this.Args[body_number - 1] + $const.STR * t * sl,
+    $const.STR * t * sb,
+    body_ptable.distance * (1 + $const.STR * t * sr)
+  ]
 }
 
 /* Generic program to accumulate sum of trigonometric series
  in two variables (e.g., longitude, radius)
  of the same list of arguments. */
-$ns.gplan.calc2 = function (date, body_ptable, polar) {
+$ns.gplan.calc2 = function (date, body_ptable) {
   var j, ip, nt // int
   var su, cu // double
 
@@ -573,8 +577,7 @@ $ns.gplan.calc2 = function (date, body_ptable, polar) {
     sr += cu * cv + su * sv
   }
   var t = body_ptable.trunclvl
-  polar[0] = t * sl
-  polar[2] = t * sr
+  return [ t * sl, null, t * sr ]
 }
 
 /* Generic program to accumulate sum of trigonometric series
@@ -665,8 +668,8 @@ $ns.gplan.calc1 = function (date, body_ptable) {
 
 /* Compute geocentric moon. */
 $ns.gplan.moon = function (date, rect, pol) {
-  this.calc2(date, $moshier.plan404.moonlr, pol)
-  var x = pol[0]
+  var moonpol = this.calc2(date, $moshier.plan404.moonlr)
+  var x = moonpol[0]
   x += this.LP_equinox
   if (x < -6.48e5) {
     x += 1.296e6
@@ -674,18 +677,17 @@ $ns.gplan.moon = function (date, rect, pol) {
   if (x > 6.48e5) {
     x -= 1.296e6
   }
+  pol = pol || {}
   pol[0] = $const.STR * x
-  x = this.calc1(date, $moshier.plan404.moonlat)
-  pol[1] = $const.STR * x
-  x = (1 + $const.STR * pol[2]) * $moshier.plan404.moonlr.distance
-  pol[2] = x
+  pol[1] = $const.STR * this.calc1(date, $moshier.plan404.moonlat)
+  pol[2] = (1 + $const.STR * moonpol[2]) * $moshier.plan404.moonlr.distance
   /* Convert ecliptic polar to equatorial rectangular coordinates. */
   $moshier.epsilon.calc(date)
   var cosB = Math.cos(pol[1])
   var sinB = Math.sin(pol[1])
   var cosL = Math.cos(pol[0])
   var sinL = Math.sin(pol[0])
-  rect[0] = cosB * cosL * x
-  rect[1] = ($moshier.epsilon.coseps * cosB * sinL - $moshier.epsilon.sineps * sinB) * x
-  rect[2] = ($moshier.epsilon.sineps * cosB * sinL + $moshier.epsilon.coseps * sinB) * x
+  rect[0] = cosB * cosL * pol[2]
+  rect[1] = ($moshier.epsilon.coseps * cosB * sinL - $moshier.epsilon.sineps * sinB) * pol[2]
+  rect[2] = ($moshier.epsilon.sineps * cosB * sinL + $moshier.epsilon.coseps * sinB) * pol[2]
 }

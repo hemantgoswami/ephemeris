@@ -7,11 +7,9 @@ $ns.kepler.calc = function (date, body, rect, polar) {
 
   /* Call program to compute position, if one is supplied. */
   if (body.ptable) {
-    if (body.key == 'earth') {
-      $moshier.gplan.calc3(date, body.ptable, polar, 3)
-    } else {
-      $moshier.gplan.calc(date, body.ptable, polar)
-    }
+    polar = body.key == 'earth'
+      ? $moshier.gplan.calc3(date, body.ptable, 3)
+      : $moshier.gplan.calc(date, body.ptable)
     /* longitude */
     body.longitude = E = polar[0]
     /* latitude */
@@ -235,7 +233,7 @@ $ns.kepler.calc = function (date, body, rect, polar) {
 
   // fill the body.position only if rect and polar are
   // not defined
-  if (arguments.length < 4) {
+  if (arguments.length < 3) {
     body.position = {
       date: date,
       rect: rect,
@@ -251,10 +249,10 @@ $ns.kepler.calc = function (date, body, rect, polar) {
  * return = Earth's distance to the Sun (au)
  */
 $ns.kepler.embofs = function (date, ea) {
-  var pm = [], polm = [] // double
+  var pm = [] // double
 
   /* Compute the vector Moon - Earth. */
-  $moshier.gplan.moon(date, pm, polm)
+  $moshier.gplan.moon(date, pm)
 
   /* Precess the lunar position
    * to ecliptic and equinox of J2000.0
