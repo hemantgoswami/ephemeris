@@ -3,7 +3,7 @@ $ns.kepler = {}
 $ns.kepler.calc = function (date, body, rect, polar) {
   var alat, E, M, W, temp, r // double
 
-  polar = polar || []
+  polar = polar || {}
 
   /* Call program to compute position, if one is supplied. */
   if (body.ptable) {
@@ -11,11 +11,11 @@ $ns.kepler.calc = function (date, body, rect, polar) {
       ? $moshier.gplan.calc3(date, body.ptable, 3)
       : $moshier.gplan.calc(date, body.ptable)
     /* longitude */
-    body.longitude = E = polar[0]
+    body.longitude = E = polar.longitude
     /* latitude */
-    W = polar[1]
+    W = polar.latitude
     /* radius */
-    r = polar[2]
+    r = polar.distance
     body.distance = r
     body.epoch = date.julian
     body.equinox = {julian: $const.j2000}
@@ -184,21 +184,21 @@ $ns.kepler.calc = function (date, body, rect, polar) {
   /* Convert to rectangular coordinates,
    * using the perturbed latitude.
    */
-  rect = rect || []
-  rect[2] = r * Math.sin(W)
+  rect = rect || {}
+  rect.distance = r * Math.sin(W)
   var cosa = Math.cos(W)
-  rect[1] = r * cosa * Math.sin(E)
-  rect[0] = r * cosa * Math.cos(E)
+  rect.latitude = r * cosa * Math.sin(E)
+  rect.longitude = r * cosa * Math.cos(E)
 
   /* Convert from heliocentric ecliptic rectangular
    * to heliocentric equatorial rectangular coordinates
    * by rotating eps radians about the x axis.
    */
   $moshier.epsilon.calc(body.equinox)
-  W = $moshier.epsilon.coseps * rect[1] - $moshier.epsilon.sineps * rect[2]
-  M = $moshier.epsilon.sineps * rect[1] + $moshier.epsilon.coseps * rect[2]
-  rect[1] = W
-  rect[2] = M
+  W = $moshier.epsilon.coseps * rect.latitude - $moshier.epsilon.sineps * rect.distance
+  M = $moshier.epsilon.sineps * rect.latitude + $moshier.epsilon.coseps * rect.distance
+  rect.latitude = W
+  rect.distance = M
 
   /* Precess the position
    * to ecliptic and equinox of J2000.0
@@ -216,28 +216,28 @@ $ns.kepler.calc = function (date, body, rect, polar) {
 
   /* Rotate back into the ecliptic. */
   $moshier.epsilon.calc({julian: $const.j2000})
-  W = $moshier.epsilon.coseps * rect[1] + $moshier.epsilon.sineps * rect[2]
-  M = -$moshier.epsilon.sineps * rect[1] + $moshier.epsilon.coseps * rect[2]
+  W = $moshier.epsilon.coseps * rect.latitude + $moshier.epsilon.sineps * rect.distance
+  M = -$moshier.epsilon.sineps * rect.latitude + $moshier.epsilon.coseps * rect.distance
 
   /* Convert to polar coordinates */
-  E = $util.zatan2(rect[0], W)
+  E = $util.zatan2(rect.longitude, W)
   W = Math.asin(M / r)
 
   /* Output the polar cooordinates */
   /* longitude */
-  polar[0] = E
+  polar.longitude = E
   /* latitude */
-  polar[1] = W
+  polar.latitude = W
   /* radius */
-  polar[2] = r
+  polar.distance = r
 
   // fill the body.position only if rect and polar are
   // not defined
   if (arguments.length < 3) {
     body.position = {
       date: date,
-      rect: rect,
-      polar: polar
+      rect: [ rect.longitude, rect.latitude, rect.distance ],
+      polar: [ E, W, r ]
     }
   }
 }
@@ -249,7 +249,7 @@ $ns.kepler.calc = function (date, body, rect, polar) {
  * return = Earth's distance to the Sun (au)
  */
 $ns.kepler.embofs = function (date, ea) {
-  var pm = [] // double
+  var pm = {}
 
   /* Compute the vector Moon - Earth. */
   $moshier.gplan.moon(date, pm)
@@ -261,13 +261,15 @@ $ns.kepler.embofs = function (date, ea) {
 
   /* Adjust the coordinates of the Earth */
   var a = 1 / ($const.emrat + 1)
-  var b = 0.0
-  for (var i = 0; i < 3; i++) {
-    ea[i] = ea[i] - a * pm[i]
-    b = b + ea[i] * ea[i]
-  }
+
+  ea.longitude = ea.longitude - a * pm.longitude
+  ea.latitude = ea.latitude - a * pm.latitude
+  ea.distance = ea.distance - a * pm.distance
+
   /* Sun-Earth distance. */
-  return Math.sqrt(b)
+  return Math.sqrt(ea.longitude * ea.longitude
+    + ea.latitude * ea.latitude + ea.distance * ea.distance
+  )
 }
 
 $ns.kepler.init = function () {

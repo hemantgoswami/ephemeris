@@ -1,17 +1,18 @@
 $ns.lonlat = {}
 
 $ns.lonlat.calc = function (pp, date, ofdate) {
-  var s = [] // double
-
   /* Make local copy of position vector
    * and calculate radius.
    */
-  var r = 0.0
-  for (var i = 0; i < 3; i++) {
-    s[i] = pp[i]
-    r += pp[i] * pp[i]
-  }
-  r = Math.sqrt(r)
+  var s = [
+    pp.longitude,
+    pp.latitude,
+    pp.distance
+  ]
+
+  var r = Math.sqrt(pp.longitude * pp.longitude
+    + pp.latitude * pp.latitude + pp.distance * pp.distance
+  )
 
   /* Precess to equinox of date J */
   if (ofdate) {
@@ -20,16 +21,19 @@ $ns.lonlat.calc = function (pp, date, ofdate) {
 
   /* Convert from equatorial to ecliptic coordinates */
   $moshier.epsilon.calc(date)
-  var y = $moshier.epsilon.coseps * s[1] + $moshier.epsilon.sineps * s[2]
-  var z = -$moshier.epsilon.sineps * s[1] + $moshier.epsilon.coseps * s[2]
+  var y = $moshier.epsilon.coseps * s.latitude + $moshier.epsilon.sineps * s.distance
+  var z = -$moshier.epsilon.sineps * s.latitude + $moshier.epsilon.coseps * s.distance
 
   var yy = $util.zatan2(s[0], y)
   var zz = Math.asin(z / r)
 
-  return [
+  return {
     // longitude and latitude in decimal
-    yy, zz, r,
+    longitude: yy,
+    latitude: zz,
+    distance: r,
     // longitude and latitude in h,m,s
-    $util.dms(yy), $util.dms(zz)
-  ]
+    dLongitude: $util.dms(yy),
+    dLatitude: $util.dms(zz)
+  }
 }

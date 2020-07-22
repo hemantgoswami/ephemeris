@@ -156,11 +156,11 @@ $ns.gplan.calc = function (date, body_ptable) {
     sr += cu * cv + su * sv
   }
 
-  return [
-    $const.STR * sl,
-    $const.STR * sb,
-    $const.STR * body_ptable.distance * sr + body_ptable.distance
-  ]
+  return {
+    longitude: $const.STR * sl,
+    latitude: $const.STR * sb,
+    distance: $const.STR * body_ptable.distance * sr + body_ptable.distance
+  }
 }
 
 /* Prepare lookup table of sin and cos ( i*Lj )
@@ -465,11 +465,11 @@ $ns.gplan.calc3 = function (date, body_ptable, body_number) {
     sr += cu * cv + su * sv
   }
   var t = body_ptable.trunclvl
-  return [
-    this.Args[body_number - 1] + $const.STR * t * sl,
-    $const.STR * t * sb,
-    body_ptable.distance * (1 + $const.STR * t * sr)
-  ]
+  return {
+    longitude: this.Args[body_number - 1] + $const.STR * t * sl,
+    latitude: $const.STR * t * sb,
+    distance: body_ptable.distance * (1 + $const.STR * t * sr)
+  }
 }
 
 /* Generic program to accumulate sum of trigonometric series
@@ -577,7 +577,11 @@ $ns.gplan.calc2 = function (date, body_ptable) {
     sr += cu * cv + su * sv
   }
   var t = body_ptable.trunclvl
-  return [ t * sl, null, t * sr ]
+  return {
+    longitude: t * sl,
+    latitude: null,
+    distance: t * sr
+  }
 }
 
 /* Generic program to accumulate sum of trigonometric series
@@ -669,8 +673,7 @@ $ns.gplan.calc1 = function (date, body_ptable) {
 /* Compute geocentric moon. */
 $ns.gplan.moon = function (date, rect, pol) {
   var moonpol = this.calc2(date, $moshier.plan404.moonlr)
-  var x = moonpol[0]
-  x += this.LP_equinox
+  var x = moonpol.longitude + this.LP_equinox
   if (x < -6.48e5) {
     x += 1.296e6
   }
@@ -678,16 +681,16 @@ $ns.gplan.moon = function (date, rect, pol) {
     x -= 1.296e6
   }
   pol = pol || {}
-  pol[0] = $const.STR * x
-  pol[1] = $const.STR * this.calc1(date, $moshier.plan404.moonlat)
-  pol[2] = (1 + $const.STR * moonpol[2]) * $moshier.plan404.moonlr.distance
+  pol.longitude = $const.STR * x
+  pol.latitude = $const.STR * this.calc1(date, $moshier.plan404.moonlat)
+  pol.distance = (1 + $const.STR * moonpol.distance) * $moshier.plan404.moonlr.distance
   /* Convert ecliptic polar to equatorial rectangular coordinates. */
   $moshier.epsilon.calc(date)
-  var cosB = Math.cos(pol[1])
-  var sinB = Math.sin(pol[1])
-  var cosL = Math.cos(pol[0])
-  var sinL = Math.sin(pol[0])
-  rect[0] = cosB * cosL * pol[2]
-  rect[1] = ($moshier.epsilon.coseps * cosB * sinL - $moshier.epsilon.sineps * sinB) * pol[2]
-  rect[2] = ($moshier.epsilon.sineps * cosB * sinL + $moshier.epsilon.coseps * sinB) * pol[2]
+  var cosB = Math.cos(pol.latitude)
+  var sinB = Math.sin(pol.latitude)
+  var cosL = Math.cos(pol.longitude)
+  var sinL = Math.sin(pol.longitude)
+  rect.longitude = cosB * cosL * pol.distance
+  rect.latitude = ($moshier.epsilon.coseps * cosB * sinL - $moshier.epsilon.sineps * sinB) * pol.distance
+  rect.distance = ($moshier.epsilon.sineps * cosB * sinL + $moshier.epsilon.coseps * sinB) * pol.distance
 }

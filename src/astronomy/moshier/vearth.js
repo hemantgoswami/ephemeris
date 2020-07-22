@@ -18,7 +18,7 @@ $ns.vearth.calc = function (date) {
   var t = 0.005
   $moshier.kepler.calc({julian: date.julian - t}, $moshier.body.earth, e)
 
-  for (var i = 0; i < 3; i++) {
-    this.vearth[i] = ($moshier.body.earth.position.rect[i] - e[i]) / t
-  }
+  this.vearth[0] = ($moshier.body.earth.position.rect[0] - e.longitude) / t
+  this.vearth[1] = ($moshier.body.earth.position.rect[1] - e.latitude) / t
+  this.vearth[2] = ($moshier.body.earth.position.rect[2] - e.distance) / t
 }

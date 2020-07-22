@@ -151,14 +151,12 @@ $ns.util.dms = function (x) {
  * in arc seconds
  */
 $ns.util.showcor = function (p, dp) {
-  var p1 = [] // double
-
-  for (var i = 0; i < 3; i++) {
-    p1[i] = p[i] + dp[i]
+  var p1 = {
+    longitude: p.longitude + dp.longitude,
+    latitude: p.latitude + dp.latitude,
+    distance: p.distance + dp.distance
   }
-
   var d = $util.deltap(p, p1)
-
   return {
     dRA: $const.RTS * d.dr / 15,
     dDec: $const.RTS * d.dd
@@ -170,25 +168,21 @@ $ns.util.showcor = function (p, dp) {
  * Output vector pol[] contains R.A., Dec., and radius.
  */
 $ns.util.showrd = function (p, pol) {
-  var r = 0
-  for (var i = 0; i < 3; i++) {
-    r += p[i] * p[i]
-  }
-  r = Math.sqrt(r)
+  var r = Math.sqrt(p.longitude * p.longitude
+    + p.latitude * p.latitude + p.distance * p.distance
+  )
 
-  pol[0] = $util.zatan2(p[0], p[1])
-  pol[1] = Math.asin(p[2] / r)
-  pol[2] = r
+  pol.longitude = $util.zatan2(p.longitude, p.latitude)
+  pol.latitude = Math.asin(p.distance / r)
+  pol.distance = r
 
   var result = {}
-
   $copy(result, {
-    dRA: pol[0],
-    dDec: pol[1],
-    ra: $util.hms(pol[0]),
-    dec: $util.dms(pol[1])
+    dRA: pol.longitude,
+    dDec: pol.latitude,
+    ra: $util.hms(pol.longitude),
+    dec: $util.dms(pol.latitude)
   })
-
   return result
 }
 
@@ -214,24 +208,32 @@ $ns.util.showrd = function (p, pol) {
  *
  */
 $ns.util.deltap = function (p0, p1) {
-  var dr, dp = [] // double
+  var dr
 
-  var P = 0.0
-  var Q = 0.0
-  var z = 0.0
-  for (var i = 0; i < 3; i++) {
-    P += p0[i] * p0[i]
-    Q += p1[i] * p1[i]
-    dp[i] = p1[i] - p0[i]
-    z += dp[i] * dp[i]
+  var P = p0.longitude * p0.longitude
+    + p0.latitude * p0.latitude
+    + p0.distance * p0.distance
+
+  var Q = p1.longitude * p1.longitude
+    + p1.latitude * p1.latitude
+    + p1.distance * p1.distance
+
+  var dp = {
+    longitude: p1.longitude - p0.longitude,
+    latitude: p1.latitude - p0.latitude,
+    distance: p1.distance - p0.distance
   }
+
+  var z = dp.longitude * dp.longitude
+    + dp.latitude * dp.latitude
+    + dp.distance * dp.distance
 
   var A = Math.sqrt(P)
   var B = Math.sqrt(Q)
 
   if (A < 1.e-7 || B < 1.e-7 || z / (P + Q) > 5.e-7) {
-    P = $util.zatan2(p0[0], p0[1])
-    Q = $util.zatan2(p1[0], p1[1])
+    P = $util.zatan2(p0.longitude, p0.latitude)
+    Q = $util.zatan2(p1.longitude, p1.latitude)
     Q = Q - P
     while (Q < -Math.PI) {
       Q += 2 * Math.PI
@@ -240,29 +242,29 @@ $ns.util.deltap = function (p0, p1) {
       Q -= 2 * Math.PI
     }
     dr = Q
-    P = Math.asin(p0[2] / A)
-    Q = Math.asin(p1[2] / B)
+    P = Math.asin(p0.distance / A)
+    Q = Math.asin(p1.distance / B)
     return {
       dd: Q - P,
       dr: dr
     }
   }
 
-  var x = p0[0]
-  var y = p0[1]
+  var x = p0.longitude
+  var y = p0.latitude
   if (x == 0.0) {
     dr = 1.0e38
   } else {
     Q = y / x
-    Q = (dp[1] - dp[0] * y / x) / (x * (1 + Q * Q))
+    Q = (dp.latitude - dp.longitude * y / x) / (x * (1 + Q * Q))
     dr = Q
   }
 
-  x = p0[2] / A
+  x = p0.distance / A
   P = Math.sqrt(1 - x * x)
 
   return {
-    dd: (p1[2] / B - x) / P,
+    dd: (p1.distance / B - x) / P,
     dr: dr
   }
 }
@@ -272,23 +274,36 @@ $ns.util.deltap = function (p0, p1) {
  * The answers are posted in the following global locations:
  */
 $ns.util.angles = function (p, q, e) {
-  $const.EO = 0.0
-  $const.SE = 0.0
-  $const.SO = 0.0
-  $const.pq = 0.0
-  $const.ep = 0.0
-  $const.qe = 0.0
-  for (var i = 0; i < 3; i++) {
-    var a = e[i]
-    var b = q[i]
-    var s = p[i]
-    $const.EO += s * s
-    $const.SE += a * a
-    $const.SO += b * b
-    $const.pq += s * b
-    $const.ep += a * s
-    $const.qe += b * a
+  var a = {
+    longitude: p.longitude,
+    latitude: p.latitude,
+    distance: p.distance
   }
+
+  $const.EO = a.longitude * a.longitude
+    + a.latitude * a.latitude
+    + a.distance * a.distance
+
+  $const.SE = e.longitude * e.longitude
+    + e.latitude * e.latitude
+    + e.distance * e.distance
+
+  $const.SO = q.longitude * q.longitude
+    + q.latitude * q.latitude
+    + q.distance * q.distance
+
+  $const.pq = a.longitude * q.longitude
+    + a.latitude * q.latitude
+    + a.distance * q.distance
+
+  $const.ep = e.longitude * a.longitude
+    + e.latitude * a.latitude
+    + e.distance * a.distance
+
+  $const.qe = q.longitude * e.longitude
+    + q.latitude * e.latitude
+    + q.distance * e.distance
+
   /* Distance between Earth and object */
   $const.EO = Math.sqrt($const.EO)
   /* Sun - object */

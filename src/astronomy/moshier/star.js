@@ -9,7 +9,7 @@ $ns.star.calc = function (body) {
 }
 
 $ns.star.reduce = function (body) {
-  var p = [], q = [], e = [], m = [], temp = [], polar = [] // double
+  var q = {}, polar = {}
   var epoch // double
   var i // int
 
@@ -19,22 +19,22 @@ $ns.star.reduce = function (body) {
     var sindec = Math.sin(body.dec)
     var cosra = Math.cos(body.ra)
     var sinra = Math.sin(body.ra)
-    q[0] = cosra * cosdec
-    q[1] = sinra * cosdec
-    q[2] = sindec
+    q.longitude = cosra * cosdec
+    q.latitude = sinra * cosdec
+    q.distance = sindec
 
     /* space motion */
     var vpi = 21.094952663 * body.velocity * body.parallax
-    m[0] = -body.raMotion * cosdec * sinra
-      - body.decMotion * sindec * cosra
-      + vpi * q[0]
-
-    m[1] = body.raMotion * cosdec * cosra
-      - body.decMotion * sindec * sinra
-      + vpi * q[1]
-
-    m[2] = body.decMotion * cosdec
-      + vpi * q[2]
+    var m = {
+      longitude: -body.raMotion * cosdec * sinra
+        - body.decMotion * sindec * cosra
+        + vpi * q.longitude,
+      latitude: body.raMotion * cosdec * cosra
+        - body.decMotion * sindec * sinra
+        + vpi * q.latitude,
+      distance: body.decMotion * cosdec
+        + vpi * q.distance
+    }
 
     epoch = body.epoch
 
@@ -45,8 +45,10 @@ $ns.star.reduce = function (body) {
     }
   } while (epoch == $const.b1950)
 
-  for (i = 0; i < 3; i++) {
-    e[i] = $moshier.body.earth.position.rect[i]
+  var e = {
+    longitude: $moshier.body.earth.position.rect[0],
+    latitude: $moshier.body.earth.position.rect[1],
+    distance: $moshier.body.earth.position.rect[2]
   }
 
   /* precess the earth to the star epoch */
@@ -54,16 +56,18 @@ $ns.star.reduce = function (body) {
 
   /* Correct for proper motion and parallax */
   var T = ($moshier.body.earth.position.date.julian - epoch) / 36525
-  for (i = 0; i < 3; i++) {
-    p[i] = q[i] + T * m[i] - body.parallax * e[i]
+  var p = {
+    longitude: q.longitude + T * m.longitude - body.parallax * e.longitude,
+    latitude: q.latitude + T * m.latitude - body.parallax * e.latitude,
+    distance: q.distance + T * m.distance - body.parallax * e.distance
   }
 
   /* precess the star to J2000 */
   $moshier.precess.calc(p, {julian: epoch}, 1)
   /* reset the earth to J2000 */
-  for (i = 0; i < 3; i++) {
-    e[i] = $moshier.body.earth.position.rect[i]
-  }
+  e.longitude = $moshier.body.earth.position.rect[0]
+  e.latitude = $moshier.body.earth.position.rect[1]
+  e.distance = $moshier.body.earth.position.rect[2]
 
   /* Find Euclidean vectors between earth, object, and the sun
    * angles( p, q, e );
@@ -71,9 +75,14 @@ $ns.star.reduce = function (body) {
   $util.angles(p, p, e)
 
   /* Find unit vector from earth in direction of object */
-  for (i = 0; i < 3; i++) {
-    p[i] /= $const.EO
-    temp[i] = p[i]
+  p.longitude /= $const.EO
+  p.latitude /= $const.EO
+  p.distance /= $const.EO
+
+  var temp = {
+    longitude: p.longitude,
+    latitude: p.latitude,
+    distance: p.distance
   }
 
   body.position = {}
@@ -88,8 +97,10 @@ $ns.star.reduce = function (body) {
   body.position.astrometricB1950 = $util.showrd(temp, polar)
 
   /* For equinox of date: */
-  for (i = 0; i < 3; i++) {
-    temp[i] = p[i]
+  temp = {
+    longitude: p.longitude,
+    latitude: p.latitude,
+    distance: p.distance
   }
 
   $moshier.precess.calc(temp, $moshier.body.earth.position.date, -1)
@@ -135,7 +146,7 @@ $ns.star.reduce = function (body) {
   /* Go do topocentric reductions. */
   $const.dradt = 0.0
   $const.ddecdt = 0.0
-  polar[2] = 1.0e38
+  polar.distance = 1.0e38
   /* make it ignore diurnal parallax */
 
   body.position.altaz = $moshier.altaz.calc(polar, $moshier.body.earth.position.date)

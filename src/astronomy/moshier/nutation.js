@@ -154,9 +154,6 @@ $ns.nutation = {
  * mean ecliptic and equinox of date.
  */
 $ns.nutation.calc = function (date, p) {
-  var dp = [], p1 = [] // double
-  var i // int
-
   this.calclo(date)
   /* be sure we calculated nutl and nuto */
   $moshier.epsilon.calc(date)
@@ -177,27 +174,29 @@ $ns.nutation.calc = function (date, p) {
    * in longitude; rotate about new x axis back to equator of date
    * plus nutation in obliquity.
    */
-  p1[0] = cl * p[0]
-    - sl * $moshier.epsilon.coseps * p[1]
-    - sl * $moshier.epsilon.sineps * p[2]
+  var p1 = {
+    longitude: cl * p.longitude
+      - sl * $moshier.epsilon.coseps * p.latitude
+      - sl * $moshier.epsilon.sineps * p.distance,
+    latitude: sl * ce * p.longitude
+      + (cl * $moshier.epsilon.coseps * ce + $moshier.epsilon.sineps * se) * p.latitude
+      - (sino + (1 - cl) * $moshier.epsilon.sineps * ce) * p.distance,
+    distance: sl * se * p.longitude
+      + (sino + (cl - 1) * se * $moshier.epsilon.coseps) * p.latitude
+      + (cl * $moshier.epsilon.sineps * se + $moshier.epsilon.coseps * ce) * p.distance
+  }
 
-  p1[1] = sl * ce * p[0]
-    + (cl * $moshier.epsilon.coseps * ce + $moshier.epsilon.sineps * se) * p[1]
-    - (sino + (1 - cl) * $moshier.epsilon.sineps * ce) * p[2]
-
-  p1[2] = sl * se * p[0]
-    + (sino + (cl - 1) * se * $moshier.epsilon.coseps) * p[1]
-    + (cl * $moshier.epsilon.sineps * se + $moshier.epsilon.coseps * ce) * p[2]
-
-  for (i = 0; i < 3; i++) {
-    dp[i] = p1[i] - p[i]
+  var dp = {
+    longitude: p1.longitude - p.longitude,
+    latitude: p1.latitude - p.latitude,
+    distance: p1.distance - p.distance
   }
 
   var result = $util.showcor(p, dp)
 
-  for (i = 0; i < 3; i++) {
-    p[i] = p1[i]
-  }
+  p.longitude = p1.longitude
+  p.latitude = p1.latitude
+  p.distance = p1.distance
 
   return result
 }

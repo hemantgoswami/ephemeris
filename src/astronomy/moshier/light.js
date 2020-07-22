@@ -1,28 +1,32 @@
 $ns.light = {}
 
 $ns.light.calc = function (body, q, e) {
-  var p = [], p0 = [], t // double
-  var i // int
+  var p = [], t // double
 
   /* save initial q-e vector for display */
-  for (i = 0; i < 3; i++) {
-    p0[i] = q[i] - e[i]
+  var p0 = {
+    longitude: q.longitude - e.longitude,
+    latitude: q.latitude - e.latitude,
+    distance: q.distance - e.distance
   }
 
-  var E = 0.0
-  for (i = 0; i < 3; i++) {
-    E += e[i] * e[i]
-  }
-  E = Math.sqrt(E)
+  var E = Math.sqrt(e.longitude * e.longitude
+    + e.latitude * e.latitude
+    + e.distance * e.distance)
 
-  for (var k = 0; k < 2; k++) {
-    var P = 0.0
-    var Q = 0.0
-    for (i = 0; i < 3; i++) {
-      p[i] = q[i] - e[i]
-      Q += q[i] * q[i]
-      P += p[i] * p[i]
-    }
+  for (var i = 0; i < 2; i++) {
+    p.longitude = q.longitude - e.longitude
+    p.latitude = q.latitude - e.latitude
+    p.distance = q.distance - e.distance
+
+    var Q = q.longitude * q.longitude
+      + q.latitude * q.latitude
+      + q.distance * q.distance
+
+    var P = p.longitude * p.longitude
+      + p.latitude * p.latitude
+      + p.distance * p.distance
+
     P = Math.sqrt(P)
     Q = Math.sqrt(Q)
     /* Note the following blows up if object equals sun. */
@@ -33,10 +37,12 @@ $ns.light.calc = function (body, q, e) {
   body.lightTime = 1440 * t
 
   /* Final object-earth vector and the amount by which it changed. */
-  for (i = 0; i < 3; i++) {
-    p[i] = q[i] - e[i]
-    $const.dp[i] = p[i] - p0[i]
-  }
+  p.longitude = q.longitude - e.longitude
+  p.latitude = q.latitude - e.latitude
+  p.distance = q.distance - e.distance
+  $const.dp[0] = p.longitude - p0.longitude
+  $const.dp[1] = p.latitude - p0.latitude
+  $const.dp[2] = p.distance - p0.distance
   body.aberration = $util.showcor(p0, $const.dp)
 
   /* Calculate dRA/dt and dDec/dt.
@@ -51,9 +57,9 @@ $ns.light.calc = function (body, q, e) {
    */
   $moshier.vearth.calc($moshier.body.earth.position.date)
 
-  for (i = 0; i < 3; i++) {
-    p[i] += $moshier.vearth.vearth[i] * t
-  }
+  p.longitude += $moshier.vearth.vearth[0] * t
+  p.latitude += $moshier.vearth.vearth[1] * t
+  p.distance += $moshier.vearth.vearth[2] * t
 
   var d = $util.deltap(p, p0)
   /* see $util.dms() */
