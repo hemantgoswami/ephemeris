@@ -51,20 +51,12 @@ $ns.util.zatan2 = function (x, y) {
   }
 
   if (x == 0) {
-    if (code & 1) {
-      return 1.5 * Math.PI
-    }
-    if (y == 0) {
-      return 0
-    }
-    return 0.5 * Math.PI
+    return code & 1 ? 1.5 * Math.PI
+      : y == 0 ? 0 : 0.5 * Math.PI
   }
 
   if (y == 0) {
-    if (code & 2) {
-      return Math.PI
-    }
-    return 0
+    return code & 2 ? Math.PI : 0
   }
 
   switch (code) {
@@ -165,7 +157,7 @@ $ns.util.showcor = function (p, dp) {
 
 /* Display Right Ascension and Declination
  * from input equatorial rectangular unit vector.
- * Output vector pol[] contains R.A., Dec., and radius.
+ * Output vector pol contains R.A., Dec., and radius.
  */
 $ns.util.showrd = function (p, pol) {
   var r = Math.sqrt(p.longitude * p.longitude
@@ -255,16 +247,12 @@ $ns.util.deltap = function (p0, p1) {
   if (x == 0.0) {
     dr = 1.0e38
   } else {
-    Q = y / x
-    Q = (dp.latitude - dp.longitude * y / x) / (x * (1 + Q * Q))
-    dr = Q
+    var a = y / x
+    dr = (dp.latitude - dp.longitude * y / x) / (x * (1 + a * a))
   }
-
   x = p0.distance / A
-  P = Math.sqrt(1 - x * x)
-
   return {
-    dd: (p1.distance / B - x) / P,
+    dd: (p1.distance / B - x) / Math.sqrt(1 - x * x),
     dr: dr
   }
 }
@@ -279,37 +267,28 @@ $ns.util.angles = function (p, q, e) {
     latitude: p.latitude,
     distance: p.distance
   }
-
-  $const.EO = a.longitude * a.longitude
-    + a.latitude * a.latitude
-    + a.distance * a.distance
-
-  $const.SE = e.longitude * e.longitude
-    + e.latitude * e.latitude
-    + e.distance * e.distance
-
-  $const.SO = q.longitude * q.longitude
-    + q.latitude * q.latitude
-    + q.distance * q.distance
+  /* Distance between Earth and object */
+  $const.EO = Math.sqrt(a.longitude * a.longitude
+    + a.latitude * a.latitude + a.distance * a.distance
+  )
+  /* Sun - object */
+  $const.SO = Math.sqrt(q.longitude * q.longitude
+    + q.latitude * q.latitude + q.distance * q.distance
+  )
+  /* Sun - earth */
+  $const.SE = Math.sqrt(e.longitude * e.longitude
+    + e.latitude * e.latitude + e.distance * e.distance
+  )
 
   $const.pq = a.longitude * q.longitude
-    + a.latitude * q.latitude
-    + a.distance * q.distance
+    + a.latitude * q.latitude + a.distance * q.distance
 
   $const.ep = e.longitude * a.longitude
-    + e.latitude * a.latitude
-    + e.distance * a.distance
+    + e.latitude * a.latitude + e.distance * a.distance
 
   $const.qe = q.longitude * e.longitude
-    + q.latitude * e.latitude
-    + q.distance * e.distance
+    + q.latitude * e.latitude + q.distance * e.distance
 
-  /* Distance between Earth and object */
-  $const.EO = Math.sqrt($const.EO)
-  /* Sun - object */
-  $const.SO = Math.sqrt($const.SO)
-  /* Sun - earth */
-  $const.SE = Math.sqrt($const.SE)
   /* Avoid fatality: if object equals sun, SO is zero. */
   if ($const.SO > 1.0e-12) {
     /* cosine of sun-object-earth */

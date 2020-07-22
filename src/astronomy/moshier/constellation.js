@@ -495,7 +495,6 @@ $ns.constellation = {
  position P.  EPOCH is the precessional equinox and ecliptic date
  of P. */
 $ns.constellation.calc = function (pp, epoch) {
-  var i // int
   var p = {
     longitude: pp.longitude,
     latitude: pp.latitude,
@@ -506,8 +505,9 @@ $ns.constellation.calc = function (pp, epoch) {
   $moshier.precess.calc(p, epoch, 1)
   /* Precess from J2000 to Besselian epoch 1875.0. */
   $moshier.precess.calc(p, {julian: 2405889.25855}, -1)
-  var d = p.longitude * p.longitude + p.latitude * p.latitude + p.distance * p.distance
-  d = Math.sqrt(d)
+  var d = Math.sqrt(p.longitude * p.longitude
+    + p.latitude * p.latitude + p.distance * p.distance
+  )
   var ra = Math.atan2(p.latitude, p.longitude) * ($const.RTD * 3600 / 15)
   if (ra < 0) {
     ra += 86400.0
@@ -519,7 +519,7 @@ $ns.constellation.calc = function (pp, epoch) {
    RIGHT ASCENSIONS FOR THE CONSTELLATION BOUND THE ENTERED RIGHT
    ASCENSION
    */
-  for (i = 0; i < this.bndries.length / 4; i++) {
+  for (var i = 0; i < this.bndries.length / 4; i++) {
     var k = i << 2
     if (ra >= this.bndries[k] && ra < this.bndries[k + 1] && dec > this.bndries[k + 2]) {
       k = this.bndries[k + 3]

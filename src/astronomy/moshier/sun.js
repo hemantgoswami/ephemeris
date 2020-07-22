@@ -7,9 +7,9 @@ $ns.sun.calc = function () {
 
   /* Display ecliptic longitude and latitude. */
   var ecr = {
-    longitude: -$moshier.body.earth.position.rect[0],
-    latitude: -$moshier.body.earth.position.rect[1],
-    distance: -$moshier.body.earth.position.rect[2]
+    longitude: -$moshier.body.earth.position.rect.longitude,
+    latitude: -$moshier.body.earth.position.rect.latitude,
+    distance: -$moshier.body.earth.position.rect.distance
   }
 
   var pol = $moshier.body.sun.position.equinoxEclipticLonLat = $moshier.lonlat.calc(ecr, $moshier.body.earth.position.date, true) // TDT
@@ -23,7 +23,7 @@ $ns.sun.calc = function () {
    * It should be done the same way as the corresponding planetary
    * correction, however.
    */
-  pol.distance = $moshier.body.earth.position.polar[2] // eapolar[2];
+  pol.distance = $moshier.body.earth.position.polar.distance // eapolar[2];
   for (var i = 0; i < 2; i++) {
     t = pol.distance / 173.1446327
     /* Find the earth at time TDT - t */
@@ -39,9 +39,9 @@ $ns.sun.calc = function () {
 
   /* position now */
   var rec = {
-    longitude: -$moshier.body.earth.position.rect[i], // -rearth[i];
-    latitude: -$moshier.body.earth.position.rect[i], // -rearth[i];
-    distance: -$moshier.body.earth.position.rect[i] // -rearth[i];
+    longitude: -$moshier.body.earth.position.rect.longitude, // -rearth[0];
+    latitude: -$moshier.body.earth.position.rect.latitude, // -rearth[1];
+    distance: -$moshier.body.earth.position.rect.distance // -rearth[2];
   }
 
   /* change in position */

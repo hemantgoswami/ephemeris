@@ -84,7 +84,7 @@ $ns.transit.calc = function (date, lha, dec) {
        * semidiameter = 0.272453 * parallax + 0.0799"
        */
       case 'moon':
-        var N = 1/(this.DISFAC*$const.body.position.polar[2]);
+        var N = 1/(this.DISFAC*$const.body.position.polar.distance);
         var D = Math.asin(N); /* the parallax */
         this.semidiameter = 0.2725076*D + 3.874e-7;
         NR[0] = NR[1] = -9.890199094634534e-3 - this.semidiameter + D;

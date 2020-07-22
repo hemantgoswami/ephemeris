@@ -37,7 +37,6 @@ $ns.precess = {
  * to go from J2000 to J2.
  */
 $ns.precess.calc = function (R, date, direction) {
-  var x = [] // double
   var p_i = 0
   var i // int
 
@@ -86,11 +85,7 @@ $ns.precess.calc = function (R, date, direction) {
   }
 
   /* Rotate about z axis to the node. */
-  if (direction == 1) {
-    z = W + pA
-  } else {
-    z = W
-  }
+  z = direction == 1 ? W + pA : W
   var B = Math.cos(z)
   var A = Math.sin(z)
   z = B * x.longitude + A * x.latitude
@@ -116,11 +111,7 @@ $ns.precess.calc = function (R, date, direction) {
   x.latitude = z
 
   /* Rotate about new z axis back from the node. */
-  if (direction == 1) {
-    z = -W
-  } else {
-    z = -W - pA
-  }
+  z = direction == 1 ? -W : -W - pA
   B = Math.cos(z)
   A = Math.sin(z)
   z = B * x.longitude + A * x.latitude

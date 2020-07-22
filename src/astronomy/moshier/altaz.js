@@ -5,15 +5,12 @@ $ns.altaz = {
 }
 
 $ns.altaz.calc = function (pol, date) {
-  var ra = pol[0]
-  var dec = pol[1]
-  var dist = pol[2]
   // var TPI = 2 * Math.PI
 
   /* local apparent sidereal time, seconds converted to radians */
   var last = $moshier.sidereal.calc(date, $const.tlong) * $const.DTR / 240
   /* local hour angle, radians */
-  var lha = last - ra
+  var lha = last - pol.longitude
 
   var result = {
     dLocalApparentSiderealTime: last,
@@ -32,9 +29,9 @@ $ns.altaz.calc = function (pol, date) {
    *	}
    */
 
-  result.diurnalAberration = $moshier.diurnal.aberration(last, ra, dec)
-  ra = result.diurnalAberration.ra
-  dec = result.diurnalAberration.dec
+  result.diurnalAberration = $moshier.diurnal.aberration(last, pol.longitude, pol.latitude)
+  var ra = result.diurnalAberration.ra
+  var dec = result.diurnalAberration.dec
 
   /* Do rise, set, and transit times
    transit.js takes diurnal parallax into account,
@@ -43,7 +40,7 @@ $ns.altaz.calc = function (pol, date) {
   result.transit = $moshier.transit.calc(date, lha, dec)
 
   /* Diurnal parallax */
-  result.diurnalParallax = $moshier.diurnal.parallax(last, ra, dec, dist)
+  result.diurnalParallax = $moshier.diurnal.parallax(last, ra, dec, pol.distance)
   ra = result.diurnalParallax.ra
   dec = result.diurnalParallax.dec
 

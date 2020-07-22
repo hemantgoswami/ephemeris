@@ -11,7 +11,6 @@ $ns.star.calc = function (body) {
 $ns.star.reduce = function (body) {
   var q = {}, polar = {}
   var epoch // double
-  var i // int
 
   /* Convert from RA and Dec to equatorial rectangular direction */
   do {
@@ -46,9 +45,9 @@ $ns.star.reduce = function (body) {
   } while (epoch == $const.b1950)
 
   var e = {
-    longitude: $moshier.body.earth.position.rect[0],
-    latitude: $moshier.body.earth.position.rect[1],
-    distance: $moshier.body.earth.position.rect[2]
+    longitude: $moshier.body.earth.position.rect.longitude,
+    latitude: $moshier.body.earth.position.rect.latitude,
+    distance: $moshier.body.earth.position.rect.distance
   }
 
   /* precess the earth to the star epoch */
@@ -65,9 +64,11 @@ $ns.star.reduce = function (body) {
   /* precess the star to J2000 */
   $moshier.precess.calc(p, {julian: epoch}, 1)
   /* reset the earth to J2000 */
-  e.longitude = $moshier.body.earth.position.rect[0]
-  e.latitude = $moshier.body.earth.position.rect[1]
-  e.distance = $moshier.body.earth.position.rect[2]
+  e = {
+    longitude: $moshier.body.earth.position.rect.longitude,
+    latitude: $moshier.body.earth.position.rect.latitude,
+    distance: $moshier.body.earth.position.rect.distance
+  }
 
   /* Find Euclidean vectors between earth, object, and the sun
    * angles( p, q, e );
@@ -158,17 +159,20 @@ $ns.star.prepare = function (body) {
   //   &body->epoch, &rh, &rm, &rs, &dd, &dm, &ds,
   //   &body->mura, &body->mudec, &body->v, &body->px, &body->mag, &body->obname[0] );
 
-  var x = body.epoch
-  if (x == 2000.0) {
-    x = $const.j2000
-  } else if (x == 1950.0) {
-    x = $const.b1950
-  } else if (x == 1900.0) {
-    x = $const.j1900
-  } else {
-    x = $const.j2000 + 365.25 * (x - 2000)
+  switch (body.epoch) {
+    case 2000:
+      body.epoch = $const.j2000
+      break
+    case 1950:
+      body.epoch = $const.b1950
+      break
+    case 1900:
+      body.epoch = $const.j1900
+      break
+    default:
+      body.epoch = $const.j2000 + 365.25 * (x - 2000)
+      break
   }
-  body.epoch = x
 
   /* read the right ascension */
   if (!body.ra) {

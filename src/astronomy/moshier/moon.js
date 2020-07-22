@@ -11,15 +11,15 @@ $ns.moon.calc = function () {
   var moonpp = {}, moonpol = {}
 
   $moshier.body.moon.position = {
-    polar: [],
-    rect: []
+    polar: {},
+    rect: {}
   }
 
   /* Geometric equatorial coordinates of the earth. */
   var re = {
-    longitude: $moshier.body.earth.position.rect[0],
-    latitude: $moshier.body.earth.position.rect[1],
-    distance: $moshier.body.earth.position.rect[2]
+    longitude: $moshier.body.earth.position.rect.longitude,
+    latitude: $moshier.body.earth.position.rect.latitude,
+    distance: $moshier.body.earth.position.rect.distance
   }
 
   /* Run the orbit calculation twice, at two different times,
@@ -30,15 +30,15 @@ $ns.moon.calc = function () {
   this.calcll({julian: $moshier.body.earth.position.date.julian - 0.001}, moonpp, moonpol) // TDT - 0.001
   var ra0 = this.ra
   var dec0 = this.dec
-  var lon0 = moonpol[0]
+  var lon0 = moonpol.longitude
 
   /* Calculate for present instant. */
   $moshier.body.moon.position.nutation = this.calcll($moshier.body.earth.position.date, moonpp, moonpol).nutation
 
   $moshier.body.moon.position.geometric = {
-    longitude: $const.RTD * $moshier.body.moon.position.polar[0],
-    latitude: $const.RTD * $moshier.body.moon.position.polar[1],
-    distance: $const.RTD * $moshier.body.moon.position.polar[2]
+    longitude: $const.RTD * $moshier.body.moon.position.polar.longitude,
+    latitude: $const.RTD * $moshier.body.moon.position.polar.latitude,
+    distance: $const.RTD * $moshier.body.moon.position.polar.distance
   }
 
   /**
@@ -58,7 +58,7 @@ $ns.moon.calc = function () {
   /* Rate of change in longitude, degrees per day
    * used for phase of the moon
    */
-  lon0 = 1000 * $const.RTD * (moonpol[0] - lon0)
+  lon0 = 1000 * $const.RTD * (moonpol.longitude - lon0)
 
   /* Get apparent coordinates for the earth. */
   var z = Math.sqrt(re.longitude * re.longitude
@@ -136,7 +136,7 @@ $ns.moon.calc = function () {
    * with time.  These rates are estimated for the date, but
    * do not stay constant.  The error can exceed 0.15 day in 4 days.
    */
-  x = moonpol[0] - pe.longitude
+  x = moonpol.longitude - pe.longitude
   x = $util.modtp(x) * $const.RTD
   /* difference in longitude */
   var y = Math.floor(x / 90)
@@ -145,7 +145,7 @@ $ns.moon.calc = function () {
   /* phase angle mod 90 degrees */
 
   /* days per degree of phase angle */
-  z = moonpol[2] / (12.3685 * 0.00257357)
+  z = moonpol.distance / (12.3685 * 0.00257357)
 
   if (x > 45) {
     $moshier.body.moon.position.phaseDaysBefore = -(x - 90) * z
@@ -164,7 +164,11 @@ $ns.moon.calc = function () {
   }
 
   /* Compute and display topocentric position (altaz.js) */
-  var pp = [ this.ra, this.dec, moonpol.distance ]
+  var pp = {
+    longitude: this.ra,
+    latitude: this.dec,
+    distance: moonpol.distance
+  }
   $moshier.body.moon.position.altaz = $moshier.altaz.calc(pp, $moshier.body.earth.position.date)
 }
 
@@ -179,14 +183,14 @@ $ns.moon.calcll = function (date, rect, pol) {
   /* Post the geometric ecliptic longitude and latitude, in radians,
    * and the radius in au.
    */
-  $const.body.position.polar[0] = pol.longitude
-  $const.body.position.polar[1] = pol.latitude
-  $const.body.position.polar[2] = pol.distance
+  $const.body.position.polar.longitude = pol.longitude
+  $const.body.position.polar.latitude = pol.latitude
+  $const.body.position.polar.distance = pol.distance
 
   /* Light time correction to longitude,
    * about 0.7".
    */
-  pol[0] -= 0.0118 * $const.DTR * $const.Rearth / pol[2]
+  pol.longitude -= 0.0118 * $const.DTR * $const.Rearth / pol.distance
 
   /* convert to equatorial system of date */
   var cosB = Math.cos(pol.latitude)
@@ -216,12 +220,12 @@ $ns.moon.calcll = function (date, rect, pol) {
   $util.angles(pp, qq, $moshier.body.earth.position.rect)
 
   /* Make rect a unit vector. */
-  /* for (i = 0; i < 3; i++) */
-  /*  rect[i] /= EO; */
+  /* rect.longitude /= EO; */
+  /* rect.latitude /= EO; */
+  /* rect.distance /= EO; */
 
-  /* Correct position for light deflection.
-   (Ignore.)  */
-  /* relativity( rect, qq, rearth ); */
+  /* Correct position for light deflection. (Ignore.) */
+  /* relativity(rect, qq, rearth); */
 
   /* Aberration of light.
    The Astronomical Almanac (Section D, Daily Polynomial Coefficients)

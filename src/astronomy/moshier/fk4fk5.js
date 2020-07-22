@@ -27,8 +27,6 @@ $ns.fk4fk5 = {
  * AA page B58.
  */
 $ns.fk4fk5.calc = function (p, m, el) {
-  var i // int
-
   /* Note the direction vector and motion vector
    * are already supplied by rstar.c.
    */
@@ -61,7 +59,7 @@ $ns.fk4fk5.calc = function (p, m, el) {
   /* Perform matrix multiplication */
   var v = this.Mat
   var M = []
-  for (i = 0; i < 6; i++) {
+  for (var i = 0; i < 6; i++) {
     M[i] = 0.0
     for (var j = 0; j < 6; j++) {
       M[i] += R[u_i++] * v[v_i++] // *u++ * *v++;

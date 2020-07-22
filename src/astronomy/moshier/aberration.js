@@ -5,9 +5,9 @@ $ns.aberration.calc = function (p) {
   $moshier.vearth.calc($moshier.body.earth.position.date)
 
   var V = {
-    longitude: $moshier.vearth.vearth[0] / $const.Clightaud,
-    latitude: $moshier.vearth.vearth[1] / $const.Clightaud,
-    distance: $moshier.vearth.vearth[2] / $const.Clightaud
+    longitude: $moshier.vearth.vearth.longitude / $const.Clightaud,
+    latitude: $moshier.vearth.vearth.latitude / $const.Clightaud,
+    distance: $moshier.vearth.vearth.distance / $const.Clightaud
   }
 
   var betai = V.longitude * V.longitude
@@ -30,13 +30,14 @@ $ns.aberration.calc = function (p) {
     distance: A * p.distance + B * V.distance
   }
 
-  $const.dp = [
-    x.longitude - p.longitude,
-    x.latitude - p.latitude,
-    x.distance - p.distance
-  ]
+  $const.dp = {
+    longitude: x.longitude - p.longitude,
+    latitude: x.latitude - p.latitude,
+    distance: x.distance - p.distance
+  }
 
   var result = $util.showcor(p, $const.dp)
+
   p.longitude = x.longitude
   p.latitude = x.latitude
   p.distance = x.distance

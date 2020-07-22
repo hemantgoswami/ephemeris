@@ -112,9 +112,9 @@ $ns.processor.test = function () {
   $assert(date.julian, 2446432.199305556)
   $assert(date.delta, 54.87089572485891)
 
-  $assert(body.position.equinoxEclipticLonLat[0], 4.90413951369789)
-  $assert(body.position.equinoxEclipticLonLat[1], 0.000002184617423267333)
-  $assert(body.position.equinoxEclipticLonLat[2], 0.9832794756330766)
+  $assert(body.position.equinoxEclipticLonLat.longitude, 4.90413951369789)
+  $assert(body.position.equinoxEclipticLonLat.latitude, 0.000002184617423267333)
+  $assert(body.position.equinoxEclipticLonLat.distance, 0.9832794756330766)
 
   $assert(body.position.lightTime, 8.177686171897745)
 

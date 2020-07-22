@@ -4,11 +4,11 @@ $ns.lonlat.calc = function (pp, date, ofdate) {
   /* Make local copy of position vector
    * and calculate radius.
    */
-  var s = [
-    pp.longitude,
-    pp.latitude,
-    pp.distance
-  ]
+  var s = {
+    longitude: pp.longitude,
+    latitude: pp.latitude,
+    distance: pp.distance
+  }
 
   var r = Math.sqrt(pp.longitude * pp.longitude
     + pp.latitude * pp.latitude + pp.distance * pp.distance
@@ -24,7 +24,7 @@ $ns.lonlat.calc = function (pp, date, ofdate) {
   var y = $moshier.epsilon.coseps * s.latitude + $moshier.epsilon.sineps * s.distance
   var z = -$moshier.epsilon.sineps * s.latitude + $moshier.epsilon.coseps * s.distance
 
-  var yy = $util.zatan2(s[0], y)
+  var yy = $util.zatan2(s.longitude, y)
   var zz = Math.asin(z / r)
 
   return {

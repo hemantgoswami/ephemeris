@@ -150,7 +150,7 @@ $ns.nutation = {
  * and obliquity of the ecliptic from epsiln()
  * both calculated for Julian date J.
  *
- * p[] = equatorial rectangular position vector of object for
+ * p = equatorial rectangular position vector of object for
  * mean ecliptic and equinox of date.
  */
 $ns.nutation.calc = function (date, p) {

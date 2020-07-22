@@ -15,8 +15,6 @@ $ns.planet.calc = function (body) {
  * right ascension and declination.
  */
 $ns.planet.reduce = function (body, q, e) {
-  var i // int
-
   /* Save the geometric coordinates at TDT */
   var temp = {
     longitude: q.longitude,

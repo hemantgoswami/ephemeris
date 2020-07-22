@@ -1,7 +1,8 @@
 $ns.light = {}
 
 $ns.light.calc = function (body, q, e) {
-  var p = [], t // double
+  var p = {}
+  var t // double
 
   /* save initial q-e vector for display */
   var p0 = {
@@ -40,9 +41,9 @@ $ns.light.calc = function (body, q, e) {
   p.longitude = q.longitude - e.longitude
   p.latitude = q.latitude - e.latitude
   p.distance = q.distance - e.distance
-  $const.dp[0] = p.longitude - p0.longitude
-  $const.dp[1] = p.latitude - p0.latitude
-  $const.dp[2] = p.distance - p0.distance
+  $const.dp.longitude = p.longitude - p0.longitude
+  $const.dp.latitude = p.latitude - p0.latitude
+  $const.dp.distance = p.distance - p0.distance
   body.aberration = $util.showcor(p0, $const.dp)
 
   /* Calculate dRA/dt and dDec/dt.
@@ -57,9 +58,9 @@ $ns.light.calc = function (body, q, e) {
    */
   $moshier.vearth.calc($moshier.body.earth.position.date)
 
-  p.longitude += $moshier.vearth.vearth[0] * t
-  p.latitude += $moshier.vearth.vearth[1] * t
-  p.distance += $moshier.vearth.vearth[2] * t
+  p.longitude += $moshier.vearth.vearth.longitude * t
+  p.latitude += $moshier.vearth.vearth.latitude * t
+  p.distance += $moshier.vearth.vearth.distance * t
 
   var d = $util.deltap(p, p0)
   /* see $util.dms() */

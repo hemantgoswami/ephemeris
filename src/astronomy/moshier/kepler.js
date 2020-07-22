@@ -236,8 +236,8 @@ $ns.kepler.calc = function (date, body, rect, polar) {
   if (arguments.length < 3) {
     body.position = {
       date: date,
-      rect: [ rect.longitude, rect.latitude, rect.distance ],
-      polar: [ E, W, r ]
+      rect: rect,
+      polar: polar
     }
   }
 }
