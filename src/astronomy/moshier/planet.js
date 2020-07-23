@@ -15,7 +15,7 @@ $ns.planet.calc = function (body) {
  * right ascension and declination.
  */
 $ns.planet.reduce = function (body, q, e) {
-  var p = [], temp = [], polar = [] // double
+  var p = [], temp = [] // double
   var a, b, s // double
   var i // int
 
@@ -26,7 +26,7 @@ $ns.planet.reduce = function (body, q, e) {
 
   /* Display ecliptic longitude and latitude, precessed to equinox
    of date. */
-  body.equinoxEclipticLonLat = $moshier.lonlat.calc(q, $moshier.body.earth.position.date, polar, 1)
+  var polar = body.equinoxEclipticLonLat = $moshier.lonlat.calc(q, $moshier.body.earth.position.date, true)
 
   /* Adjust for light time (planetary aberration) */
   $moshier.light.calc(body, q, e)
@@ -109,7 +109,7 @@ $ns.planet.reduce = function (body, q, e) {
   for (i = 0; i < 3; i++) {
     p[i] *= $const.EO
   }
-  body.position.apparentGeocentric = $moshier.lonlat.calc(p, $moshier.body.earth.position.date, temp, 0)
+  body.position.apparentGeocentric = $moshier.lonlat.calc(p, $moshier.body.earth.position.date, false)
   body.position.apparentLongitude = body.position.apparentGeocentric [0] * $const.RTD
   body.position.apparentLongitudeString =
     body.position.apparentGeocentric [3].degree + '\u00B0' +

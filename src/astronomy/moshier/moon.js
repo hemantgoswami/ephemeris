@@ -8,10 +8,10 @@ $ns.moon = {
  * phase of the Moon, etc. for AA.ARC.
  */
 $ns.moon.calc = function () {
-  var i, prtsav // int
+  var i // int
   var ra0, dec0 // double
   var x, y, z, lon0 // double
-  var pp = [], qq = [], pe = [], re = [], moonpp = [], moonpol = [] // double
+  var pp = [], qq = [], re = [], moonpp = [], moonpol = [] // double
 
   $moshier.body.moon.position = {
     polar: [],
@@ -78,7 +78,7 @@ $ns.moon.calc = function () {
     re[i] *= z
   }
 
-  $moshier.lonlat.calc(re, $moshier.body.earth.position.date, pe, 0)
+  var pe = $moshier.lonlat.calc(re, $moshier.body.earth.position.date, false)
 
   /* Find sun-moon-earth angles */
   for (i = 0; i < 3; i++) {
