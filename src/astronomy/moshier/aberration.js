@@ -1,6 +1,6 @@
 $ns.aberration = {}
 
-$ns.aberration.calc = function (p, result) {
+$ns.aberration.calc = function (p) {
   var A, B, C // double
   var betai, pV // double
   var x = [], V = [] // double
@@ -29,9 +29,7 @@ $ns.aberration.calc = function (p, result) {
     $const.dp[i] = C - p[i]
   }
 
-  result = result || {}
-
-  $util.showcor(p, $const.dp, result)
+  var result = $util.showcor(p, $const.dp)
   for (i = 0; i < 3; i++) {
     p[i] = x[i]
   }
