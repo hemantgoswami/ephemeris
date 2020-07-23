@@ -288,7 +288,7 @@ $ns.transit.iterateTransit = function (callback, result) {
       if (this.t_rise != -1.0) {
         t0 = this.t_set - this.t_rise;
         if (t0 > 0.0 && t0 < 1.0) {
-          result.visibleHaours = 24.0 * t0;
+          result.visibleHours = 24.0 * t0;
         }
       }
     }
