@@ -21,8 +21,7 @@ $ns.constant = {
   tlat: 42.38, /* geocentric */ // input for kinit
   glat: 42.27, /* geodetic */ // input for kinit
 
-  /* Parameters for calculation of azimuth and elevation
-   */
+  /* Parameters for calculation of azimuth and elevation */
   attemp: 12.0, /* atmospheric temperature, degrees Centigrade */ // input for kinit
   atpress: 1010.0, /* atmospheric pressure, millibars */ // input for kinit
 
@@ -32,23 +31,22 @@ $ns.constant = {
    */
   dtgiven: 0.0, // input for kinit
 
-  /* Distance from observer to center of earth, in earth radii
-   */
+  /* Distance from observer to center of earth, in earth radii */
   trho: 0.9985,
   flat: 298.257222,
   height: 0.0,
 
   /* Radius of the earth in au
    Thanks to Min He <Min.He@businessobjects.com> for pointing out
-   this needs to be initialized early.  */
+   this needs to be initialized early. */
   Rearth: 0.0, // calculated in kinit
 
   /* Constants used elsewhere. These are DE403 values. */
-  aearth: 6378137., /* Radius of the earth, in meters.  */
-  au: 1.49597870691e8, /* Astronomical unit, in kilometers.  */
-  emrat: 81.300585, /* Earth/Moon mass ratio.  */
-  Clight: 2.99792458e5, /* Speed of light, km/sec  */
-  Clightaud: 0.0, /* C in au/day  */
+  aearth: 6378137., /* Radius of the earth, in meters. */
+  au: 1.49597870691e8, /* Astronomical unit, in kilometers. */
+  emrat: 81.300585, /* Earth/Moon mass ratio. */
+  Clight: 2.99792458e5, /* Speed of light, km/sec */
+  Clightaud: 0.0, /* C in au/day */
 
   /* approximate motion of right ascension and declination
    * of object, in radians per day
@@ -64,11 +62,9 @@ $ns.constant = {
   ep: 0.0, /* -cosine of sun-earth-object angle */
   qe: 0.0, /* cosine of earth-sun-object angle */
 
-  /* correction vector, saved for display  */
-  dp: [],
+  /* correction vector, saved for display */
+  dp: {},
 
-  /*
-   * Current kepler body
-   */
+  /* Current kepler body */
   body: {}
 }

@@ -28,13 +28,14 @@ $ns.diurnal.aberration = function (last, ra, dec) {
 
 /* Diurnal parallax, AA page D3 */
 $ns.diurnal.parallax = function (last, ra, dec, dist) {
-  var p = [], dp = [] // double
-
   /* Don't bother with this unless the equatorial horizontal parallax
    * is at least 0.005"
    */
-  if (dist > 1758.8) return {
-    ra: ra, dec: dec
+  if (dist > 1758.8) {
+    return {
+      ra: ra,
+      dec: dec
+    }
   }
 
   this.DISFAC = $const.au / (0.001 * $const.aearth)
@@ -50,20 +51,22 @@ $ns.diurnal.parallax = function (last, ra, dec, dist) {
    * in which unit distance = earth radius
    */
   var D = dist * this.DISFAC
-  p[0] = D * cosdec * Math.cos(ra)
-  p[1] = D * cosdec * Math.sin(ra)
-  p[2] = D * sindec
+  var p = {
+    longitude: longitude = D * cosdec * Math.cos(ra),
+    latitude: latitude = D * cosdec * Math.sin(ra),
+    distance: distance = D * sindec
+  }
+  var dp = {
+    longitude: longitude = -$const.trho * coslat * Math.cos(last),
+    latitude: latitude = -$const.trho * coslat * Math.sin(last),
+    distance: distance = -$const.trho * sinlat
+  }
 
-  dp[0] = -$const.trho * coslat * Math.cos(last)
-  dp[1] = -$const.trho * coslat * Math.sin(last)
-  dp[2] = -$const.trho * sinlat
-
-  x = p[0] + dp[0]
-  var y = p[1] + dp[1]
-  var z = p[2] + dp[2]
-  D = x * x + y * y + z * z
-  D = Math.sqrt(D)
+  x = p.longitude + dp.longitude
+  var y = p.latitude + dp.latitude
+  var z = p.distance + dp.distance
   /* topocentric distance */
+  D = Math.sqrt(x * x + y * y + z * z)
 
   var result = $util.showcor(p, dp)
   return {

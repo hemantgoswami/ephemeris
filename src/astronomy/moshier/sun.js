@@ -1,16 +1,16 @@
 $ns.sun = {}
 
 $ns.sun.calc = function () {
-  var t, ecr = [], rec = [] // double
-  var i // int
+  var t // double
 
   $moshier.body.sun.position = $moshier.body.sun.position || {}
 
   /* Display ecliptic longitude and latitude. */
-  for (i = 0; i < 3; i++) {
-    ecr[i] = -$moshier.body.earth.position.rect[i] // -rearth[i];
+  var ecr = {
+    longitude: -$moshier.body.earth.position.rect.longitude,
+    latitude: -$moshier.body.earth.position.rect.latitude,
+    distance: -$moshier.body.earth.position.rect.distance
   }
-  var r = $moshier.body.earth.position.polar[2] // eapolar[2];
 
   var pol = $moshier.body.sun.position.equinoxEclipticLonLat = $moshier.lonlat.calc(ecr, $moshier.body.earth.position.date, true) // TDT
 
@@ -23,22 +23,32 @@ $ns.sun.calc = function () {
    * It should be done the same way as the corresponding planetary
    * correction, however.
    */
-  pol[2] = r
-  for (i = 0; i < 2; i++) {
-    t = pol[2] / 173.1446327
+  pol.distance = $moshier.body.earth.position.polar.distance // eapolar[2];
+  for (var i = 0; i < 2; i++) {
+    t = pol.distance / 173.1446327
     /* Find the earth at time TDT - t */
     $moshier.kepler.calc({julian: $moshier.body.earth.position.date.julian - t}, $moshier.body.earth, ecr, pol)
   }
-  r = pol[2]
 
-  for (i = 0; i < 3; i++) {
-    var x = -ecr[i]
-    /* position t days ago */
-    ecr[i] = x
-    /* position now */
-    rec[i] = -$moshier.body.earth.position.rect[i] // -rearth[i];
-    /* change in position */
-    pol[i] = rec[i] - x
+  /* position t days ago */
+  ecr = {
+    longitude: -ecr.longitude,
+    latitude: -ecr.latitude,
+    distance: -ecr.distance
+  }
+
+  /* position now */
+  var rec = {
+    longitude: -$moshier.body.earth.position.rect.longitude, // -rearth[0];
+    latitude: -$moshier.body.earth.position.rect.latitude, // -rearth[1];
+    distance: -$moshier.body.earth.position.rect.distance // -rearth[2];
+  }
+
+  /* change in position */
+  pol = {
+    longitude: rec.longitude - ecr.longitude,
+    latitude: rec.latitude - ecr.latitude,
+    distance: rec.distance - ecr.distance
   }
 
   $copy($moshier.body.sun.position, {
@@ -64,8 +74,10 @@ $ns.sun.calc = function () {
   /* precess to equinox of date */
   $moshier.precess.calc(ecr, $moshier.body.earth.position.date, -1)
 
-  for (i = 0; i < 3; i++) {
-    rec[i] = ecr[i]
+  rec = {
+    longitude: ecr.longitude,
+    latitude: ecr.latitude,
+    distance: ecr.distance
   }
 
   /* Nutation */
@@ -80,8 +92,8 @@ $ns.sun.calc = function () {
   $moshier.body.sun.position.apparent = $util.showrd(ecr, pol)
 
   /* Show it in ecliptic coordinates */
-  var y = $moshier.epsilon.coseps * rec[1] + $moshier.epsilon.sineps * rec[2]
-  y = $util.zatan2(rec[0], y) + $moshier.nutation.nutl
+  var y = $moshier.epsilon.coseps * rec.latitude + $moshier.epsilon.sineps * rec.distance
+  y = $util.zatan2(rec.longitude, y) + $moshier.nutation.nutl
   $moshier.body.sun.position.apparentLongitude = $const.RTD * y
   var dmsLongitude = $util.dms(y)
   $moshier.body.sun.position.apparentLongitudeString =

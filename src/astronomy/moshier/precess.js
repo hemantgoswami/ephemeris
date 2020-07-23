@@ -37,7 +37,6 @@ $ns.precess = {
  * to go from J2000 to J2.
  */
 $ns.precess.calc = function (R, date, direction) {
-  var x = [] // double
   var p_i = 0
   var i // int
 
@@ -60,10 +59,12 @@ $ns.precess.calc = function (R, date, direction) {
     /* From J2000 */
     $moshier.epsilon.calc({julian: $const.j2000})
   }
-  x[0] = R[0]
-  var z = $moshier.epsilon.coseps * R[1] + $moshier.epsilon.sineps * R[2]
-  x[2] = -$moshier.epsilon.sineps * R[1] + $moshier.epsilon.coseps * R[2]
-  x[1] = z
+  var z = $moshier.epsilon.coseps * R.latitude + $moshier.epsilon.sineps * R.distance
+  var x = {
+    longitude: R.longitude,
+    latitude: z,
+    distance: -$moshier.epsilon.sineps * R.latitude + $moshier.epsilon.coseps * R.distance
+  }
 
   /* Precession in longitude */
   T /= 10
@@ -84,16 +85,12 @@ $ns.precess.calc = function (R, date, direction) {
   }
 
   /* Rotate about z axis to the node. */
-  if (direction == 1) {
-    z = W + pA
-  } else {
-    z = W
-  }
+  z = direction == 1 ? W + pA : W
   var B = Math.cos(z)
   var A = Math.sin(z)
-  z = B * x[0] + A * x[1]
-  x[1] = -A * x[0] + B * x[1]
-  x[0] = z
+  z = B * x.longitude + A * x.latitude
+  x.latitude = -A * x.longitude + B * x.latitude
+  x.longitude = z
 
   /* Rotate about new x axis by the inclination of the moving
    * ecliptic on the J2000 ecliptic.
@@ -109,21 +106,17 @@ $ns.precess.calc = function (R, date, direction) {
   }
   B = Math.cos(z)
   A = Math.sin(z)
-  z = B * x[1] + A * x[2]
-  x[2] = -A * x[1] + B * x[2]
-  x[1] = z
+  z = B * x.latitude + A * x.distance
+  x.distance = -A * x.latitude + B * x.distance
+  x.latitude = z
 
   /* Rotate about new z axis back from the node. */
-  if (direction == 1) {
-    z = -W
-  } else {
-    z = -W - pA
-  }
+  z = direction == 1 ? -W : -W - pA
   B = Math.cos(z)
   A = Math.sin(z)
-  z = B * x[0] + A * x[1]
-  x[1] = -A * x[0] + B * x[1]
-  x[0] = z
+  z = B * x.longitude + A * x.latitude
+  x.latitude = -A * x.longitude + B * x.latitude
+  x.longitude = z
 
   /* Rotate about x axis to final equator. */
   if (direction == 1) {
@@ -131,11 +124,11 @@ $ns.precess.calc = function (R, date, direction) {
   } else {
     $moshier.epsilon.calc(date)
   }
-  z = $moshier.epsilon.coseps * x[1] - $moshier.epsilon.sineps * x[2]
-  x[2] = $moshier.epsilon.sineps * x[1] + $moshier.epsilon.coseps * x[2]
-  x[1] = z
+  z = $moshier.epsilon.coseps * x.latitude - $moshier.epsilon.sineps * x.distance
+  x.distance = $moshier.epsilon.sineps * x.latitude + $moshier.epsilon.coseps * x.distance
+  x.latitude = z
 
-  for (i = 0; i < 3; i++) {
-    R[i] = x[i]
-  }
+  R.longitude = x.longitude
+  R.latitude = x.latitude
+  R.distance = x.distance
 }
