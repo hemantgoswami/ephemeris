@@ -2,7 +2,7 @@ $ns.sun = {}
 
 $ns.sun.calc = function () {
   var r, x, y, t // double
-  var ecr = [], rec = [], pol = [] // double
+  var ecr = [], rec = [] // double
   var i // int
   var d
   //double asin(), modtp(), sqrt(), cos(), sin();
@@ -15,7 +15,7 @@ $ns.sun.calc = function () {
   }
   r = $moshier.body.earth.position.polar [2] //eapolar [2];
 
-  $moshier.body.sun.position.equinoxEclipticLonLat = $moshier.lonlat.calc(ecr, $moshier.body.earth.position.date, pol, 1) // TDT
+  var pol = $moshier.body.sun.position.equinoxEclipticLonLat = $moshier.lonlat.calc(ecr, $moshier.body.earth.position.date, true) // TDT
 
   /* Philosophical note: the light time correction really affects
    * only the Sun's barycentric position; aberration is due to
