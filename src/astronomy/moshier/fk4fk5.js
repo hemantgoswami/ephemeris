@@ -27,62 +27,69 @@ $ns.fk4fk5 = {
  * AA page B58.
  */
 $ns.fk4fk5.calc = function (p, m, el) {
-  var R = [] // double
-  var i // int
-
   /* Note the direction vector and motion vector
    * are already supplied by rstar.c.
    */
-  var a = 0.0
-  var b = 0.0
-  for (i = 0; i < 3; i++) {
-    m[i] *= $const.RTS
-    /* motion must be in arc seconds per century */
-    a += this.A[i] * p[i]
-    b += this.Ad[i] * p[i]
-  }
+  m.longitude *= $const.RTS
+  m.latitude *= $const.RTS
+  m.distance *= $const.RTS
+
+  /* motion must be in arc seconds per century */
+  var a = this.A[0] * p.longitude
+    + this.A[1] * p.latitude
+    + this.A[2] * p.distance
+
+  var b = this.Ad[0] * p.longitude
+    + this.Ad[1] * p.latitude
+    + this.Ad[2] * p.distance
+
   /* Remove E terms of aberration from FK4 */
-  for (i = 0; i < 3; i++) {
-    R[i] = p[i] - this.A[i] + a * p[i]
-    R[i + 3] = m[i] - this.Ad[i] + b * p[i]
-  }
+  var R = [
+    p.longitude - this.A[0] + a * p.longitude,
+    p.latitude - this.A[1] + a * p.latitude,
+    p.distance - this.A[2] + a * p.distance,
+    m.longitude - this.Ad[0] + b * p.longitude,
+    m.latitude - this.Ad[1] + b * p.latitude,
+    m.distance - this.Ad[2] + b * p.distance
+  ]
 
   var u_i = 0
   var v_i = 0
 
   /* Perform matrix multiplication */
   var v = this.Mat
-  for (i = 0; i < 6; i++) {
-    a = 0.0
+  var M = []
+  for (var i = 0; i < 6; i++) {
+    M[i] = 0.0
     for (var j = 0; j < 6; j++) {
-      a += R[u_i++] * v[v_i++] // *u++ * *v++;
-    }
-    if (i < 3) {
-      p[i] = a
-    } else {
-      m[i - 3] = a
+      M[i] += R[u_i++] * v[v_i++] // *u++ * *v++;
     }
   }
+  p.longitude = M[0]
+  p.latitude = M[1]
+  p.distance = M[2]
+  m.longitude = M[3]
+  m.latitude = M[4]
+  m.distance = M[5]
 
   /* Transform the answers into J2000 catalogue entries
    * in radian measure.
    */
-  b = p[0] * p[0] + p[1] * p[1]
-  var c = b + p[2] * p[2]
+  b = p.longitude * p.longitude + p.latitude * p.latitude
+  var c = b + p.distance * p.distance
   a = Math.sqrt(c)
 
-  el.ra = $util.zatan2(p[0], p[1])
-  el.dec = Math.asin(p[2] / a)
+  el.ra = $util.zatan2(p.longitude, p.latitude)
+  el.dec = Math.asin(p.distance / a)
 
   /* Note motion converted back to radians per (Julian) century */
-  el.raMotion = (p[0] * m[1] - p[1] * m[0]) / ($const.RTS * b)
-  el.decMotion = (m[2] * b - p[2] * (p[0] * m[0] + p[1] * m[1])) / ($const.RTS * c * Math.sqrt(b))
+  el.raMotion = (p.longitude * m.latitude - p.latitude * m.longitude) / ($const.RTS * b)
+  el.decMotion = (
+    m.distance * b - p.distance * (p.longitude * m.longitude + p.latitude * m.latitude)
+  ) / ($const.RTS * c * Math.sqrt(b))
 
   if (el.parallax > 0) {
-    c = 0.0
-    for (i = 0; i < 3; i++) {
-      c += p[i] * m[i]
-    }
+    c = p.longitude * m.longitude + p.latitude * m.latitude + p.distance * m.distance
 
     /* divide by RTS to deconvert m (and therefore c)
      * from arc seconds back to radians

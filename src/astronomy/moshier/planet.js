@@ -15,12 +15,11 @@ $ns.planet.calc = function (body) {
  * right ascension and declination.
  */
 $ns.planet.reduce = function (body, q, e) {
-  var p = [], temp = [] // double
-  var i // int
-
   /* Save the geometric coordinates at TDT */
-  for (i = 0; i < 3; i++) {
-    temp[i] = q[i]
+  var temp = {
+    longitude: q.longitude,
+    latitude: q.latitude,
+    distance: q.distance
   }
 
   /* Display ecliptic longitude and latitude, precessed to equinox
@@ -31,18 +30,22 @@ $ns.planet.reduce = function (body, q, e) {
   $moshier.light.calc(body, q, e)
 
   /* Find Euclidean vectors between earth, object, and the sun */
-  for (i = 0; i < 3; i++) {
-    p[i] = q[i] - e[i]
+  var p = {
+    longitude: q.longitude - e.longitude,
+    latitude: q.latitude - e.latitude,
+    distance: q.distance - e.distance
   }
 
   $util.angles(p, q, e)
 
-  var a = 0.0
-  for (i = 0; i < 3; i++) {
-    var b = temp[i] - e[i]
-    a += b * b
-  }
+  var b = temp.longitude - e.longitude
+  var a = b * b
+  b = temp.latitude - e.latitude
+  a += b * b
+  b = temp.distance - e.distance
+  a += b * b
   body.position.trueGeocentricDistance = Math.sqrt(a)
+
   /* was EO */
   body.position.equatorialDiameter = 2 * body.semiDiameter / $const.EO
 
@@ -68,9 +71,14 @@ $ns.planet.reduce = function (body, q, e) {
   }
 
   /* Find unit vector from earth in direction of object */
-  for (i = 0; i < 3; i++) {
-    p[i] /= $const.EO
-    temp[i] = p[i]
+  p.longitude /= $const.EO
+  p.latitude /= $const.EO
+  p.distance /= $const.EO
+
+  temp = {
+    longitude: p.longitude,
+    latitude: p.latitude,
+    distance: p.distance
   }
 
   /* Report astrometric position */
@@ -102,25 +110,26 @@ $ns.planet.reduce = function (body, q, e) {
   body.position.apparent = $util.showrd(p, polar)
 
   /* Geocentric ecliptic longitude and latitude. */
-  for (i = 0; i < 3; i++) {
-    p[i] *= $const.EO
-  }
+  p.longitude *= $const.EO
+  p.latitude *= $const.EO
+  p.distance *= $const.EO
+
   body.position.apparentGeocentric = $moshier.lonlat.calc(p, $moshier.body.earth.position.date, false)
-  body.position.apparentLongitude = body.position.apparentGeocentric[0] * $const.RTD
+  body.position.apparentLongitude = body.position.apparentGeocentric.longitude * $const.RTD
   body.position.apparentLongitudeString =
-    body.position.apparentGeocentric[3].degree + '\u00B0' +
-    body.position.apparentGeocentric[3].minutes + '\'' +
-    Math.floor(body.position.apparentGeocentric[3].seconds) + '"'
+    body.position.apparentGeocentric.dLongitude.degree + '\u00B0' +
+    body.position.apparentGeocentric.dLongitude.minutes + '\'' +
+    Math.floor(body.position.apparentGeocentric.dLongitude.seconds) + '"'
 
   body.position.apparentLongitude30String =
-    $util.mod30(body.position.apparentGeocentric[3].degree) + '\u00B0' +
-    body.position.apparentGeocentric[3].minutes + '\'' +
-    Math.floor(body.position.apparentGeocentric[3].seconds) + '"'
+    $util.mod30(body.position.apparentGeocentric.dLongitude.degree) + '\u00B0' +
+    body.position.apparentGeocentric.dLongitude.minutes + '\'' +
+    Math.floor(body.position.apparentGeocentric.dLongitude.seconds) + '"'
 
   body.position.geocentricDistance = -1
 
   /* Go do topocentric reductions. */
-  polar[2] = $const.EO
+  polar.distance = $const.EO
   body.position.altaz = $moshier.altaz.calc(polar, $moshier.body.earth.position.date)
 }
 

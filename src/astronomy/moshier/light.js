@@ -1,42 +1,49 @@
 $ns.light = {}
 
 $ns.light.calc = function (body, q, e) {
-  var p = [], p0 = [], t // double
-  var i // int
+  var p = {}
+  var t // double
 
   /* save initial q-e vector for display */
-  for (i = 0; i < 3; i++) {
-    p0[i] = q[i] - e[i]
+  var p0 = {
+    longitude: q.longitude - e.longitude,
+    latitude: q.latitude - e.latitude,
+    distance: q.distance - e.distance
   }
 
-  var E = 0.0
-  for (i = 0; i < 3; i++) {
-    E += e[i] * e[i]
-  }
-  E = Math.sqrt(E)
+  var E = Math.sqrt(e.longitude * e.longitude
+    + e.latitude * e.latitude
+    + e.distance * e.distance)
 
-  for (var k = 0; k < 2; k++) {
-    var P = 0.0
-    var Q = 0.0
-    for (i = 0; i < 3; i++) {
-      p[i] = q[i] - e[i]
-      Q += q[i] * q[i]
-      P += p[i] * p[i]
-    }
+  for (var i = 0; i < 2; i++) {
+    p.longitude = q.longitude - e.longitude
+    p.latitude = q.latitude - e.latitude
+    p.distance = q.distance - e.distance
+
+    var Q = q.longitude * q.longitude
+      + q.latitude * q.latitude
+      + q.distance * q.distance
+
+    var P = p.longitude * p.longitude
+      + p.latitude * p.latitude
+      + p.distance * p.distance
+
     P = Math.sqrt(P)
     Q = Math.sqrt(Q)
     /* Note the following blows up if object equals sun. */
     t = (P + 1.97e-8 * Math.log((E + P + Q) / (E - P + Q))) / 173.1446327
-    $moshier.kepler.calc({julian: $moshier.body.earth.position.date.julian - t}, body, q, [])
+    $moshier.kepler.calc({julian: $moshier.body.earth.position.date.julian - t}, body, q)
   }
 
   body.lightTime = 1440 * t
 
   /* Final object-earth vector and the amount by which it changed. */
-  for (i = 0; i < 3; i++) {
-    p[i] = q[i] - e[i]
-    $const.dp[i] = p[i] - p0[i]
-  }
+  p.longitude = q.longitude - e.longitude
+  p.latitude = q.latitude - e.latitude
+  p.distance = q.distance - e.distance
+  $const.dp.longitude = p.longitude - p0.longitude
+  $const.dp.latitude = p.latitude - p0.latitude
+  $const.dp.distance = p.distance - p0.distance
   body.aberration = $util.showcor(p0, $const.dp)
 
   /* Calculate dRA/dt and dDec/dt.
@@ -51,9 +58,9 @@ $ns.light.calc = function (body, q, e) {
    */
   $moshier.vearth.calc($moshier.body.earth.position.date)
 
-  for (i = 0; i < 3; i++) {
-    p[i] += $moshier.vearth.vearth[i] * t
-  }
+  p.longitude += $moshier.vearth.vearth.longitude * t
+  p.latitude += $moshier.vearth.vearth.latitude * t
+  p.distance += $moshier.vearth.vearth.distance * t
 
   var d = $util.deltap(p, p0)
   /* see $util.dms() */
