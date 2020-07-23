@@ -223,7 +223,7 @@ $ns.kepler.calc = function (date, body, rect, polar) {
   E = $util.zatan2(rect.longitude, W)
   W = Math.asin(M / r)
 
-  /* Output the polar cooordinates */
+  /* Output the polar coordinates */
   /* longitude */
   polar.longitude = E
   /* latitude */
