@@ -1,7 +1,7 @@
 $ns.light = {}
 
 $ns.light.calc = function (body, q, e) {
-  var p = [], p0 = [], ptemp = [] // double
+  var p = [], p0 = [] // double
   var P, Q, E, t, x, y // double
   var i, k // int
 
@@ -30,7 +30,7 @@ $ns.light.calc = function (body, q, e) {
     Q = Math.sqrt(Q)
     /* Note the following blows up if object equals sun. */
     t = (P + 1.97e-8 * Math.log((E + P + Q) / (E - P + Q))) / 173.1446327
-    $moshier.kepler.calc({julian: $moshier.body.earth.position.date.julian - t}, body, q, ptemp)
+    $moshier.kepler.calc({julian: $moshier.body.earth.position.date.julian - t}, body, q)
   }
 
   body.lightTime = 1440.0 * t
