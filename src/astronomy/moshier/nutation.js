@@ -154,22 +154,20 @@ $ns.nutation = {
  * mean ecliptic and equinox of date.
  */
 $ns.nutation.calc = function (date, p) {
-  var ce, se, cl, sl, sino, f // double
   var dp = [], p1 = [] // double
   var i // int
-  var result
 
   this.calclo(date)
   /* be sure we calculated nutl and nuto */
   $moshier.epsilon.calc(date)
   /* and also the obliquity of date */
 
-  f = $moshier.epsilon.eps + this.nuto
-  ce = Math.cos(f)
-  se = Math.sin(f)
-  sino = Math.sin(this.nuto)
-  cl = Math.cos(this.nutl)
-  sl = Math.sin(this.nutl)
+  var f = $moshier.epsilon.eps + this.nuto
+  var ce = Math.cos(f)
+  var se = Math.sin(f)
+  var sino = Math.sin(this.nuto)
+  var cl = Math.cos(this.nutl)
+  var sl = Math.sin(this.nutl)
 
   /* Apply adjustment
    * to equatorial rectangular coordinates of object.
@@ -185,17 +183,17 @@ $ns.nutation.calc = function (date, p) {
 
   p1[1] = sl * ce * p[0]
     + (cl * $moshier.epsilon.coseps * ce + $moshier.epsilon.sineps * se) * p[1]
-    - (sino + (1.0 - cl) * $moshier.epsilon.sineps * ce) * p[2]
+    - (sino + (1 - cl) * $moshier.epsilon.sineps * ce) * p[2]
 
   p1[2] = sl * se * p[0]
-    + (sino + (cl - 1.0) * se * $moshier.epsilon.coseps) * p[1]
+    + (sino + (cl - 1) * se * $moshier.epsilon.coseps) * p[1]
     + (cl * $moshier.epsilon.sineps * se + $moshier.epsilon.coseps * ce) * p[2]
 
   for (i = 0; i < 3; i++) {
     dp[i] = p1[i] - p[i]
   }
 
-  result = $util.showcor(p, dp)
+  var result = $util.showcor(p, dp)
 
   for (i = 0; i < 3; i++) {
     p[i] = p1[i]
@@ -208,52 +206,47 @@ $ns.nutation.calc = function (date, p) {
  * computed at Julian date J.
  */
 $ns.nutation.calclo = function (date) {
-  var f, g, T, T2, T10 // double
-  var MM, MS, FF, DD, OM // double
-  var cu, su, cv, sv, sw // double
-  var C, D // double
-  var i, j, k, k1, m // int
-  var p // short array
-
-  if (this.jdnut.julian == date.julian)
+  if (this.jdnut.julian == date.julian) {
     return 0
+  }
+
   this.jdnut = date
 
   /* Julian centuries from 2000 January 1.5,
    * barycentric dynamical time
    */
-  T = (date.julian - 2451545.0) / 36525.0
-  T2 = T * T
-  T10 = T / 10.0
+  var T = (date.julian - 2451545) / 36525
+  var T2 = T * T
+  var T10 = T / 10
 
   /* Fundamental arguments in the FK5 reference system. */
 
   /* longitude of the mean ascending node of the lunar orbit
    * on the ecliptic, measured from the mean equinox of date
    */
-  OM = ($util.mods3600(-6962890.539 * T + 450160.280) + (0.008 * T + 7.455) * T2)
+  var OM = ($util.mods3600(-6962890.539 * T + 450160.280) + (0.008 * T + 7.455) * T2)
     * $const.STR
 
   /* mean longitude of the Sun minus the
    * mean longitude of the Sun's perigee
    */
-  MS = ($util.mods3600(129596581.224 * T + 1287099.804) - (0.012 * T + 0.577) * T2)
+  var MS = ($util.mods3600(129596581.224 * T + 1287099.804) - (0.012 * T + 0.577) * T2)
     * $const.STR
 
   /* mean longitude of the Moon minus the
    * mean longitude of the Moon's perigee
    */
-  MM = ($util.mods3600(1717915922.633 * T + 485866.733) + (0.064 * T + 31.310) * T2)
+  var MM = ($util.mods3600(1717915922.633 * T + 485866.733) + (0.064 * T + 31.310) * T2)
     * $const.STR
 
   /* mean longitude of the Moon minus the
    * mean longitude of the Moon's node
    */
-  FF = ($util.mods3600(1739527263.137 * T + 335778.877) + (0.011 * T - 13.257) * T2)
+  var FF = ($util.mods3600(1739527263.137 * T + 335778.877) + (0.011 * T - 13.257) * T2)
     * $const.STR
 
   /* mean elongation of the Moon from the Sun. */
-  DD = ($util.mods3600(1602961601.328 * T + 1072261.307) + (0.019 * T - 6.891) * T2)
+  var DD = ($util.mods3600(1602961601.328 * T + 1072261.307) + (0.019 * T - 6.891) * T2)
     * $const.STR
 
   /* Calculate sin( i*MM ), etc. for needed multiple angles */
@@ -263,61 +256,62 @@ $ns.nutation.calclo = function (date) {
   this.sscc(3, DD, 4)
   this.sscc(4, OM, 2)
 
-  C = 0.0
-  D = 0.0
-  p = this.nt
+  var C = 0.0
+  var D = 0.0
+  var p = this.nt
   /* point to start of table */
 
   var p_i = 0
 
-  for (i = 0; i < 105; i++) {
+  for (var i = 0; i < 105; i++) {
     /* argument of sine and cosine */
-    k1 = 0
-    cv = 0.0
-    sv = 0.0
-    for (m = 0; m < 5; m++) {
-      j = p [p_i++] //*p++;
+    var k
+    var k1 = false
+    var cv = 0.0
+    var sv = 0.0
+    for (var m = 0; m < 5; m++) {
+      var j = p[p_i++] // *p++;
       if (j) {
-        k = j
-        if (j < 0) {
-          k = -k
-        }
-        su = this.ss[m][k - 1]
+        k = j < 0 ? -j : j
+        var su = this.ss[m][k - 1]
         /* sin(k*angle) */
         if (j < 0) {
           su = -su
         }
-        cu = this.cc[m][k - 1]
-        if (k1 == 0) { /* set first angle */
+        var cu = this.cc[m][k - 1]
+        if (!k1) { /* set first angle */
           sv = su
           cv = cu
-          k1 = 1
+          k1 = true
         } else { /* combine angles */
-          sw = su * cv + cu * sv
+          var sw = su * cv + cu * sv
           cv = cu * cv - su * sv
           sv = sw
         }
       }
     }
     /* longitude coefficient */
-    f = p [p_i++] //*p++;
-    if ((k = p [p_i++] /* *p++ */) != 0) {
+    var f = p[p_i++] // *p++;
+    k = p[p_i++] /* *p++ */
+    if (k != 0) {
       f += T10 * k
     }
 
     /* obliquity coefficient */
-    g = p [p_i++] //*p++;
-    if ((k = p [p_i++] /* *p++ */) != 0)
+    var g = p[p_i++] // *p++;
+    k = p[p_i++] /* *p++ */
+    if (k != 0) {
       g += T10 * k
+    }
 
     /* accumulate the terms */
     C += f * sv
     D += g * cv
   }
   /* first terms, not in table: */
-  C += (-1742. * T10 - 171996.) * this.ss[4][0]
+  C += (-1742 * T10 - 171996) * this.ss[4][0]
   /* sin(OM) */
-  D += (89. * T10 + 92025.) * this.cc[4][0]
+  D += (89 * T10 + 92025) * this.cc[4][0]
   /* cos(OM) */
   /*
    printf( "nutation: in longitude %.3f\", in obliquity %.3f\"\n", C, D );
@@ -331,11 +325,8 @@ $ns.nutation.calclo = function (date) {
  * for required multiple angles
  */
 $ns.nutation.sscc = function (k, arg, n) {
-  var cu, su, cv, sv, s // double
-  var i // int
-
-  su = Math.sin(arg)
-  cu = Math.cos(arg)
+  var su = Math.sin(arg)
+  var cu = Math.cos(arg)
   this.ss[k] = []
   this.cc[k] = []
 
@@ -343,13 +334,13 @@ $ns.nutation.sscc = function (k, arg, n) {
   /* sin(L) */
   this.cc[k][0] = cu
   /* cos(L) */
-  sv = 2.0 * su * cu
-  cv = cu * cu - su * su
+  var sv = 2 * su * cu
+  var cv = cu * cu - su * su
   this.ss[k][1] = sv
   /* sin(2L) */
   this.cc[k][1] = cv
-  for (i = 2; i < n; i++) {
-    s = su * cv + cu * sv
+  for (var i = 2; i < n; i++) {
+    var s = su * cv + cu * sv
     cv = cu * cv - su * sv
     sv = s
     this.ss[k][i] = sv
