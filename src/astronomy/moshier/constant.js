@@ -5,7 +5,7 @@ $ns.constant = {
   j2000: 2451545.0, /* 2000 January 1.5 */
   b1950: 2433282.423, /* 1950 January 0.923 Besselian epoch */
   j1900: 2415020.0, /* 1900 January 0, 12h UT */
-  RTOH: 12.0 / Math.PI, /* Radians to hours, minutes, seconds */
+  RTOH: 12 / Math.PI, /* Radians to hours, minutes, seconds */
 
   /* Conversion factors between degrees and radians */
   DTR: 1.7453292519943295769e-2,
@@ -13,7 +13,7 @@ $ns.constant = {
   RTS: 2.0626480624709635516e5, /* arc seconds per radian */
   STR: 4.8481368110953599359e-6, /* radians per arc second */
 
-  TPI: 2.0 * Math.PI,
+  TPI: 2 * Math.PI,
 
   date: {}, /* Input date */
 

@@ -41,7 +41,7 @@ $ns.processor.calc = function (date, body) {
 $ns.processor.ecliptic = function (date, observer, body) {
   this.calc(date, observer)
   this.calc(date, body)
-  // this.reduce (observer, body);
+  // this.reduce(observer, body)
 }
 
 $ns.processor.init = function () {
@@ -50,8 +50,6 @@ $ns.processor.init = function () {
 }
 
 $ns.processor.test = function () {
-  var body, date
-
   // tested position
   $copy($const, {
     tlong: -71.13,
@@ -65,8 +63,8 @@ $ns.processor.test = function () {
   this.init()
 
   // test the moon
-  date = {year: 1986, month: 1, day: 1, hours: 1, minutes: 52, seconds: 0}
-  body = $moshier.body.moon
+  var date = {year: 1986, month: 1, day: 1, hours: 1, minutes: 52, seconds: 0}
+  var body = $moshier.body.moon
   this.calc(date, body)
 
   $assert(date.julian, 2446431.577777778)
@@ -114,9 +112,9 @@ $ns.processor.test = function () {
   $assert(date.julian, 2446432.199305556)
   $assert(date.delta, 54.87089572485891)
 
-  $assert(body.position.equinoxEclipticLonLat [0], 4.90413951369789)
-  $assert(body.position.equinoxEclipticLonLat [1], 0.000002184617423267333)
-  $assert(body.position.equinoxEclipticLonLat [2], 0.9832794756330766)
+  $assert(body.position.equinoxEclipticLonLat[0], 4.90413951369789)
+  $assert(body.position.equinoxEclipticLonLat[1], 0.000002184617423267333)
+  $assert(body.position.equinoxEclipticLonLat[2], 0.9832794756330766)
 
   $assert(body.position.lightTime, 8.177686171897745)
 
