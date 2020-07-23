@@ -413,7 +413,7 @@ $ns.transit.noRiseSet = function (t0, callback) {
   } else {
     /* Find missed set time. */
 // search_set:
-    this.t_set = search_halve (t, elevation, this.t_trnsit, this.elevation_trnsit, callback);
+    this.t_set = this.searchHalve (t, elevation, this.t_trnsit, this.elevation_trnsit, callback);
     this.f_trnsit = true;
   }
 };
