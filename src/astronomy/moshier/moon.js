@@ -135,24 +135,22 @@ $ns.moon.calc = function () {
   x = moonpol[0] - pe[0]
   x = $util.modtp(x) * $const.RTD
   /* difference in longitude */
-  i = Math.floor(x / 90)
+  y = Math.floor(x / 90)
   /* number of quarters */
-  x = (x - i * 90.0)
+  x = x - y * 90
   /* phase angle mod 90 degrees */
 
   /* days per degree of phase angle */
   z = moonpol[2] / (12.3685 * 0.00257357)
 
-  if (x > 45.0) {
-    y = -(x - 90.0) * z
-    $moshier.body.moon.position.phaseDaysBefore = y
-    i = (i + 1) & 3
+  if (x > 45) {
+    $moshier.body.moon.position.phaseDaysBefore = -(x - 90) * z
+    y = (y + 1) & 3
   } else {
-    y = x * z
-    $moshier.body.moon.position.phaseDaysPast = y
+    $moshier.body.moon.position.phaseDaysPast = x * z
   }
 
-  $moshier.body.moon.position.phaseQuarter = i
+  $moshier.body.moon.position.phaseQuarter = y
 
   $moshier.body.moon.position.apparent = {
     dRA: this.ra,
