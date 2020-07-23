@@ -189,16 +189,11 @@ $ns.star.prepare = function (body) {
   body.raMotion *= 15.0 / $const.RTS
   /* s/century -> "/century -> rad/century */
   body.decMotion /= $const.RTS
-  z = body.parallax
-  if (z < 1.0) {
-    if (z <= 0.0) {
-      body.parallax = 0.0
-    } else {
-      body.parallax = $const.STR * z
-      /* assume px in arc seconds */
-    }
+  if (body.parallax < 1) {
+    /* assume px in arc seconds */
+    body.parallax = body.parallax <= 0 ? 0 : $const.STR * body.parallax
   } else {
-    body.parallax = 1.0 / ($const.RTS * z)
+    body.parallax = 1.0 / ($const.RTS * body.parallax)
     /* parsecs -> radians */
   }
 }
