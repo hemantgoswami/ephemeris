@@ -66,7 +66,7 @@ function getAllPlanets (date, geodeticalLongitude, geodeticalLatitude, height) {
       }
     }
 
-    var body = {
+    ret.observed[eph.const.body.key] = {
       name: eph.const.body.key,
       raw: eph.const.body,
       apparentLongitudeDms30: eph.const.body.position.apparentLongitude30String,
@@ -74,7 +74,6 @@ function getAllPlanets (date, geodeticalLongitude, geodeticalLatitude, height) {
       apparentLongitudeDd: eph.const.body.position.apparentLongitude,
       geocentricDistanceKm: eph.const.body.position.geocentricDistance
     }
-    ret.observed[body.name] = body
 
   }
 
@@ -121,7 +120,7 @@ function getPlanet (planetName, date, geodeticalLongitude, geodeticalLatitude, h
     }
   }
 
-  var body = {
+  ret.observed[eph.const.body.key] = {
     name: eph.const.body.key,
     raw: eph.const.body,
     apparentLongitudeDms30: eph.const.body.position.apparentLongitude30String,
@@ -129,7 +128,6 @@ function getPlanet (planetName, date, geodeticalLongitude, geodeticalLatitude, h
     apparentLongitudeDd: eph.const.body.position.apparentLongitude,
     geocentricDistanceKm: eph.const.body.position.geocentricDistance
   }
-  ret.observed[body.name] = body
 
   return ret
 }
