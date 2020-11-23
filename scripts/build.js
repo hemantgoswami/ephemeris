@@ -22,7 +22,7 @@ var jsFilesInOrder = [ // does fs.readFile adjust the separators if running on w
 
   'src/astronomy/moshier/index.js',
   'src/astronomy/moshier/constant.js',
-  'custom.constant.js',
+  'src/custom.constant.js',
   'src/astronomy/moshier/julian.js',
   'src/astronomy/moshier/delta.js',
   'src/astronomy/moshier/epsilon.js',
