@@ -1,4 +1,6 @@
-$ns.delta = {}
+var constant = require('./constant')
+
+var delta = {}
 
 /**
  * Morrison and Stephenson (2004)
@@ -10,7 +12,7 @@ $ns.delta = {}
  * The last value in this table agrees with the AA table at 1700,
  * so there is no discontinuity at either endpoint.
  */
-$ns.delta.m_s = [
+delta.m_s = [
   /* -1000 to -100 */
   25428, 23700, 22000, 21000, 19040, 17190, 15530, 14080, 12790, 11640,
   /* 0 to 900 */
@@ -24,7 +26,7 @@ $ns.delta.m_s = [
  * the 1984 Astronomical Almanac and assume ndot = -26.0.
  * For dates prior to 1700, the above table is used instead of this one.
  */
-$ns.delta.dt = [
+delta.dt = [
   /* 1620.0 thru 1659.0 */
   12400, 11900, 11500, 11000, 10600, 10200, 9800, 9500, 9100, 8800,
   8500, 8200, 7900, 7700, 7400, 7200, 7000, 6700, 6500, 6300,
@@ -78,18 +80,18 @@ $ns.delta.dt = [
   6607, 6632
 ]
 
-$ns.delta.demo = 0
-$ns.delta.TABSTART = 1620
-$ns.delta.TABEND = 2011
-$ns.delta.TABSIZ = $ns.delta.TABEND - $ns.delta.TABSTART + 1
+delta.demo = 0
+delta.TABSTART = 1620
+delta.TABEND = 2011
+delta.TABSIZ = delta.TABEND - delta.TABSTART + 1
 
-$ns.delta.calc = function (date) {
+delta.calc = function (date) {
   var p, B // double
   var diff = [0, 0, 0, 0, 0, 0] // int
   var i, iy // int
 
-  if ($const.dtgiven) {
-    date.delta = $const.dtgiven
+  if (constant.dtgiven) {
+    date.delta = constant.dtgiven
   } else if (date.j2000 > this.TABEND) {
     /* Extrapolate future values beyond the lookup table. */
     if (date.j2000 > this.TABEND + 100) {
@@ -212,3 +214,5 @@ $ns.delta.calc = function (date) {
 
   return date.delta
 }
+
+module.exports = delta

@@ -1,5 +1,10 @@
-$ns.gplan = {
-  /* From Simon et al (1994) */
+var constant = require('./constant')
+var epsilon = require('./epsilon')
+var plan404 = require('./plan404')
+var util = require('./util')
+
+var gplan = {
+  /** From Simon et al (1994) */
   freqs: [
     /* Arc sec per 10000 Julian years. */
     53810162868.8982,
@@ -37,18 +42,18 @@ $ns.gplan = {
 
 }
 
-/* Routines to chew through tables of perturbations. */
-$ns.gplan.calc = function (date, body_ptable) {
+/** Routines to chew through tables of perturbations. */
+gplan.calc = function (date, body_ptable) {
   var j, ip, nt // int
   var su, cu // double
 
-  var T = (date.julian - $const.j2000) / body_ptable.timescale
+  var T = (date.julian - constant.j2000) / body_ptable.timescale
   var n = body_ptable.maxargs
   /* Calculate sin( i*MM ), etc. for needed multiple angles. */
   for (var i = 0; i < n; i++) {
     j = body_ptable.max_harmonic[i]
     if (j > 0) {
-      sr = ($util.mods3600(this.freqs[i] * T) + this.phases[i]) * $const.STR
+      sr = (util.mods3600(this.freqs[i] * T) + this.phases[i]) * constant.STR
       this.sscc(i, sr, j)
     }
   }
@@ -84,7 +89,7 @@ $ns.gplan.calc = function (date, body_ptable) {
       for (ip = 0; ip < nt; ip++) {
         cu = cu * T + pl[pl_i++] // *pl++;
       }
-      sl += $util.mods3600(cu)
+      sl += util.mods3600(cu)
       /* Latitude polynomial. */
       cu = pb[pb_i++] // *pb++;
       for (ip = 0; ip < nt; ip++) {
@@ -157,16 +162,17 @@ $ns.gplan.calc = function (date, body_ptable) {
   }
 
   return {
-    longitude: $const.STR * sl,
-    latitude: $const.STR * sb,
-    distance: $const.STR * body_ptable.distance * sr + body_ptable.distance
+    longitude: constant.STR * sl,
+    latitude: constant.STR * sb,
+    distance: constant.STR * body_ptable.distance * sr + body_ptable.distance
   }
 }
 
-/* Prepare lookup table of sin and cos ( i*Lj )
+/**
+ * Prepare lookup table of sin and cos ( i*Lj )
  * for required multiple angles
  */
-$ns.gplan.sscc = function (k, arg, n) {
+gplan.sscc = function (k, arg, n) {
   var su = Math.sin(arg)
   var cu = Math.cos(arg)
   this.ss[k] = []
@@ -190,8 +196,8 @@ $ns.gplan.sscc = function (k, arg, n) {
   }
 }
 
-/* Compute mean elements at Julian date J. */
-$ns.gplan.meanElements = function (date) {
+/** Compute mean elements at Julian date J. */
+gplan.meanElements = function (date) {
   /* Time variables. T is in Julian centuries. */
   var T = (date.julian - 2451545.0) / 36525.0
   var T2 = T * T
@@ -200,61 +206,61 @@ $ns.gplan.meanElements = function (date) {
    .047" subtracted from constant term for offset to DE403 origin. */
 
   /* Mercury */
-  var x = $util.mods3600(538101628.6889819 * T + 908103.213)
+  var x = util.mods3600(538101628.6889819 * T + 908103.213)
   x += (6.39e-6 * T
     - 0.0192789) * T2
-  this.Args[0] = $const.STR * x
+  this.Args[0] = constant.STR * x
 
   /* Venus */
-  x = $util.mods3600(210664136.4335482 * T + 655127.236)
+  x = util.mods3600(210664136.4335482 * T + 655127.236)
   x += (-6.27e-6 * T
     + 0.0059381) * T2
-  this.Args[1] = $const.STR * x
+  this.Args[1] = constant.STR * x
 
   /* Earth */
-  x = $util.mods3600(129597742.283429 * T + 361679.198)
+  x = util.mods3600(129597742.283429 * T + 361679.198)
   x += (-5.23e-6 * T
     - 2.04411e-2) * T2
   this.Ea_arcsec = x
-  this.Args[2] = $const.STR * x
+  this.Args[2] = constant.STR * x
 
   /* Mars */
-  x = $util.mods3600(68905077.493988 * T + 1279558.751)
+  x = util.mods3600(68905077.493988 * T + 1279558.751)
   x += (-1.043e-5 * T
     + 0.0094264) * T2
-  this.Args[3] = $const.STR * x
+  this.Args[3] = constant.STR * x
 
   /* Jupiter */
-  x = $util.mods3600(10925660.377991 * T + 123665.420)
+  x = util.mods3600(10925660.377991 * T + 123665.420)
   x += ((((-3.4e-10 * T
     + 5.91e-8) * T
     + 4.667e-6) * T
     + 5.706e-5) * T
     - 3.060378e-1) * T2
-  this.Args[4] = $const.STR * x
+  this.Args[4] = constant.STR * x
 
   /* Saturn */
-  x = $util.mods3600(4399609.855372 * T + 180278.752)
+  x = util.mods3600(4399609.855372 * T + 180278.752)
   x += ((((8.3e-10 * T
     - 1.452e-7) * T
     - 1.1484e-5) * T
     - 1.6618e-4) * T
     + 7.561614E-1) * T2
-  this.Args[5] = $const.STR * x
+  this.Args[5] = constant.STR * x
 
   /* Uranus */
-  x = $util.mods3600(1542481.193933 * T + 1130597.971)
+  x = util.mods3600(1542481.193933 * T + 1130597.971)
     + (0.00002156 * T - 0.0175083) * T2
-  this.Args[6] = $const.STR * x
+  this.Args[6] = constant.STR * x
 
   /* Neptune */
-  x = $util.mods3600(786550.320744 * T + 1095655.149)
+  x = util.mods3600(786550.320744 * T + 1095655.149)
     + (-0.00000895 * T + 0.0021103) * T2
-  this.Args[7] = $const.STR * x
+  this.Args[7] = constant.STR * x
 
   /* Copied from cmoon.c, DE404 version. */
   /* Mean elongation of moon = D */
-  x = $util.mods3600(1.6029616009939659e+09 * T + 1.0722612202445078e+06)
+  x = util.mods3600(1.6029616009939659e+09 * T + 1.0722612202445078e+06)
   x += (((((-3.207663637426e-013 * T
     + 2.555243317839e-011) * T
     + 2.560078201452e-009) * T
@@ -262,10 +268,10 @@ $ns.gplan.meanElements = function (date) {
     + 6.9492746836058421e-03) * T /* D, t^3 */
     - 6.7352202374457519e+00) * T2
   /* D, t^2 */
-  this.Args[9] = $const.STR * x
+  this.Args[9] = constant.STR * x
 
   /* Mean distance of moon from its ascending node = F */
-  x = $util.mods3600(1.7395272628437717e+09 * T + 3.3577951412884740e+05)
+  x = util.mods3600(1.7395272628437717e+09 * T + 3.3577951412884740e+05)
   x += (((((4.474984866301e-013 * T
     + 4.189032191814e-011) * T
     - 2.790392351314e-009) * T
@@ -274,10 +280,10 @@ $ns.gplan.meanElements = function (date) {
     - 1.3117809789650071e+01) * T2
   /* F, t^2 */
   this.NF_arcsec = x
-  this.Args[10] = $const.STR * x
+  this.Args[10] = constant.STR * x
 
   /* Mean anomaly of sun = l' (J. Laskar) */
-  x = $util.mods3600(1.2959658102304320e+08 * T + 1.2871027407441526e+06)
+  x = util.mods3600(1.2959658102304320e+08 * T + 1.2871027407441526e+06)
   x += ((((((((
     1.62e-20 * T
     - 1.0390e-17) * T
@@ -288,10 +294,10 @@ $ns.gplan.meanElements = function (date) {
     - 1.1297037031e-5) * T
     + 8.7473717367324703e-05) * T
     - 5.5281306421783094e-01) * T2
-  this.Args[11] = $const.STR * x
+  this.Args[11] = constant.STR * x
 
   /* Mean anomaly of moon = l */
-  x = $util.mods3600(1.7179159228846793e+09 * T + 4.8586817465825332e+05)
+  x = util.mods3600(1.7179159228846793e+09 * T + 4.8586817465825332e+05)
   x += (((((-1.755312760154e-012 * T
     + 3.452144225877e-011) * T
     - 2.506365935364e-008) * T
@@ -299,10 +305,10 @@ $ns.gplan.meanElements = function (date) {
     + 5.2099641302735818e-02) * T /* l, t^3 */
     + 3.1501359071894147e+01) * T2
   /* l, t^2 */
-  this.Args[12] = $const.STR * x
+  this.Args[12] = constant.STR * x
 
   /* Mean longitude of moon, re mean ecliptic and equinox of date = L */
-  x = $util.mods3600(1.7325643720442266e+09 * T + 7.8593980921052420e+05)
+  x = util.mods3600(1.7325643720442266e+09 * T + 7.8593980921052420e+05)
   x += (((((7.200592540556e-014 * T
     + 2.235210987108e-010) * T
     - 1.024222633731e-008) * T
@@ -311,7 +317,7 @@ $ns.gplan.meanElements = function (date) {
     - 5.6550460027471399e+00) * T2
   /* L, t^2 */
   this.LP_equinox = x
-  this.Args[13] = $const.STR * x
+  this.Args[13] = constant.STR * x
 
   /* Precession of the equinox */
   x = (((((((((-8.66e-20 * T - 4.759e-17) * T
@@ -327,31 +333,33 @@ $ns.gplan.meanElements = function (date) {
   /*
    Args[13] -= x;
    */
-  this.pA_precession = $const.STR * x
+  this.pA_precession = constant.STR * x
 
   /* Free librations. */
   /* longitudinal libration 2.891725 years */
-  x = $util.mods3600(4.48175409e7 * T + 8.060457e5)
-  this.Args[14] = $const.STR * x
+  x = util.mods3600(4.48175409e7 * T + 8.060457e5)
+  this.Args[14] = constant.STR * x
   /* libration P, 24.2 years */
-  x = $util.mods3600(5.36486787e6 * T - 391702.8)
-  this.Args[15] = $const.STR * x
+  x = util.mods3600(5.36486787e6 * T - 391702.8)
+  this.Args[15] = constant.STR * x
 
   /* libration W, 74.7 years. */
-  x = $util.mods3600(1.73573e6 * T)
-  this.Args[17] = $const.STR * x
+  x = util.mods3600(1.73573e6 * T)
+  this.Args[17] = constant.STR * x
 }
 
-/* Generic program to accumulate sum of trigonometric series
- in three variables (e.g., longitude, latitude, radius)
- of the same list of arguments. */
-$ns.gplan.calc3 = function (date, body_ptable, body_number) {
+/**
+ * Generic program to accumulate sum of trigonometric series
+ * in three variables (e.g., longitude, latitude, radius)
+ * of the same list of arguments.
+ */
+gplan.calc3 = function (date, body_ptable, body_number) {
   var j, ip, nt // int
   var su, cu // double
 
   this.meanElements(date)
 
-  var T = (date.julian - $const.j2000) / body_ptable.timescale
+  var T = (date.julian - constant.j2000) / body_ptable.timescale
   var n = body_ptable.maxargs
   /* Calculate sin( i*MM ), etc. for needed multiple angles. */
   for (var i = 0; i < n; i++) {
@@ -466,22 +474,24 @@ $ns.gplan.calc3 = function (date, body_ptable, body_number) {
   }
   var t = body_ptable.trunclvl
   return {
-    longitude: this.Args[body_number - 1] + $const.STR * t * sl,
-    latitude: $const.STR * t * sb,
-    distance: body_ptable.distance * (1 + $const.STR * t * sr)
+    longitude: this.Args[body_number - 1] + constant.STR * t * sl,
+    latitude: constant.STR * t * sb,
+    distance: body_ptable.distance * (1 + constant.STR * t * sr)
   }
 }
 
-/* Generic program to accumulate sum of trigonometric series
- in two variables (e.g., longitude, radius)
- of the same list of arguments. */
-$ns.gplan.calc2 = function (date, body_ptable) {
+/**
+ * Generic program to accumulate sum of trigonometric series
+ * in two variables (e.g., longitude, radius)
+ * of the same list of arguments.
+ */
+gplan.calc2 = function (date, body_ptable) {
   var j, ip, nt // int
   var su, cu // double
 
   this.meanElements(date)
 
-  var T = (date.julian - $const.j2000) / body_ptable.timescale
+  var T = (date.julian - constant.j2000) / body_ptable.timescale
   var n = body_ptable.maxargs
   /* Calculate sin( i*MM ), etc. for needed multiple angles. */
   for (var i = 0; i < n; i++) {
@@ -584,13 +594,15 @@ $ns.gplan.calc2 = function (date, body_ptable) {
   }
 }
 
-/* Generic program to accumulate sum of trigonometric series
- in one variable. */
-$ns.gplan.calc1 = function (date, body_ptable) {
+/**
+ * Generic program to accumulate sum of trigonometric series
+ * in one variable.
+ */
+gplan.calc1 = function (date, body_ptable) {
   var j, ip, nt // int
   var su, cu // double
 
-  var T = (date.julian - $const.j2000) / body_ptable.timescale
+  var T = (date.julian - constant.j2000) / body_ptable.timescale
   this.meanElements(date)
   /* Calculate sin( i*MM ), etc. for needed multiple angles. */
   for (var i = 0; i < this.Args.length; i++) {
@@ -670,9 +682,9 @@ $ns.gplan.calc1 = function (date, body_ptable) {
   return body_ptable.trunclvl * sl
 }
 
-/* Compute geocentric moon. */
-$ns.gplan.moon = function (date, rect, pol) {
-  var moonpol = this.calc2(date, $moshier.plan404.moonlr)
+/** Compute geocentric moon. */
+gplan.moon = function (date, rect, pol) {
+  var moonpol = this.calc2(date, plan404.moonlr)
   var x = moonpol.longitude + this.LP_equinox
   if (x < -6.48e5) {
     x += 1.296e6
@@ -681,16 +693,18 @@ $ns.gplan.moon = function (date, rect, pol) {
     x -= 1.296e6
   }
   pol = pol || {}
-  pol.longitude = $const.STR * x
-  pol.latitude = $const.STR * this.calc1(date, $moshier.plan404.moonlat)
-  pol.distance = (1 + $const.STR * moonpol.distance) * $moshier.plan404.moonlr.distance
+  pol.longitude = constant.STR * x
+  pol.latitude = constant.STR * this.calc1(date, plan404.moonlat)
+  pol.distance = (1 + constant.STR * moonpol.distance) * plan404.moonlr.distance
   /* Convert ecliptic polar to equatorial rectangular coordinates. */
-  $moshier.epsilon.calc(date)
+  epsilon.calc(date)
   var cosB = Math.cos(pol.latitude)
   var sinB = Math.sin(pol.latitude)
   var cosL = Math.cos(pol.longitude)
   var sinL = Math.sin(pol.longitude)
   rect.longitude = cosB * cosL * pol.distance
-  rect.latitude = ($moshier.epsilon.coseps * cosB * sinL - $moshier.epsilon.sineps * sinB) * pol.distance
-  rect.distance = ($moshier.epsilon.sineps * cosB * sinL + $moshier.epsilon.coseps * sinB) * pol.distance
+  rect.latitude = (epsilon.coseps * cosB * sinL - epsilon.sineps * sinB) * pol.distance
+  rect.distance = (epsilon.sineps * cosB * sinL + epsilon.coseps * sinB) * pol.distance
 }
+
+module.exports = gplan

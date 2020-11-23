@@ -1,23 +1,26 @@
-$ns.util = {}
+var common = require('../../common')
+var constant = require('./constant')
 
-$ns.util.mods3600 = function (value) {
+var util = {}
+
+util.mods3600 = function (value) {
   return value - 1.296e6 * Math.floor(value / 1.296e6)
 }
 
-/* Reduce x modulo 2 pi */
-$ns.util.modtp = function (x) {
-  var y = x - Math.floor(x / $const.TPI) * $const.TPI
+/** Reduce x modulo 2 pi */
+util.modtp = function (x) {
+  var y = x - Math.floor(x / constant.TPI) * constant.TPI
   while (y < 0) {
-    y += $const.TPI
+    y += constant.TPI
   }
-  while (y >= $const.TPI) {
-    y -= $const.TPI
+  while (y >= constant.TPI) {
+    y -= constant.TPI
   }
   return y
 }
 
-/* Reduce x modulo 360 degrees */
-$ns.util.mod360 = function (x) {
+/** Reduce x modulo 360 degrees */
+util.mod360 = function (x) {
   var y = x - Math.floor(x / 360) * 360
   while (y < 0) {
     y += 360
@@ -28,8 +31,8 @@ $ns.util.mod360 = function (x) {
   return y
 }
 
-/* Reduce x modulo 30 degrees */
-$ns.util.mod30 = function (x) {
+/** Reduce x modulo 30 degrees */
+util.mod30 = function (x) {
   var y = x - Math.floor(x / 30) * 30
   while (y < 0) {
     y += 30
@@ -40,7 +43,7 @@ $ns.util.mod30 = function (x) {
   return y
 }
 
-$ns.util.zatan2 = function (x, y) {
+util.zatan2 = function (x, y) {
   var w = 0, code = 0
 
   if (x < 0) {
@@ -76,20 +79,20 @@ $ns.util.zatan2 = function (x, y) {
   return w + Math.atan(y / x)
 }
 
-$ns.util.sinh = function (x) {
+util.sinh = function (x) {
   return (Math.exp(x) - Math.exp(-x)) / 2
 }
 
-$ns.util.cosh = function (x) {
+util.cosh = function (x) {
   return (Math.exp(x) + Math.exp(-x)) / 2
 }
 
-$ns.util.tanh = function (x) {
+util.tanh = function (x) {
   return (Math.exp(x) - Math.exp(-x)) / (Math.exp(x) + Math.exp(-x))
 }
 
-$ns.util.hms = function (x) {
-  var s = x * $const.RTOH
+util.hms = function (x) {
+  var s = x * constant.RTOH
   if (s < 0) {
     s += 24
   }
@@ -120,8 +123,8 @@ $ns.util.hms = function (x) {
   }
 }
 
-$ns.util.dms = function (x) {
-  var s = x * $const.RTD
+util.dms = function (x) {
+  var s = x * constant.RTD
   if (s < 0) {
     s = -s
   }
@@ -139,46 +142,48 @@ $ns.util.dms = function (x) {
   }
 }
 
-/* Display magnitude of correction vector
+/**
+ * Display magnitude of correction vector
  * in arc seconds
  */
-$ns.util.showcor = function (p, dp) {
+util.showcor = function (p, dp) {
   var p1 = {
     longitude: p.longitude + dp.longitude,
     latitude: p.latitude + dp.latitude,
     distance: p.distance + dp.distance
   }
-  var d = $util.deltap(p, p1)
+  var d = util.deltap(p, p1)
   return {
-    dRA: $const.RTS * d.dr / 15,
-    dDec: $const.RTS * d.dd
+    dRA: constant.RTS * d.dr / 15,
+    dDec: constant.RTS * d.dd
   }
 }
 
-/* Display Right Ascension and Declination
+/**
+ * Display Right Ascension and Declination
  * from input equatorial rectangular unit vector.
  * Output vector pol contains R.A., Dec., and radius.
  */
-$ns.util.showrd = function (p, pol) {
+util.showrd = function (p, pol) {
   var r = Math.sqrt(p.longitude * p.longitude
     + p.latitude * p.latitude + p.distance * p.distance
   )
 
-  pol.longitude = $util.zatan2(p.longitude, p.latitude)
+  pol.longitude = util.zatan2(p.longitude, p.latitude)
   pol.latitude = Math.asin(p.distance / r)
   pol.distance = r
 
   var result = {}
-  $copy(result, {
+  common.copy(result, {
     dRA: pol.longitude,
     dDec: pol.latitude,
-    ra: $util.hms(pol.longitude),
-    dec: $util.dms(pol.latitude)
+    ra: util.hms(pol.longitude),
+    dec: util.dms(pol.latitude)
   })
   return result
 }
 
-/*
+/**
  * Convert change in rectangular coordinates to change
  * in right ascension and declination.
  * For changes greater than about 0.1 degree, the
@@ -197,9 +202,8 @@ $ns.util.showrd = function (p, pol) {
  *
  * p0 is the initial object - earth vector and
  * p1 is the vector after motion or aberration.
- *
  */
-$ns.util.deltap = function (p0, p1) {
+util.deltap = function (p0, p1) {
   var dr
 
   var P = p0.longitude * p0.longitude
@@ -224,8 +228,8 @@ $ns.util.deltap = function (p0, p1) {
   var B = Math.sqrt(Q)
 
   if (A < 1.e-7 || B < 1.e-7 || z / (P + Q) > 5.e-7) {
-    P = $util.zatan2(p0.longitude, p0.latitude)
-    Q = $util.zatan2(p1.longitude, p1.latitude)
+    P = util.zatan2(p0.longitude, p0.latitude)
+    Q = util.zatan2(p1.longitude, p1.latitude)
     Q = Q - P
     while (Q < -Math.PI) {
       Q += 2 * Math.PI
@@ -257,45 +261,48 @@ $ns.util.deltap = function (p0, p1) {
   }
 }
 
-/* Sun - object - earth angles and distances.
+/**
+ * Sun - object - earth angles and distances.
  * q (object), e (earth), and p (q minus e) are input vectors.
  * The answers are posted in the following global locations:
  */
-$ns.util.angles = function (p, q, e) {
+util.angles = function (p, q, e) {
   var a = {
     longitude: p.longitude,
     latitude: p.latitude,
     distance: p.distance
   }
   /* Distance between Earth and object */
-  $const.EO = Math.sqrt(a.longitude * a.longitude
+  constant.EO = Math.sqrt(a.longitude * a.longitude
     + a.latitude * a.latitude + a.distance * a.distance
   )
   /* Sun - object */
-  $const.SO = Math.sqrt(q.longitude * q.longitude
+  constant.SO = Math.sqrt(q.longitude * q.longitude
     + q.latitude * q.latitude + q.distance * q.distance
   )
   /* Sun - earth */
-  $const.SE = Math.sqrt(e.longitude * e.longitude
+  constant.SE = Math.sqrt(e.longitude * e.longitude
     + e.latitude * e.latitude + e.distance * e.distance
   )
 
-  $const.pq = a.longitude * q.longitude
+  constant.pq = a.longitude * q.longitude
     + a.latitude * q.latitude + a.distance * q.distance
 
-  $const.ep = e.longitude * a.longitude
+  constant.ep = e.longitude * a.longitude
     + e.latitude * a.latitude + e.distance * a.distance
 
-  $const.qe = q.longitude * e.longitude
+  constant.qe = q.longitude * e.longitude
     + q.latitude * e.latitude + q.distance * e.distance
 
   /* Avoid fatality: if object equals sun, SO is zero. */
-  if ($const.SO > 1.0e-12) {
+  if (constant.SO > 1.0e-12) {
     /* cosine of sun-object-earth */
-    $const.pq /= $const.EO * $const.SO
+    constant.pq /= constant.EO * constant.SO
     /* cosine of earth-sun-object */
-    $const.qe /= $const.SO * $const.SE
+    constant.qe /= constant.SO * constant.SE
   }
   /* -cosine of sun-earth-object */
-  $const.ep /= $const.SE * $const.EO
+  constant.ep /= constant.SE * constant.EO
 }
+
+module.exports = util

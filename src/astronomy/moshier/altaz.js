@@ -1,35 +1,42 @@
-$ns.altaz = {
+var constant = require('./constant')
+var diurnal = require('./diurnal')
+var refraction = require('./refraction')
+var sidereal = require('./sidereal')
+var transit = require('./transit')
+var util = require('./util')
+
+var altaz = {
   azimuth: 0.0,
   elevation: 0.0,
   refracted_elevation: 0.0
 }
 
-$ns.altaz.calc = function (pol, date) {
+altaz.calc = function (pol, date) {
   // var TPI = 2 * Math.PI
 
-  /* local apparent sidereal time, seconds converted to radians */
-  var last = $moshier.sidereal.calc(date, $const.tlong) * $const.DTR / 240
-  /* local hour angle, radians */
+  /** local apparent sidereal time, seconds converted to radians */
+  var last = sidereal.calc(date, constant.tlong) * constant.DTR / 240
+  /** local hour angle, radians */
   var lha = last - pol.longitude
 
   var result = {
     dLocalApparentSiderealTime: last,
-    localApparentSiderealTime: $util.hms(last)
+    localApparentSiderealTime: util.hms(last)
   }
 
   /* Display rate at which ra and dec are changing */
   /*
-   *if( prtflg )
-   *	{
-   *	x = RTS/24.0;
-   *	N = x*dradt;
-   *	D = x*ddecdt;
-   *	if( N != 0.0 )
-   *		printf( "dRA/dt %.2f\"/h, dDec/dt %.2f\"/h\n", N, D );
-   *	}
+   * if( prtflg )
+   *   {
+   *   x = RTS/24.0;
+   *   N = x*dradt;
+   *   D = x*ddecdt;
+   *   if( N != 0.0 )
+   *     printf( "dRA/dt %.2f\"/h, dDec/dt %.2f\"/h\n", N, D );
+   *   }
    */
 
-  result.diurnalAberration = $moshier.diurnal.aberration(last, pol.longitude, pol.latitude)
+  result.diurnalAberration = diurnal.aberration(last, pol.longitude, pol.latitude)
   var ra = result.diurnalAberration.ra
   var dec = result.diurnalAberration.dec
 
@@ -37,10 +44,10 @@ $ns.altaz.calc = function (pol, date) {
    transit.js takes diurnal parallax into account,
    but not diurnal aberration. */
   lha = last - ra
-  result.transit = $moshier.transit.calc(date, lha, dec)
+  result.transit = transit.calc(date, lha, dec)
 
   /* Diurnal parallax */
-  result.diurnalParallax = $moshier.diurnal.parallax(last, ra, dec, pol.distance)
+  result.diurnalParallax = diurnal.parallax(last, ra, dec, pol.distance)
   ra = result.diurnalParallax.ra
   dec = result.diurnalParallax.dec
 
@@ -55,15 +62,15 @@ $ns.altaz.calc = function (pol, date) {
   var sinlha = Math.sin(lha)
 
   /* Use the geodetic latitude for altitude and azimuth */
-  x = $const.DTR * $const.glat
+  x = constant.DTR * constant.glat
   var coslat = Math.cos(x)
   var sinlat = Math.sin(x)
 
   var N = -cosdec * sinlha
   var D = sindec * coslat - cosdec * coslha * sinlat
-  var az = $const.RTD * $util.zatan2(D, N)
+  var az = constant.RTD * util.zatan2(D, N)
   var alt = sindec * sinlat + cosdec * coslha * coslat
-  alt = $const.RTD * Math.asin(alt)
+  alt = constant.RTD * Math.asin(alt)
 
   /* Store results */
   this.azimuth = az
@@ -73,18 +80,18 @@ $ns.altaz.calc = function (pol, date) {
   /* Correction for atmospheric refraction
    * unit = degrees
    */
-  D = $moshier.refraction.calc(alt)
+  D = refraction.calc(alt)
   alt += D
   this.refracted_elevation = alt
 
   /* Convert back to R.A. and Dec. */
-  var x = Math.cos($const.DTR * alt)
-  var y = Math.sin($const.DTR * alt)
-  var z = Math.cos($const.DTR * az)
-  sinlha = -x * Math.sin($const.DTR * az)
+  var x = Math.cos(constant.DTR * alt)
+  var y = Math.sin(constant.DTR * alt)
+  var z = Math.cos(constant.DTR * az)
+  sinlha = -x * Math.sin(constant.DTR * az)
   coslha = y * coslat - x * z * sinlat
   sindec = y * sinlat + x * z * coslat
-  lha = $util.zatan2(coslha, sinlha)
+  lha = util.zatan2(coslha, sinlha)
 
   y = ra
   /* save previous values, before refrac() */
@@ -94,13 +101,13 @@ $ns.altaz.calc = function (pol, date) {
   y = ra - y
   /* change in ra */
   while (y < -Math.PI) {
-    y += $const.TPI
+    y += constant.TPI
   }
   while (y > Math.PI) {
-    y -= $const.TPI
+    y -= constant.TPI
   }
-  y = $const.RTS * y / 15
-  z = $const.RTS * (dec - z)
+  y = constant.RTS * y / 15
+  z = constant.RTS * (dec - z)
 
   result.atmosphericRefraction = {
     deg: D,
@@ -113,9 +120,11 @@ $ns.altaz.calc = function (pol, date) {
     azimuth: az,
     ra: ra,
     dec: dec,
-    dRA: $util.hms(ra),
-    dDec: $util.dms(dec)
+    dRA: util.hms(ra),
+    dDec: util.dms(dec)
   }
 
   return result
 }
+
+module.exports = altaz

@@ -1,46 +1,43 @@
-/**
- *
- * body definition {
- *
- *	 // body
- *	 epoch:			epoch = epoch of orbital elements
- *	 inclination:	i = inclination
- *	 node:			W = longitude of the ascending node
- *	 perihelion:		w = argument of the perihelion
- *	 semiAxis:		a = mean distance (semimajor axis), if 0.0 then = perihelionDistance / (1 - eccentricity)
- *	 dailyMotion:	dm = daily motion, if 0.0 will be calculated
- *	 eccentricity:	ecc = eccentricity
- *	 anomaly:		M = mean anomaly
- *	 equinox:		equinox = epoch of equinox and ecliptic
- *	 magnitude: 		mag = visual magnitude at 1AU from earth and sun
- *	 semiDiameter:	sdiam = equatorial semidiameter at 1au, arc seconds
- *	 perihelionDistance: = perihelion distance
- * // computed values
- *	 longitude:		L = computed mean longitude
- *	 distance:		r = computed radius vector
- *	 perturbation	plat = perturbation in ecliptic latitude
- *
- *	 // star
- *	 ra:				ra = right ascension, radians
- *	 dec:			dec = declination, radians
- *	 parallax:		px = parallax, radians
- *	 raMotion:		mura = proper motion in R.A., rad/century
- *	 decMotion:		mudec = proper motion in Dec., rad/century
- *	 velocity:		v = radial velocity, km/s
- *	 equinox:		equinox = epoch of equinox and ecliptic
- *	 magnitude:		mag = visual magnitude
- *
- *  // constellation
- *  index:			index of constellation (1-88)
- *  raLow:			lower right ascension, in units of hours times 3600
- *  raHight:		upper right ascension, in units of hours times 3600
- *  dec0:			lower declination, in units of degrees times 3600
- *
- * }
- *
- */
+var plan404 = require('./plan404')
 
-$ns.body = {
+/**
+ * body definition
+ *
+ * // body
+ * epoch:        epoch = epoch of orbital elements
+ * inclination:  i = inclination
+ * node:         W = longitude of the ascending node
+ * perihelion:   w = argument of the perihelion
+ * semiAxis:     a = mean distance (semimajor axis), if 0.0 then = perihelionDistance / (1 - eccentricity)
+ * dailyMotion:  dm = daily motion, if 0.0 will be calculated
+ * eccentricity: ecc = eccentricity
+ * anomaly:      M = mean anomaly
+ * equinox:      equinox = epoch of equinox and ecliptic
+ * magnitude:    mag = visual magnitude at 1AU from earth and sun
+ * semiDiameter: sdiam = equatorial semidiameter at 1au, arc seconds
+ * perihelionDistance: perihelion distance
+ * // computed values
+ * longitude:    L = computed mean longitude
+ * distance:     r = computed radius vector
+ * perturbation  plat = perturbation in ecliptic latitude
+ *
+ * // star
+ * ra:           ra = right ascension, radians
+ * dec:          dec = declination, radians
+ * parallax:     px = parallax, radians
+ * raMotion:     mura = proper motion in R.A., rad/century
+ * decMotion:    mudec = proper motion in Dec., rad/century
+ * velocity:     v = radial velocity, km/s
+ * equinox:      equinox = epoch of equinox and ecliptic
+ * magnitude:    mag = visual magnitude
+ *
+ * // constellation
+ * index:        index of constellation (1-88)
+ * raLow:        lower right ascension, in units of hours times 3600
+ * raHight:      upper right ascension, in units of hours times 3600
+ * dec0:         lower declination, in units of degrees times 3600
+ */
+var body = {
   /**
    * Sun
    */
@@ -48,7 +45,7 @@ $ns.body = {
     weight: 100
   },
 
-  /**
+  /*
    * Planets
    */
   mercury: {
@@ -176,7 +173,7 @@ $ns.body = {
     semiDiameter: 2.07
   },
 
-  /**
+  /*
    * Comets and asteroids
    */
   chiron: {
@@ -194,7 +191,7 @@ $ns.body = {
     perihelionDistance: 8.486494269138399
   },
 
-  /**
+  /*
    * Stars (implemented, not tested)
    */
   sirius: {
@@ -212,15 +209,17 @@ $ns.body = {
   }
 }
 
-$ns.body.init = function () {
+body.init = function () {
   for (var key in this) {
     if (Object.prototype.hasOwnProperty.call(this, key) && key != 'init') {
       // fill the 'key'
       this [key].key = key
       // fill the ptable for the body
-      if (Object.prototype.hasOwnProperty.call($moshier.plan404, key)) {
-        this [key].ptable = $moshier.plan404 [key]
+      if (Object.prototype.hasOwnProperty.call(plan404, key)) {
+        this [key].ptable = plan404 [key]
       }
     }
   }
 }
+
+module.exports = body

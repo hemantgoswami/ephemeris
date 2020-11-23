@@ -1,6 +1,15 @@
-$ns.light = {}
+var constant = require('./constant')
+var kepler = require('./kepler')
+var util = require('./util')
+var vearth = require('./vearth')
 
-$ns.light.calc = function (body, q, e) {
+var moshier = {
+  body: require('./body')
+}
+
+var light = {}
+
+light.calc = function (body, q, e) {
   var p = {}
   var t // double
 
@@ -32,7 +41,7 @@ $ns.light.calc = function (body, q, e) {
     Q = Math.sqrt(Q)
     /* Note the following blows up if object equals sun. */
     t = (P + 1.97e-8 * Math.log((E + P + Q) / (E - P + Q))) / 173.1446327
-    $moshier.kepler.calc({julian: $moshier.body.earth.position.date.julian - t}, body, q)
+    kepler.calc({julian: moshier.body.earth.position.date.julian - t}, body, q)
   }
 
   body.lightTime = 1440 * t
@@ -41,10 +50,10 @@ $ns.light.calc = function (body, q, e) {
   p.longitude = q.longitude - e.longitude
   p.latitude = q.latitude - e.latitude
   p.distance = q.distance - e.distance
-  $const.dp.longitude = p.longitude - p0.longitude
-  $const.dp.latitude = p.latitude - p0.latitude
-  $const.dp.distance = p.distance - p0.distance
-  body.aberration = $util.showcor(p0, $const.dp)
+  constant.dp.longitude = p.longitude - p0.longitude
+  constant.dp.latitude = p.latitude - p0.latitude
+  constant.dp.distance = p.distance - p0.distance
+  body.aberration = util.showcor(p0, constant.dp)
 
   /* Calculate dRA/dt and dDec/dt.
    * The desired correction of apparent coordinates is relative
@@ -56,16 +65,18 @@ $ns.light.calc = function (body, q, e) {
    * p(J-t)  =  q(J-t) - e(J-t)  =  q(J-t) - (e(J) - Vearth * t)
    *         =  p(?) + Vearth * t.
    */
-  $moshier.vearth.calc($moshier.body.earth.position.date)
+  vearth.calc(moshier.body.earth.position.date)
 
-  p.longitude += $moshier.vearth.vearth.longitude * t
-  p.latitude += $moshier.vearth.vearth.latitude * t
-  p.distance += $moshier.vearth.vearth.distance * t
+  p.longitude += vearth.vearth.longitude * t
+  p.latitude += vearth.vearth.latitude * t
+  p.distance += vearth.vearth.distance * t
 
-  var d = $util.deltap(p, p0)
-  /* see $util.dms() */
-  $const.dradt = d.dr
-  $const.ddecdt = d.dd
-  $const.dradt /= t
-  $const.ddecdt /= t
+  var d = util.deltap(p, p0)
+  /* see util.dms() */
+  constant.dradt = d.dr
+  constant.ddecdt = d.dd
+  constant.dradt /= t
+  constant.ddecdt /= t
 }
+
+module.exports = light

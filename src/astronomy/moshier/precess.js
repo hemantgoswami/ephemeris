@@ -1,4 +1,7 @@
-$ns.precess = {
+var constant = require('./constant')
+var epsilon = require('./epsilon')
+
+var precess = {
   /* In WILLIAMS and SIMON, Laskar's terms of order higher than t^4
    have been retained, because Simon et al mention that the solution
    is the same except for the lower order terms. */
@@ -7,13 +10,13 @@ $ns.precess = {
     -8.66e-10, -4.759e-8, 2.424e-7, 1.3095e-5, 1.7451e-4, -1.8055e-3,
     -0.235316, 0.076, 110.5414, 50287.91959
   ],
-  /* Pi from Williams' 1994 paper, in radians.  No change in DE403. */
+  /** Pi from Williams' 1994 paper, in radians.  No change in DE403. */
   nodecof: [
     6.6402e-16, -2.69151e-15, -1.547021e-12, 7.521313e-12, 1.9e-10,
     -3.54e-9, -1.8103e-7, 1.26e-7, 7.436169e-5,
     -0.04207794833, 3.052115282424
   ],
-  /* pi from Williams' 1994 paper, in radians.  No change in DE403. */
+  /** Pi from Williams' 1994 paper, in radians.  No change in DE403. */
   inclcof: [
     1.2147e-16, 7.3759e-17, -8.26287e-14, 2.503410e-13, 2.4650839e-11,
     -5.4000441e-11, 1.32115526e-9, -6.012e-7, -1.62442e-5,
@@ -21,7 +24,8 @@ $ns.precess = {
   ]
 }
 
-/* Precession of the equinox and ecliptic
+/**
+ * Precession of the equinox and ecliptic
  * from epoch Julian date J to or from J2000.0
  *
  * Subroutine arguments:
@@ -36,17 +40,17 @@ $ns.precess = {
  * first go from J1 to J2000, then call the program again
  * to go from J2000 to J2.
  */
-$ns.precess.calc = function (R, date, direction) {
+precess.calc = function (R, date, direction) {
   var p_i = 0
   var i // int
 
-  if (date.julian == $const.j2000) {
+  if (date.julian == constant.j2000) {
     return
   }
   /* Each precession angle is specified by a polynomial in
    * T = Julian centuries from J2000.0.  See AA page B18.
    */
-  var T = (date.julian - $const.j2000) / 36525
+  var T = (date.julian - constant.j2000) / 36525
 
   /* Implementation by elementary rotations using Laskar's expansions.
    * First rotate about the x axis from the initial equator
@@ -54,16 +58,16 @@ $ns.precess.calc = function (R, date, direction) {
    */
   if (direction == 1) {
     /* To J2000 */
-    $moshier.epsilon.calc(date)
+    epsilon.calc(date)
   } else {
     /* From J2000 */
-    $moshier.epsilon.calc({julian: $const.j2000})
+    epsilon.calc({julian: constant.j2000})
   }
-  var z = $moshier.epsilon.coseps * R.latitude + $moshier.epsilon.sineps * R.distance
+  var z = epsilon.coseps * R.latitude + epsilon.sineps * R.distance
   var x = {
     longitude: R.longitude,
     latitude: z,
-    distance: -$moshier.epsilon.sineps * R.latitude + $moshier.epsilon.coseps * R.distance
+    distance: -epsilon.sineps * R.latitude + epsilon.coseps * R.distance
   }
 
   /* Precession in longitude */
@@ -74,7 +78,7 @@ $ns.precess.calc = function (R, date, direction) {
   for (i = 0; i < 9; i++) {
     pA = pA * T + p[p_i++] // *p++;
   }
-  pA *= $const.STR * T
+  pA *= constant.STR * T
 
   /* Node of the moving ecliptic on the J2000 ecliptic. */
   p = this.nodecof
@@ -120,15 +124,17 @@ $ns.precess.calc = function (R, date, direction) {
 
   /* Rotate about x axis to final equator. */
   if (direction == 1) {
-    $moshier.epsilon.calc({julian: $const.j2000})
+    epsilon.calc({julian: constant.j2000})
   } else {
-    $moshier.epsilon.calc(date)
+    epsilon.calc(date)
   }
-  z = $moshier.epsilon.coseps * x.latitude - $moshier.epsilon.sineps * x.distance
-  x.distance = $moshier.epsilon.sineps * x.latitude + $moshier.epsilon.coseps * x.distance
+  z = epsilon.coseps * x.latitude - epsilon.sineps * x.distance
+  x.distance = epsilon.sineps * x.latitude + epsilon.coseps * x.distance
   x.latitude = z
 
   R.longitude = x.longitude
   R.latitude = x.latitude
   R.distance = x.distance
 }
+
+module.exports = precess

@@ -1,6 +1,12 @@
-$ns.kepler = {}
+var constant = require('./constant')
+var epsilon = require('./epsilon')
+var gplan = require('./gplan')
+var precess = require('./precess')
+var util = require('./util')
 
-$ns.kepler.calc = function (date, body, rect, polar) {
+var kepler = {}
+
+kepler.calc = function (date, body, rect, polar) {
   var alat, E, M, W, temp, r // double
 
   polar = polar || {}
@@ -8,8 +14,8 @@ $ns.kepler.calc = function (date, body, rect, polar) {
   /* Call program to compute position, if one is supplied. */
   if (body.ptable) {
     polar = body.key == 'earth'
-      ? $moshier.gplan.calc3(date, body.ptable, 3)
-      : $moshier.gplan.calc(date, body.ptable)
+      ? gplan.calc3(date, body.ptable, 3)
+      : gplan.calc(date, body.ptable)
     /* longitude */
     body.longitude = E = polar.longitude
     /* latitude */
@@ -18,13 +24,13 @@ $ns.kepler.calc = function (date, body, rect, polar) {
     r = polar.distance
     body.distance = r
     body.epoch = date.julian
-    body.equinox = {julian: $const.j2000}
+    body.equinox = {julian: constant.j2000}
     // goto kepdon;
   } else {
     /* Decant the parameters from the data structure */
     var epoch = body.epoch
     var inclination = body.inclination
-    var ascnode = body.node * $const.DTR
+    var ascnode = body.node * constant.DTR
     var argperih = body.perihelion
     /* semimajor axis */
     var meandistance = body.semiAxis
@@ -54,7 +60,7 @@ $ns.kepler.calc = function (date, body, rect, polar) {
       r = meandistance * (1 + E * E)
       M = Math.atan(E)
       M = 2 * M
-      alat = M + $const.DTR * argperih
+      alat = M + constant.DTR * argperih
       // goto parabcon;
     } else {
       if (eccent > 1) {
@@ -70,14 +76,14 @@ $ns.kepler.calc = function (date, body, rect, polar) {
         E = W / (eccent - 1)
         M = 1.0
         while (Math.abs(M) > 1.0e-11) {
-          M = -E + eccent * $util.sinh(E) - W
-          E += M / (1 - eccent * $util.cosh(E))
+          M = -E + eccent * util.sinh(E) - W
+          E += M / (1 - eccent * util.cosh(E))
         }
-        r = meandistance * (-1 + eccent * $util.cosh(E))
+        r = meandistance * (-1 + eccent * util.cosh(E))
         temp = (eccent + 1) / (eccent - 1)
-        M = Math.sqrt(temp) * $util.tanh(0.5 * E)
+        M = Math.sqrt(temp) * util.tanh(0.5 * E)
         M = 2 * Math.atan(M)
-        alat = M + $const.DTR * argperih
+        alat = M + constant.DTR * argperih
         // goto parabcon;
       } else {
         /* Calculate the daily motion, if it is not given. */
@@ -93,14 +99,14 @@ $ns.kepler.calc = function (date, body, rect, polar) {
          * perihelion passage and Julian date J.
          * It is the mean anomaly at time J.
          */
-        M = $const.DTR * (meananomaly + dailymotion)
-        M = $util.modtp(M)
+        M = constant.DTR * (meananomaly + dailymotion)
+        M = util.modtp(M)
         /* If mean longitude was calculated, adjust it also
          * for motion since epoch of elements.
          */
         if (body.longitude) {
           body.longitude += dailymotion
-          body.longitude = $util.mod360(body.longitude)
+          body.longitude = util.mod360(body.longitude)
         }
 
         /* By Kepler's second law, M must be equal to
@@ -145,16 +151,16 @@ $ns.kepler.calc = function (date, body, rect, polar) {
         W = 2 * Math.atan(temp * Math.tan(0.5 * E))
 
         /* The true anomaly. */
-        W = $util.modtp(W)
+        W = util.modtp(W)
 
-        meananomaly *= $const.DTR
+        meananomaly *= constant.DTR
         /* Orbital longitude measured from node
          * (argument of latitude)
          */
         if (body.longitude) {
-          alat = body.longitude * $const.DTR + W - meananomaly - ascnode
+          alat = body.longitude * constant.DTR + W - meananomaly - ascnode
         } else {
-          alat = W + $const.DTR * argperih
+          alat = W + constant.DTR * argperih
           /* mean longitude not given */
         }
 
@@ -171,9 +177,9 @@ $ns.kepler.calc = function (date, body, rect, polar) {
      */
     var coso = Math.cos(alat)
     var sino = Math.sin(alat)
-    inclination *= $const.DTR
+    inclination *= constant.DTR
     W = sino * Math.cos(inclination)
-    E = $util.zatan2(coso, W) + ascnode
+    E = util.zatan2(coso, W) + ascnode
 
     /* The ecliptic latitude of the object */
     W = sino * Math.sin(inclination)
@@ -194,9 +200,9 @@ $ns.kepler.calc = function (date, body, rect, polar) {
    * to heliocentric equatorial rectangular coordinates
    * by rotating eps radians about the x axis.
    */
-  $moshier.epsilon.calc(body.equinox)
-  W = $moshier.epsilon.coseps * rect.latitude - $moshier.epsilon.sineps * rect.distance
-  M = $moshier.epsilon.sineps * rect.latitude + $moshier.epsilon.coseps * rect.distance
+  epsilon.calc(body.equinox)
+  W = epsilon.coseps * rect.latitude - epsilon.sineps * rect.distance
+  M = epsilon.sineps * rect.latitude + epsilon.coseps * rect.distance
   rect.latitude = W
   rect.distance = M
 
@@ -204,7 +210,7 @@ $ns.kepler.calc = function (date, body, rect, polar) {
    * to ecliptic and equinox of J2000.0
    * if not already there.
    */
-  $moshier.precess.calc(rect, body.equinox, 1)
+  precess.calc(rect, body.equinox, 1)
 
   /* If earth, adjust from earth-moon barycenter to earth
    * by AA page E2.
@@ -215,12 +221,12 @@ $ns.kepler.calc = function (date, body, rect, polar) {
   }
 
   /* Rotate back into the ecliptic. */
-  $moshier.epsilon.calc({julian: $const.j2000})
-  W = $moshier.epsilon.coseps * rect.latitude + $moshier.epsilon.sineps * rect.distance
-  M = -$moshier.epsilon.sineps * rect.latitude + $moshier.epsilon.coseps * rect.distance
+  epsilon.calc({julian: constant.j2000})
+  W = epsilon.coseps * rect.latitude + epsilon.sineps * rect.distance
+  M = -epsilon.sineps * rect.latitude + epsilon.coseps * rect.distance
 
   /* Convert to polar coordinates */
-  E = $util.zatan2(rect.longitude, W)
+  E = util.zatan2(rect.longitude, W)
   W = Math.asin(M / r)
 
   /* Output the polar coordinates */
@@ -242,25 +248,26 @@ $ns.kepler.calc = function (date, body, rect, polar) {
   }
 }
 
-/* Adjust position from Earth-Moon barycenter to Earth
+/**
+ * Adjust position from Earth-Moon barycenter to Earth
  *
  * J = Julian day number
  * emb = Equatorial rectangular coordinates of EMB.
  * return = Earth's distance to the Sun (au)
  */
-$ns.kepler.embofs = function (date, ea) {
+kepler.embofs = function (date, ea) {
   var pm = {}
 
   /* Compute the vector Moon - Earth. */
-  $moshier.gplan.moon(date, pm)
+  gplan.moon(date, pm)
 
   /* Precess the lunar position
    * to ecliptic and equinox of J2000.0
    */
-  $moshier.precess.calc(pm, date, 1)
+  precess.calc(pm, date, 1)
 
   /* Adjust the coordinates of the Earth */
-  var a = 1 / ($const.emrat + 1)
+  var a = 1 / (constant.emrat + 1)
 
   ea.longitude = ea.longitude - a * pm.longitude
   ea.latitude = ea.latitude - a * pm.latitude
@@ -272,26 +279,26 @@ $ns.kepler.embofs = function (date, ea) {
   )
 }
 
-$ns.kepler.init = function () {
-  var u = $const.glat * $const.DTR
+kepler.init = function () {
+  var u = constant.glat * constant.DTR
 
   /* Reduction from geodetic latitude to geocentric latitude
    * AA page K5
    */
   var co = Math.cos(u)
   var si = Math.sin(u)
-  var fl = 1 - 1 / $const.flat
+  var fl = 1 - 1 / constant.flat
   fl = fl * fl
   si = si * si
   u = 1 / Math.sqrt(co * co + fl * si)
-  var a = $const.aearth * u + $const.height
-  var b = $const.aearth * fl * u + $const.height
-  $const.trho = Math.sqrt(a * a * co * co + b * b * si)
-  $const.tlat = $const.RTD * Math.acos(a * co / $const.trho)
-  if ($const.glat < 0) {
-    $const.tlat = -$const.tlat
+  var a = constant.aearth * u + constant.height
+  var b = constant.aearth * fl * u + constant.height
+  constant.trho = Math.sqrt(a * a * co * co + b * b * si)
+  constant.tlat = constant.RTD * Math.acos(a * co / constant.trho)
+  if (constant.glat < 0) {
+    constant.tlat = -constant.tlat
   }
-  $const.trho /= $const.aearth
+  constant.trho /= constant.aearth
 
   /* Reduction from geodetic latitude to geocentric latitude
    * AA page K5
@@ -309,9 +316,11 @@ $ns.kepler.init = function () {
    trho += height/6378160;
    */
 
-  $const.Clightaud = 86400 * $const.Clight / $const.au
+  constant.Clightaud = 86400 * constant.Clight / constant.au
   /* Radius of the earth in au
    Thanks to Min He <Min.He@businessobjects.com> for pointing out
    this needs to be initialized early. */
-  $const.Rearth = 0.001 * $const.aearth / $const.au
+  constant.Rearth = 0.001 * constant.aearth / constant.au
 }
+
+module.exports = kepler
