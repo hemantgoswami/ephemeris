@@ -170,7 +170,7 @@ $ns.star.prepare = function (body) {
       body.epoch = $const.j1900
       break
     default:
-      body.epoch = $const.j2000 + 365.25 * (x - 2000)
+      body.epoch = $const.j2000 + 365.25 * (body.epoch - 2000)
       break
   }
 
