@@ -52,14 +52,14 @@ $ns.diurnal.parallax = function (last, ra, dec, dist) {
    */
   var D = dist * this.DISFAC
   var p = {
-    longitude: longitude = D * cosdec * Math.cos(ra),
-    latitude: latitude = D * cosdec * Math.sin(ra),
-    distance: distance = D * sindec
+    longitude: D * cosdec * Math.cos(ra),
+    latitude: D * cosdec * Math.sin(ra),
+    distance: D * sindec
   }
   var dp = {
-    longitude: longitude = -$const.trho * coslat * Math.cos(last),
-    latitude: latitude = -$const.trho * coslat * Math.sin(last),
-    distance: distance = -$const.trho * sinlat
+    longitude: -$const.trho * coslat * Math.cos(last),
+    latitude: -$const.trho * coslat * Math.sin(last),
+    distance: -$const.trho * sinlat
   }
 
   x = p.longitude + dp.longitude
