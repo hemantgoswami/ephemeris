@@ -135,7 +135,6 @@ function getPlanet (planetName, date, geodeticalLongitude, geodeticalLatitude, h
 }
 
 module.exports = {
-  ephemeris: eph,
   getAllPlanets: getAllPlanets,
   getPlanet: getPlanet
 }
