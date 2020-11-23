@@ -28,7 +28,7 @@ function getAllPlanets (date, geodeticalLongitude, geodeticalLatitude, height) {
     observer: undefined,
     observed: {}
   }
-  var date = eph.const.date
+  date = eph.const.date
   var observables = Object.keys(eph.moshier.body)
 
   for (var i = 0; i < observables.length; i++) {
@@ -91,7 +91,7 @@ function getPlanet (planetName, date, geodeticalLongitude, geodeticalLatitude, h
     observer: undefined,
     observed: {}
   }
-  var date = eph.const.date
+  date = eph.const.date
 
   eph.const.body = eph.moshier.body[planetName]
 
