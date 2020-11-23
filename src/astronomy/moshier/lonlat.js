@@ -1,6 +1,10 @@
-$ns.lonlat = {}
+var epsilon = require('./epsilon')
+var precess = require('./precess')
+var util = require('./util')
 
-$ns.lonlat.calc = function (pp, date, ofdate) {
+var lonlat = {}
+
+lonlat.calc = function (pp, date, ofdate) {
   /* Make local copy of position vector
    * and calculate radius.
    */
@@ -16,15 +20,15 @@ $ns.lonlat.calc = function (pp, date, ofdate) {
 
   /* Precess to equinox of date J */
   if (ofdate) {
-    $moshier.precess.calc(s, date, -1)
+    precess.calc(s, date, -1)
   }
 
   /* Convert from equatorial to ecliptic coordinates */
-  $moshier.epsilon.calc(date)
-  var y = $moshier.epsilon.coseps * s.latitude + $moshier.epsilon.sineps * s.distance
-  var z = -$moshier.epsilon.sineps * s.latitude + $moshier.epsilon.coseps * s.distance
+  epsilon.calc(date)
+  var y = epsilon.coseps * s.latitude + epsilon.sineps * s.distance
+  var z = -epsilon.sineps * s.latitude + epsilon.coseps * s.distance
 
-  var yy = $util.zatan2(s.longitude, y)
+  var yy = util.zatan2(s.longitude, y)
   var zz = Math.asin(z / r)
 
   return {
@@ -33,7 +37,9 @@ $ns.lonlat.calc = function (pp, date, ofdate) {
     latitude: zz,
     distance: r,
     // longitude and latitude in h,m,s
-    dLongitude: $util.dms(yy),
-    dLatitude: $util.dms(zz)
+    dLongitude: util.dms(yy),
+    dLatitude: util.dms(zz)
   }
 }
+
+module.exports = lonlat

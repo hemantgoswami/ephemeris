@@ -1,33 +1,37 @@
-$ns.diurnal = {
-  /* Earth radii per au. */
+var constant = require('./constant')
+var util = require('./util')
+
+var diurnal = {
+  /** Earth radii per au. */
   DISFAC: 0.0
 }
 
-/* Diurnal aberration
+/**
+ * Diurnal aberration
  * This formula is less rigorous than the method used for
  * annual aberration.  However, the correction is small.
  */
-$ns.diurnal.aberration = function (last, ra, dec) {
+diurnal.aberration = function (last, ra, dec) {
   var lha = last - ra
   var coslha = Math.cos(lha)
   var sinlha = Math.sin(lha)
   var cosdec = Math.cos(dec)
   var sindec = Math.sin(dec)
-  var coslat = Math.cos($const.DTR * $const.tlat)
+  var coslat = Math.cos(constant.DTR * constant.tlat)
 
-  var N = cosdec != 0.0 ? 1.5472e-6 * $const.trho * coslat * coslha / cosdec : 0.0
-  var D = 1.5472e-6 * $const.trho * coslat * sinlha * sindec
+  var N = cosdec != 0.0 ? 1.5472e-6 * constant.trho * coslat * coslha / cosdec : 0.0
+  var D = 1.5472e-6 * constant.trho * coslat * sinlha * sindec
 
   return {
     ra: ra + N,
     dec: dec + D,
-    dRA: $const.RTS * N / 15,
-    dDec: $const.RTS * D
+    dRA: constant.RTS * N / 15,
+    dDec: constant.RTS * D
   }
 }
 
-/* Diurnal parallax, AA page D3 */
-$ns.diurnal.parallax = function (last, ra, dec, dist) {
+/** Diurnal parallax, AA page D3 */
+diurnal.parallax = function (last, ra, dec, dist) {
   /* Don't bother with this unless the equatorial horizontal parallax
    * is at least 0.005"
    */
@@ -38,12 +42,12 @@ $ns.diurnal.parallax = function (last, ra, dec, dist) {
     }
   }
 
-  this.DISFAC = $const.au / (0.001 * $const.aearth)
+  this.DISFAC = constant.au / (0.001 * constant.aearth)
   var cosdec = Math.cos(dec)
   var sindec = Math.sin(dec)
 
   /* Observer's astronomical latitude */
-  var x = $const.tlat * $const.DTR
+  var x = constant.tlat * constant.DTR
   var coslat = Math.cos(x)
   var sinlat = Math.sin(x)
 
@@ -57,9 +61,9 @@ $ns.diurnal.parallax = function (last, ra, dec, dist) {
     distance: D * sindec
   }
   var dp = {
-    longitude: -$const.trho * coslat * Math.cos(last),
-    latitude: -$const.trho * coslat * Math.sin(last),
-    distance: -$const.trho * sinlat
+    longitude: -constant.trho * coslat * Math.cos(last),
+    latitude: -constant.trho * coslat * Math.sin(last),
+    distance: -constant.trho * sinlat
   }
 
   x = p.longitude + dp.longitude
@@ -68,11 +72,13 @@ $ns.diurnal.parallax = function (last, ra, dec, dist) {
   /* topocentric distance */
   D = Math.sqrt(x * x + y * y + z * z)
 
-  var result = $util.showcor(p, dp)
+  var result = util.showcor(p, dp)
   return {
-    ra: $util.zatan2(x, y),
+    ra: util.zatan2(x, y),
     dec: Math.asin(z / D),
     dRA: result.dRA,
     dDec: result.dDec
   }
 }
+
+module.exports = diurnal

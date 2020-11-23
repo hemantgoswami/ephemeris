@@ -1,1 +1,11 @@
-$ns = ephemeris.astronomy.moshier.plan404 = {}
+exports.earth = require('./earth')
+exports.jupiter = require('./jupiter')
+exports.mars = require('./mars')
+exports.mercury = require('./mercury')
+exports.moonlat = require('./moonlat')
+exports.moonlr = require('./moonlr')
+exports.neptune = require('./neptune')
+exports.pluto = require('./pluto')
+exports.saturn = require('./saturn')
+exports.uranus = require('./uranus')
+exports.venus = require('./venus')

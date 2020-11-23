@@ -1,10 +1,13 @@
-$ns.refraction = {}
+var constant = require('./constant')
 
-/* Atmospheric refraction
+var refraction = {}
+
+/**
+ * Atmospheric refraction.
  * Returns correction in degrees to be added to true altitude
  * to obtain apparent altitude.
  */
-$ns.refraction.calc = function (alt) {
+refraction.calc = function (alt) {
   if (alt < -2 || alt >= 90) {
     return 0
   }
@@ -13,7 +16,7 @@ $ns.refraction.calc = function (alt) {
    * Accuracy "usually about 0.1' ".
    */
   if (alt > 15) {
-    return 0.00452 * $const.atpress / ((273 + $const.attemp) * Math.tan($const.DTR * alt))
+    return 0.00452 * constant.atpress / ((273 + constant.attemp) * Math.tan(constant.DTR * alt))
   }
 
   /* Formula for low altitude is from the Almanac for Computers.
@@ -26,14 +29,14 @@ $ns.refraction.calc = function (alt) {
   var y = alt
   var D = 0.0
   /* Invert Almanac for Computers formula numerically */
-  var P = ($const.atpress - 80) / 930
-  var Q = 4.8e-3 * ($const.attemp - 10)
+  var P = (constant.atpress - 80) / 930
+  var Q = 4.8e-3 * (constant.attemp - 10)
   var y0 = y
   var D0 = D
 
   for (var i = 0; i < 4; i++) {
     var N = y + (7.31 / (y + 4.4))
-    N = 1 / Math.tan($const.DTR * N)
+    N = 1 / Math.tan(constant.DTR * N)
     D = N * P / (60 + Q * (N + 39))
     N = y - y0
     y0 = D - D0 - N
@@ -53,3 +56,5 @@ $ns.refraction.calc = function (alt) {
   }
   return D
 }
+
+module.exports = refraction

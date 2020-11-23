@@ -1,14 +1,20 @@
-$ns.epsilon = {
+var constant = require('./constant')
+
+var epsilon = {
   /* The results of the program are returned in these
    * global variables:
    */
-  jdeps: -1.0, /* Date for which obliquity was last computed */
-  eps: 0.0, /* The computed obliquity in radians */
-  coseps: 0.0, /* Cosine of the obliquity */
-  sineps: 0.0 /* Sine of the obliquity */
+  /** Date for which obliquity was last computed */
+  jdeps: -1.0,
+  /** The computed obliquity in radians */
+  eps: 0.0,
+  /** Cosine of the obliquity */
+  coseps: 0.0,
+  /** Sine of the obliquity */
+  sineps: 0.0
 }
 
-$ns.epsilon.calc = function (date) {
+epsilon.calc = function (date) {
   if (date.julian == this.jdeps) {
     return
   }
@@ -20,9 +26,11 @@ $ns.epsilon.calc = function (date) {
     + 7.12e-7) * T - 3.905e-5) * T - 2.4967e-3) * T
     - 5.138e-3) * T + 1.9989) * T - 0.0175) * T - 468.33960) * T
     + 84381.406173
-  this.eps *= $const.STR
+  this.eps *= constant.STR
 
   this.coseps = Math.cos(this.eps)
   this.sineps = Math.sin(this.eps)
   this.jdeps = date.julian
 }
+
+module.exports = epsilon

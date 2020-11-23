@@ -1,9 +1,13 @@
-$ns.fk4fk5 = {
+var constant = require('./constant')
+var util = require('./util')
+
+var fk4fk5 = {
   /* Factors to eliminate E terms of aberration */
   A: [-1.62557e-6, -3.1919e-7, -1.3843e-7],
   Ad: [1.244e-3, -1.579e-3, -6.60e-4],
 
-  /* Transformation matrix for unit direction vector,
+  /**
+   * Transformation matrix for unit direction vector,
    * and motion vector in arc seconds per century
    */
   Mat: [
@@ -22,17 +26,18 @@ $ns.fk4fk5 = {
   ]
 }
 
-/* Convert FK4 B1950.0 catalogue coordinates
+/**
+ * Convert FK4 B1950.0 catalogue coordinates
  * to FK5 J2000.0 coordinates.
  * AA page B58.
  */
-$ns.fk4fk5.calc = function (p, m, el) {
+fk4fk5.calc = function (p, m, el) {
   /* Note the direction vector and motion vector
    * are already supplied by rstar.c.
    */
-  m.longitude *= $const.RTS
-  m.latitude *= $const.RTS
-  m.distance *= $const.RTS
+  m.longitude *= constant.RTS
+  m.latitude *= constant.RTS
+  m.distance *= constant.RTS
 
   /* motion must be in arc seconds per century */
   var a = this.A[0] * p.longitude
@@ -79,14 +84,14 @@ $ns.fk4fk5.calc = function (p, m, el) {
   var c = b + p.distance * p.distance
   a = Math.sqrt(c)
 
-  el.ra = $util.zatan2(p.longitude, p.latitude)
+  el.ra = util.zatan2(p.longitude, p.latitude)
   el.dec = Math.asin(p.distance / a)
 
   /* Note motion converted back to radians per (Julian) century */
-  el.raMotion = (p.longitude * m.latitude - p.latitude * m.longitude) / ($const.RTS * b)
+  el.raMotion = (p.longitude * m.latitude - p.latitude * m.longitude) / (constant.RTS * b)
   el.decMotion = (
     m.distance * b - p.distance * (p.longitude * m.longitude + p.latitude * m.latitude)
-  ) / ($const.RTS * c * Math.sqrt(b))
+  ) / (constant.RTS * c * Math.sqrt(b))
 
   if (el.parallax > 0) {
     c = p.longitude * m.longitude + p.latitude * m.latitude + p.distance * m.distance
@@ -94,9 +99,11 @@ $ns.fk4fk5.calc = function (p, m, el) {
     /* divide by RTS to deconvert m (and therefore c)
      * from arc seconds back to radians
      */
-    el.velocity = c / (21.094952663 * el.parallax * $const.RTS * a)
+    el.velocity = c / (21.094952663 * el.parallax * constant.RTS * a)
   }
   el.parallax = el.parallax / a
   /* a is dimensionless */
-  el.epoch = $const.j2000
+  el.epoch = constant.j2000
 }
+
+module.exports = fk4fk5

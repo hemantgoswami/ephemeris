@@ -1,5 +1,8 @@
-$ns.constellation = {
-  /* Constellation names */
+var constant = require('./constant')
+var precess = require('./precess')
+
+var constellation = {
+  /** Constellation names */
   constel: [
     'And Andromedae',
     'Ant Antliae',
@@ -92,7 +95,7 @@ $ns.constellation = {
     'Vul Vulpeculae'
   ],
 
-  /* Greek letters */
+  /** Greek letters */
   greek: [
     'alpha',
     'beta',
@@ -120,16 +123,18 @@ $ns.constellation = {
     'omega'
   ],
 
-  /* Table of constellation boundaries.
-
-   Roman, Nancy Grace, "Identification of a Constellation from a Position"
-   Pub. Astron. Soc. Pac. 99, 695, (1987)
-
-   Array items are
-   Lower Right Ascension, Upper Right Ascension,
-   both in units of hours times 3600;
-   Lower Declination, in units of degrees times 3600;
-   and array index of constellation name. */
+  /**
+   * Table of constellation boundaries.
+   *
+   * Roman, Nancy Grace, "Identification of a Constellation from a Position"
+   * Pub. Astron. Soc. Pac. 99, 695, (1987)
+   *
+   * Array items are
+   * Lower Right Ascension, Upper Right Ascension,
+   * both in units of hours times 3600;
+   * Lower Declination, in units of degrees times 3600;
+   * and array index of constellation name.
+   */
   bndries: [
     0, 86400, 316800, 84,
     28800, 52200, 311400, 84,
@@ -491,10 +496,12 @@ $ns.constellation = {
   ]
 }
 
-/* Return the constellation name corresponding to a given mean equatorial
- position P.  EPOCH is the precessional equinox and ecliptic date
- of P. */
-$ns.constellation.calc = function (pp, epoch) {
+/**
+ * Return the constellation name corresponding to a given mean equatorial
+ * position P.  EPOCH is the precessional equinox and ecliptic date
+ * of P.
+ */
+constellation.calc = function (pp, epoch) {
   var p = {
     longitude: pp.longitude,
     latitude: pp.latitude,
@@ -502,17 +509,17 @@ $ns.constellation.calc = function (pp, epoch) {
   }
 
   /* Precess from given epoch to J2000. */
-  $moshier.precess.calc(p, epoch, 1)
+  precess.calc(p, epoch, 1)
   /* Precess from J2000 to Besselian epoch 1875.0. */
-  $moshier.precess.calc(p, {julian: 2405889.25855}, -1)
+  precess.calc(p, {julian: 2405889.25855}, -1)
   var d = Math.sqrt(p.longitude * p.longitude
     + p.latitude * p.latitude + p.distance * p.distance
   )
-  var ra = Math.atan2(p.latitude, p.longitude) * ($const.RTD * 3600 / 15)
+  var ra = Math.atan2(p.latitude, p.longitude) * (constant.RTD * 3600 / 15)
   if (ra < 0) {
     ra += 86400.0
   }
-  var dec = Math.asin(p.distance / d) * ($const.RTD * 3600)
+  var dec = Math.asin(p.distance / d) * (constant.RTD * 3600)
 
   /* FIND CONSTELLATION SUCH THAT THE DECLINATION ENTERED IS HIGHER THAN
    THE LOWER BOUNDARY OF THE CONSTELLATION WHEN THE UPPER AND LOWER
@@ -528,3 +535,5 @@ $ns.constellation.calc = function (pp, epoch) {
   }
   return -1
 }
+
+module.exports = constellation

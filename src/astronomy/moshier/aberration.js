@@ -1,13 +1,18 @@
-$ns.aberration = {}
+var body = require('./body')
+var constant = require('./constant')
+var util = require('./util')
+var vearth = require('./vearth')
 
-$ns.aberration.calc = function (p) {
+var aberration = {}
+
+aberration.calc = function (p) {
   /* Calculate the velocity of the earth (see vearth.js). */
-  $moshier.vearth.calc($moshier.body.earth.position.date)
+  vearth.calc(body.earth.position.date)
 
   var V = {
-    longitude: $moshier.vearth.vearth.longitude / $const.Clightaud,
-    latitude: $moshier.vearth.vearth.latitude / $const.Clightaud,
-    distance: $moshier.vearth.vearth.distance / $const.Clightaud
+    longitude: vearth.vearth.longitude / constant.Clightaud,
+    latitude: vearth.vearth.latitude / constant.Clightaud,
+    distance: vearth.vearth.distance / constant.Clightaud
   }
 
   var betai = V.longitude * V.longitude
@@ -30,13 +35,13 @@ $ns.aberration.calc = function (p) {
     distance: A * p.distance + B * V.distance
   }
 
-  $const.dp = {
+  constant.dp = {
     longitude: x.longitude - p.longitude,
     latitude: x.latitude - p.latitude,
     distance: x.distance - p.distance
   }
 
-  var result = $util.showcor(p, $const.dp)
+  var result = util.showcor(p, constant.dp)
 
   p.longitude = x.longitude
   p.latitude = x.latitude
@@ -44,3 +49,5 @@ $ns.aberration.calc = function (p) {
 
   return result
 }
+
+module.exports = aberration

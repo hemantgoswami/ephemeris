@@ -1,10 +1,18 @@
-$ns.nutation = {
-  /* The answers are posted here by nutlo(): */
-  jdnut: {}, /* time to which the nutation applies */
-  nutl: 0.0, /* nutation in longitude (radians) */
-  nuto: 0.0, /* nutation in obliquity (radians) */
+var constant = require('./constant')
+var epsilon = require('./epsilon')
+var util = require('./util')
 
-  /* Each term in the expansion has a trigonometric
+var nutation = {
+  /* The answers are posted here by nutlo(): */
+  /** time to which the nutation applies */
+  jdnut: {},
+  /** nutation in longitude (radians) */
+  nutl: 0.0,
+  /** nutation in obliquity (radians) */
+  nuto: 0.0,
+
+  /**
+   * Each term in the expansion has a trigonometric
    * argument given by
    *   W = i*MM + j*MS + k*FF + l*DD + m*OM
    * where the variables are defined below.
@@ -26,12 +34,12 @@ $ns.nutation = {
    * If terms with coefficient less than X are omitted, the peak
    * errors will be:
    *
-   *   omit	error,		  omit	error,
-   *   a <	longitude	  c <	obliquity
-   * .0005"	.0100"		.0008"	.0094"
-   * .0046	.0492		.0095	.0481
-   * .0123	.0880		.0224	.0905
-   * .0386	.1808		.0895	.1129
+   *   omit    error,      omit      error,
+   *   a <     longitude   c <       obliquity
+   * .0005"    .0100"      .0008"    .0094"
+   * .0046     .0492       .0095     .0481
+   * .0123     .0880       .0224     .0905
+   * .0386     .1808       .0895     .1129
    */
   nt: [
     0, 0, 0, 0, 2, 2062, 2, -895, 5,
@@ -145,7 +153,8 @@ $ns.nutation = {
   cc: []
 }
 
-/* Nutation -- AA page B20
+/**
+ * Nutation -- AA page B20
  * using nutation in longitude and obliquity from nutlo()
  * and obliquity of the ecliptic from epsiln()
  * both calculated for Julian date J.
@@ -153,13 +162,13 @@ $ns.nutation = {
  * p = equatorial rectangular position vector of object for
  * mean ecliptic and equinox of date.
  */
-$ns.nutation.calc = function (date, p) {
+nutation.calc = function (date, p) {
   this.calclo(date)
   /* be sure we calculated nutl and nuto */
-  $moshier.epsilon.calc(date)
+  epsilon.calc(date)
   /* and also the obliquity of date */
 
-  var f = $moshier.epsilon.eps + this.nuto
+  var f = epsilon.eps + this.nuto
   var ce = Math.cos(f)
   var se = Math.sin(f)
   var sino = Math.sin(this.nuto)
@@ -176,14 +185,14 @@ $ns.nutation.calc = function (date, p) {
    */
   var p1 = {
     longitude: cl * p.longitude
-      - sl * $moshier.epsilon.coseps * p.latitude
-      - sl * $moshier.epsilon.sineps * p.distance,
+      - sl * epsilon.coseps * p.latitude
+      - sl * epsilon.sineps * p.distance,
     latitude: sl * ce * p.longitude
-      + (cl * $moshier.epsilon.coseps * ce + $moshier.epsilon.sineps * se) * p.latitude
-      - (sino + (1 - cl) * $moshier.epsilon.sineps * ce) * p.distance,
+      + (cl * epsilon.coseps * ce + epsilon.sineps * se) * p.latitude
+      - (sino + (1 - cl) * epsilon.sineps * ce) * p.distance,
     distance: sl * se * p.longitude
-      + (sino + (cl - 1) * se * $moshier.epsilon.coseps) * p.latitude
-      + (cl * $moshier.epsilon.sineps * se + $moshier.epsilon.coseps * ce) * p.distance
+      + (sino + (cl - 1) * se * epsilon.coseps) * p.latitude
+      + (cl * epsilon.sineps * se + epsilon.coseps * ce) * p.distance
   }
 
   var dp = {
@@ -192,7 +201,7 @@ $ns.nutation.calc = function (date, p) {
     distance: p1.distance - p.distance
   }
 
-  var result = $util.showcor(p, dp)
+  var result = util.showcor(p, dp)
 
   p.longitude = p1.longitude
   p.latitude = p1.latitude
@@ -201,10 +210,11 @@ $ns.nutation.calc = function (date, p) {
   return result
 }
 
-/* Nutation in longitude and obliquity
+/**
+ * Nutation in longitude and obliquity
  * computed at Julian date J.
  */
-$ns.nutation.calclo = function (date) {
+nutation.calclo = function (date) {
   if (this.jdnut.julian == date.julian) {
     return 0
   }
@@ -220,33 +230,39 @@ $ns.nutation.calclo = function (date) {
 
   /* Fundamental arguments in the FK5 reference system. */
 
-  /* longitude of the mean ascending node of the lunar orbit
+  /**
+   * longitude of the mean ascending node of the lunar orbit
    * on the ecliptic, measured from the mean equinox of date
    */
-  var OM = ($util.mods3600(-6962890.539 * T + 450160.280) + (0.008 * T + 7.455) * T2)
-    * $const.STR
+  var OM = (util.mods3600(-6962890.539 * T + 450160.280) + (0.008 * T + 7.455) * T2)
+    * constant.STR
 
-  /* mean longitude of the Sun minus the
+  /**
+   * mean longitude of the Sun minus the
    * mean longitude of the Sun's perigee
    */
-  var MS = ($util.mods3600(129596581.224 * T + 1287099.804) - (0.012 * T + 0.577) * T2)
-    * $const.STR
+  var MS = (util.mods3600(129596581.224 * T + 1287099.804) - (0.012 * T + 0.577) * T2)
+    * constant.STR
 
-  /* mean longitude of the Moon minus the
+  /**
+   * mean longitude of the Moon minus the
    * mean longitude of the Moon's perigee
    */
-  var MM = ($util.mods3600(1717915922.633 * T + 485866.733) + (0.064 * T + 31.310) * T2)
-    * $const.STR
+  var MM = (util.mods3600(1717915922.633 * T + 485866.733) + (0.064 * T + 31.310) * T2)
+    * constant.STR
 
-  /* mean longitude of the Moon minus the
+  /**
+   * mean longitude of the Moon minus the
    * mean longitude of the Moon's node
    */
-  var FF = ($util.mods3600(1739527263.137 * T + 335778.877) + (0.011 * T - 13.257) * T2)
-    * $const.STR
+  var FF = (util.mods3600(1739527263.137 * T + 335778.877) + (0.011 * T - 13.257) * T2)
+    * constant.STR
 
-  /* mean elongation of the Moon from the Sun. */
-  var DD = ($util.mods3600(1602961601.328 * T + 1072261.307) + (0.019 * T - 6.891) * T2)
-    * $const.STR
+  /**
+   * mean elongation of the Moon from the Sun.
+   */
+  var DD = (util.mods3600(1602961601.328 * T + 1072261.307) + (0.019 * T - 6.891) * T2)
+    * constant.STR
 
   /* Calculate sin( i*MM ), etc. for needed multiple angles */
   this.sscc(0, MM, 3)
@@ -291,14 +307,14 @@ $ns.nutation.calclo = function (date) {
     }
     /* longitude coefficient */
     var f = p[p_i++] // *p++;
-    k = p[p_i++] /* *p++ */
+    k = p[p_i++] // *p++;
     if (k != 0) {
       f += T10 * k
     }
 
     /* obliquity coefficient */
     var g = p[p_i++] // *p++;
-    k = p[p_i++] /* *p++ */
+    k = p[p_i++] // *p++;
     if (k != 0) {
       g += T10 * k
     }
@@ -316,14 +332,15 @@ $ns.nutation.calclo = function (date) {
    printf( "nutation: in longitude %.3f\", in obliquity %.3f\"\n", C, D );
    */
   /* Save answers, expressed in radians */
-  this.nutl = 0.0001 * $const.STR * C
-  this.nuto = 0.0001 * $const.STR * D
+  this.nutl = 0.0001 * constant.STR * C
+  this.nuto = 0.0001 * constant.STR * D
 }
 
-/* Prepare lookup table of sin and cos ( i*Lj )
+/**
+ * Prepare lookup table of sin and cos ( i*Lj )
  * for required multiple angles
  */
-$ns.nutation.sscc = function (k, arg, n) {
+nutation.sscc = function (k, arg, n) {
   var su = Math.sin(arg)
   var cu = Math.cos(arg)
   this.ss[k] = []
@@ -347,3 +364,5 @@ $ns.nutation.sscc = function (k, arg, n) {
     this.cc[k][i] = cv
   }
 }
+
+module.exports = nutation

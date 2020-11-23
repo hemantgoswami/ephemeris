@@ -1,6 +1,10 @@
-$ns.julian = {}
+var common = require('../../common')
+var constant = require('./constant')
+var util = require('./util')
 
-$ns.julian.calc = function (date) {
+var julian = {}
+
+julian.calc = function (date) {
   var b = 0
 
   /* The origin should be chosen to be a century year
@@ -53,14 +57,14 @@ $ns.julian.calc = function (date) {
 
   date.julian = date.julianDate + date.julianTime
 
-  date.j2000 = 2000 + (date.julian - $const.j2000) / 365.25
-  date.b1950 = 1950 + (date.julian - $const.b1950) / 365.25
-  date.j1900 = 1900 + (date.julian - $const.j1900) / 365.25
+  date.j2000 = 2000 + (date.julian - constant.j2000) / 365.25
+  date.b1950 = 1950 + (date.julian - constant.b1950) / 365.25
+  date.j1900 = 1900 + (date.julian - constant.j1900) / 365.25
 
   return date.julian
 }
 
-$ns.julian.toGregorian = function (date) {
+julian.toGregorian = function (date) {
   var J = date.julian
 
   /* January 1.0, 1 A.D. */
@@ -125,7 +129,9 @@ $ns.julian.toGregorian = function (date) {
   dd = dd - Math.floor(dd)
   x = 2 * Math.PI * dd
 
-  $copy(date, $util.hms(x))
+  common.copy(date, util.hms(x))
 
   return date
 }
+
+module.exports = julian
