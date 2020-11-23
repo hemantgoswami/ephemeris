@@ -2,9 +2,9 @@ $ns.copy = function (target /*, source ... */) {
   if (target) {
     for (var i = arguments.length - 1; i > 0; i--) {
       var source = arguments [i]
-      if (source && source.hasOwnProperty) {
+      if (source) {
         for (var key in source) {
-          if (source.hasOwnProperty(key)) {
+          if (Object.prototype.hasOwnProperty.call(source, key)) {
             target [key] = source [key]
           }
         }
