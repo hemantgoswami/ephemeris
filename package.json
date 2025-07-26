@@ -1,6 +1,6 @@
 {
   "name": "ephemeris",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "JavaScript implementation of Moshier's ephemeris calculations for sun, planets, comets, asteroids and stars.",
   "repository": {
     "type": "git",
@@ -21,16 +21,7 @@
   "author": "Hemantkumar Goswami",
   "license": "GPL-3.0",
   "devDependencies": {
-    "browserify": "^17.0.0",
-    "del": "^6.0.0",
-    "eslint": "^7.11.0",
-    "gulp": "^4.0.2",
-    "gulp-eslint": "^6.0.0",
-    "gulp-rename": "^2.0.0",
-    "gulp-uglify": "^3.0.2",
-    "tape": "^4.13.3",
-    "vinyl-buffer": "^1.0.1",
-    "vinyl-source-stream": "^2.0.0"
-  },
-  "dependencies": {}
+    "eslint": "^9.32.0",
+    "tape": "^4.13.3"
+  }
 }
