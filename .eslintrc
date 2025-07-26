@@ -1,0 +1,63 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "ecmaFeatures": {
+      "sourceType": "module",
+      "experimentalObjectRestSpread": true
+    }
+  },
+  "extends": "standard",
+  "env": {
+    "es6": true,
+    "node": true,
+    "mocha": true
+  },
+  "rules": {
+    "semi": ["error", "never"],
+    "global-require": "error",
+    "arrow-body-style": [2, "always"],
+    "import/no-extraneous-dependencies": 0,
+    "no-prototype-builtins": 0,
+    "no-underscore-dangle": 0,
+    "prefer-spread": 0,
+    "new-cap": [
+      "error",
+      {
+        "newIsCapExceptions": ["tz", "duration"],
+        "capIsNewExceptions": ["FLOAT", "Router"]
+      }
+    ],
+    "comma-dangle": [
+      "error",
+      {
+        "arrays": "only-multiline",
+        "objects": "only-multiline",
+        "imports": "never",
+        "exports": "never",
+        "functions": "ignore"
+      }
+    ],
+    "indent": [
+      "error",
+      2,
+      {
+        "VariableDeclarator": 2,
+        "MemberExpression": 1,
+        "FunctionDeclaration": {
+          "parameters": "first",
+          "body": 1
+        },
+        "FunctionExpression": {
+          "parameters": "first",
+          "body": 1
+        },
+        "CallExpression": {
+          "arguments": 1
+        },
+        "ArrayExpression": 1,
+        "ObjectExpression": 1,
+        "SwitchCase": 1
+      }
+    ]
+  }
+}

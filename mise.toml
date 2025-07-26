@@ -1,0 +1,27 @@
+[tools]
+node = "20"
+
+[env]
+# Use the project name derived from the current directory
+PROJECT_NAME = "{{ config_root | basename }}"
+
+[tasks.yarninstall]
+description = "Install dependencies"
+alias = "yi"
+run = "yarn install"
+
+[tasks.test]
+description = "Run tests"
+alias = "t"
+run = "yarn run test"
+
+[tasks.lint]
+description = "Lint the code"
+run = "eslint . -f"
+
+[tasks.info]
+description = "Print project information"
+run = '''
+echo "Project: $PROJECT_NAME"
+echo "Virtual Environment: $VIRTUAL_ENV"
+'''
