@@ -16,6 +16,9 @@ Which, initially written by [mivion](https://github.com/mivion/ephemeris), xerik
 
 ### Changelog
 
+#### 2.2.0 Feature added
+* Adds retrograde flag for planets
+
 #### 2.0.0 Breaking Changes - Please read carefully
 * Released 5th July 2020
 * Removes dependency on Moment.js and uses JavaScript's default date object
