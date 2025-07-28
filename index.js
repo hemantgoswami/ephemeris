@@ -75,7 +75,8 @@ function getAllPlanets (date, geodeticalLongitude, geodeticalLatitude, height) {
       apparentLongitudeDms30: constant.body.position.apparentLongitude30String,
       apparentLongitudeDms360: constant.body.position.apparentLongitudeString,
       apparentLongitudeDd: constant.body.position.apparentLongitude,
-      geocentricDistanceKm: constant.body.position.geocentricDistance
+      geocentricDistanceKm: constant.body.position.geocentricDistance,
+      is_retrograde: constant.body.position.is_retrograde
     }
 
   }
@@ -130,7 +131,8 @@ function getPlanet (planetName, date, geodeticalLongitude, geodeticalLatitude, h
     apparentLongitudeDms30: constant.body.position.apparentLongitude30String,
     apparentLongitudeDms360: constant.body.position.apparentLongitudeString,
     apparentLongitudeDd: constant.body.position.apparentLongitude,
-    geocentricDistanceKm: constant.body.position.geocentricDistance
+    geocentricDistanceKm: constant.body.position.geocentricDistance,
+    is_retrograde: constant.body.position.is_retrograde
   }
 
   return ret

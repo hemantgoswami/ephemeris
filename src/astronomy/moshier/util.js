@@ -123,6 +123,10 @@ util.hms = function (x) {
   }
 }
 
+util.degreesToDecimal = function (deg, minutes, seconds) {
+  return deg + (minutes / 60) + (seconds / 3600)
+}
+
 util.dms = function (x) {
   var s = x * constant.RTD
   if (s < 0) {

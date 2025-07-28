@@ -32,6 +32,31 @@ processor.calc = function (date, body) {
     date.universalDate.minutes + ':' +
     (date.universalDate.seconds + date.universalDate.milliseconds / 1000)
 
+  // Adding another date to check if a planet is in retrograde position
+  var retro_date = new Date(date.year, date.month-1, date.day, date.hours, date.minutes, date.seconds)
+  retro_date.setUTCHours(retro_date.getUTCHours() - 1)
+  constant.retro_date = {
+    day: retro_date.getUTCDate(),
+    month: retro_date.getUTCMonth()+1,
+    year: retro_date.getUTCFullYear(),
+    hours: retro_date.getUTCHours(),
+    minutes: retro_date.getUTCMinutes(),
+    seconds: retro_date.getUTCSeconds()
+  }
+  julian.calc(constant.retro_date)
+  delta.calc(constant.retro_date)
+  constant.retro_date.universalDate = julian.toGregorian({
+    julian: date.universal
+  })
+
+  constant.retro_date.universalDateString =
+      constant.retro_date.universalDate.day + '.' +
+      constant.retro_date.universalDate.month + '.' +
+      constant.retro_date.universalDate.year + ' ' +
+      constant.retro_date.universalDate.hours + ':' +
+      constant.retro_date.universalDate.minutes + ':' +
+      (constant.retro_date.universalDate.seconds + constant.retro_date.universalDate.milliseconds / 1000)
+
   // First calculate the earth
   kepler.calc(date, moshier.body.earth)
 

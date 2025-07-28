@@ -133,11 +133,15 @@ planet.reduce = function (body, q, e) {
   p.distance *= constant.EO
 
   body.position.apparentGeocentric = lonlat.calc(p, moshier.body.earth.position.date, false)
+  body.position.apparentGeocentric_prev_date = lonlat.calc(p, constant.retro_date, false)
   body.position.apparentLongitude = body.position.apparentGeocentric.longitude * constant.RTD
   body.position.apparentLongitudeString =
     body.position.apparentGeocentric.dLongitude.degree + '\u00B0' +
     body.position.apparentGeocentric.dLongitude.minutes + '\'' +
     Math.floor(body.position.apparentGeocentric.dLongitude.seconds) + '"'
+  var p1 = body.position.apparentGeocentric_prev_date.dLongitude
+  var p2 = body.position.apparentGeocentric.dLongitude
+  body.position.is_retrograde = (util.degreesToDecimal(p1['degree'], p1['minutes'], p1['seconds']) - util.degreesToDecimal(p2['degree'], p2['minutes'], p2['seconds'])) < 0
 
   body.position.apparentLongitude30String =
     util.mod30(body.position.apparentGeocentric.dLongitude.degree) + '\u00B0' +
