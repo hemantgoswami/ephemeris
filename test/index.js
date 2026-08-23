@@ -235,3 +235,228 @@ test('a body that never rises or sets reports no rise or set', function (t) {
   t.ok(midnightSun.approxLocalMeridian, 'the meridian crossing is still reported')
   t.end()
 })
+
+/*
+ * Contract tests. These exist to catch a field being dropped or renamed by
+ * accident, which a value test would not notice. If one of these fails and
+ * the change was deliberate, update the list and say so in the changelog.
+ */
+
+const RESULT_KEYS = ['date', 'observer', 'observed']
+
+const DATE_KEYS = [
+  'gregorianTerrestrial', 'gregorianTerrestrialRaw', 'gregorianUniversal',
+  'gregorianDelta', 'julianTerrestrial', 'julianUniversal', 'julianDelta'
+]
+
+const TERRESTRIAL_RAW_KEYS = [
+  'day', 'month', 'year', 'hours', 'minutes', 'seconds',
+  'julianDate', 'julianTime', 'julian', 'j2000', 'b1950', 'j1900',
+  'delta', 'terrestrial', 'universal', 'universalDate', 'universalDateString'
+]
+
+const OBSERVER_KEYS = [
+  'name', 'longitudeGeodetic', 'longitudeGeocentric', 'latitudeGeodetic',
+  'latitudeGeocentric', 'heightGeodetic', 'heightGeocentric'
+]
+
+const OBSERVED_KEYS = [
+  'name', 'raw', 'apparentLongitudeDms30', 'apparentLongitudeDms360',
+  'apparentLongitudeDd', 'apparentLongitudeDdPerDay', 'geocentricDistanceKm',
+  'is_retrograde'
+]
+
+const BODY_NAMES = [
+  'sun', 'mercury', 'venus', 'moon', 'mars', 'jupiter',
+  'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'sirius'
+]
+
+test('the result keeps its documented shape', function (t) {
+  const result = ephemeris.getAllPlanets(at('2015-08-10T17:09:01Z'),
+    BERLIN.longitude, BERLIN.latitude, BERLIN.height)
+
+  t.deepEqual(Object.keys(result).sort(), RESULT_KEYS.slice().sort(), 'top level keys')
+  t.deepEqual(Object.keys(result.date).sort(), DATE_KEYS.slice().sort(), 'date keys')
+  t.deepEqual(Object.keys(result.date.gregorianTerrestrialRaw).sort(),
+    TERRESTRIAL_RAW_KEYS.slice().sort(), 'raw terrestrial date keys')
+  t.deepEqual(Object.keys(result.observer).sort(), OBSERVER_KEYS.slice().sort(), 'observer keys')
+  t.deepEqual(Object.keys(result.observed), BODY_NAMES, 'bodies, in order')
+
+  BODY_NAMES.forEach(function (name) {
+    t.deepEqual(Object.keys(result.observed[name]).sort(), OBSERVED_KEYS.slice().sort(),
+      name + ' keys')
+  })
+  t.end()
+})
+
+test('getBodyNames is the documented list', function (t) {
+  t.deepEqual(ephemeris.getBodyNames(), BODY_NAMES, 'names, in order')
+  t.end()
+})
+
+test('the module exports exactly the documented functions', function (t) {
+  t.deepEqual(Object.keys(ephemeris).sort(),
+    ['getAllPlanets', 'getBodyNames', 'getPlanet'], 'public surface')
+  t.end()
+})
+
+test('the raw block still carries the internal detail callers read', function (t) {
+  const raw = observe('moon', '2015-08-10T17:09:01Z').raw
+
+  t.ok(raw.position, 'position')
+  t.ok(raw.position.altaz, 'position.altaz')
+  t.ok(raw.position.altaz.topocentric, 'topocentric altitude and azimuth')
+  t.ok(raw.position.altaz.transit, 'transit block')
+  t.ok(raw.position.altaz.diurnalParallax, 'diurnal parallax')
+  t.ok(raw.position.apparentGeocentric, 'apparent geocentric position')
+  t.equal(typeof raw.position.altaz.topocentric.altitude, 'number', 'altitude is a number')
+  t.equal(typeof raw.position.altaz.transit.approxLocalMeridian, 'object', 'meridian crossing')
+  t.end()
+})
+
+/*
+ * The calculation runs on a shared mutable singleton, so one call leaking
+ * into the next is a standing risk. These pin that down.
+ */
+test('one call does not leak into the next', function (t) {
+  const reference = ephemeris.getAllPlanets(at('2015-08-10T17:09:01Z'),
+    BERLIN.longitude, BERLIN.latitude, BERLIN.height)
+  const fingerprint = JSON.stringify(reference.observed)
+
+  function again (why) {
+    const repeat = ephemeris.getAllPlanets(at('2015-08-10T17:09:01Z'),
+      BERLIN.longitude, BERLIN.latitude, BERLIN.height)
+    t.equal(JSON.stringify(repeat.observed), fingerprint, why)
+  }
+
+  again('repeating the same call is stable')
+
+  ephemeris.getPlanet('moon', at('1999-01-01T03:00:00Z'), -120, -40, 5000)
+  again('after a single body somewhere else entirely')
+
+  ephemeris.getAllPlanets(at('2200-01-01T00:00:00Z'), 179, 89, 0)
+  again('after a far future call near the pole')
+
+  try {
+    ephemeris.getPlanet('nibiru', at('2015-08-10T17:09:01Z'), 0, 0, 0)
+  } catch {
+    // the throw is the point
+  }
+  again('after a call that threw')
+  t.end()
+})
+
+test('every body reports finite numbers, everywhere, over four centuries', function (t) {
+  function nonFinite (node, prefix, found, depth) {
+    if (depth > 8 || node === null || typeof node !== 'object') {
+      return found
+    }
+    Object.keys(node).forEach(function (key) {
+      const value = node[key]
+      const path = prefix ? prefix + '.' + key : key
+      if (typeof value === 'number' && !Number.isFinite(value)) {
+        found.push(path + ' = ' + value)
+      } else if (typeof value === 'object') {
+        nonFinite(value, path, found, depth + 1)
+      }
+    })
+    return found
+  }
+
+  const dates = ['1700-06-15', '1900-03-01', '2026-04-18', '2099-12-31']
+  const spots = [
+    [0, 0], [10.0014, 53.5653], [-71.13, 42.27],
+    [15.6469, 78.2232], [174.78, -41.29], [0, 89.9], [0, -89.9], [179.99, 0]
+  ]
+
+  dates.forEach(function (day) {
+    spots.forEach(function (spot) {
+      const iso = day + 'T00:00:00Z' // midnight is the awkward one
+      let result
+      t.doesNotThrow(function () {
+        result = ephemeris.getAllPlanets(at(iso), spot[0], spot[1], 0)
+      }, iso + ' at ' + spot[0] + ',' + spot[1] + ' does not throw')
+
+      if (result) {
+        const bad = nonFinite(result, '', [], 0)
+        t.equal(bad.length, 0, iso + ' at ' + spot[0] + ',' + spot[1] +
+          ' is all finite' + (bad.length ? ': ' + bad.slice(0, 3).join(', ') : ''))
+      }
+    })
+  })
+  t.end()
+})
+
+test('every module under src loads on its own', function (t) {
+  const fs = require('fs')
+  const path = require('path')
+  const root = path.join(__dirname, '..', 'src')
+  const files = []
+
+  ;(function walk (dir) {
+    fs.readdirSync(dir).forEach(function (entry) {
+      const full = path.join(dir, entry)
+      if (fs.statSync(full).isDirectory()) {
+        walk(full)
+      } else if (/\.js$/.test(entry)) {
+        files.push(full)
+      }
+    })
+  })(root)
+
+  t.ok(files.length > 30, 'found ' + files.length + ' modules')
+  files.forEach(function (file) {
+    t.doesNotThrow(function () {
+      require(file)
+    }, path.relative(root, file) + ' loads')
+  })
+  t.end()
+})
+
+test('requiring an internal module first does not break the package', function (t) {
+  // transit and altaz used to import each other, so loading transit before
+  // the entry point handed altaz a half built module and blew up with
+  // 'transit.calc is not a function'.
+  const script = 'require(' + JSON.stringify(path.join(__dirname, '..', 'src', 'astronomy', 'moshier', 'transit')) + ');' +
+    'const e = require(' + JSON.stringify(path.join(__dirname, '..')) + ');' +
+    'const r = e.getPlanet("sun", new Date("2015-08-10T17:09:01Z"), 10.0014, 53.5653, 0);' +
+    'process.stdout.write(r.observed.sun.apparentLongitudeDms360)'
+
+  const direct = observe('sun', '2015-08-10T17:09:01Z').apparentLongitudeDms360
+  let loadedFirst
+
+  try {
+    loadedFirst = execFileSync(process.execPath, ['-e', script],
+      {encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']})
+  } catch (error) {
+    // Report the crash as a failed assertion rather than letting it take the
+    // whole run down, which is what an import cycle regression would do.
+    loadedFirst = 'the child process failed: ' +
+      String(error.stderr || error.message).split('\n')[0]
+  }
+
+  t.equal(loadedFirst, direct, 'same answer whichever module is required first')
+  t.end()
+})
+
+test('common.copy applies sources so the earliest one wins', function (t) {
+  const common = require('../src/common')
+
+  t.deepEqual(common.copy({}, {a: 1, z: 9}, {a: 2, b: 3}, {a: 4, c: 5}),
+    {a: 1, b: 3, c: 5, z: 9}, 'first source wins, unlike Object.assign')
+  t.deepEqual(common.copy({}, null, {a: 1}), {a: 1}, 'a missing source is skipped')
+  t.deepEqual(common.copy({x: 0}, {y: 2}), {x: 0, y: 2}, 'the target is kept and returned')
+  t.equal(common.copy(null, {a: 1}), null, 'a falsy target comes back untouched')
+  t.end()
+})
+
+test('the published package points at its type definitions', function (t) {
+  const fs = require('fs')
+  const pkg = require('../package.json')
+
+  t.equal(pkg.types, 'index.d.ts', 'types field')
+  t.ok(fs.existsSync(path.join(__dirname, '..', pkg.types)), 'the file exists')
+  t.ok(pkg.files.indexOf(pkg.types) >= 0, 'and it is in files, so it ships')
+  t.ok(pkg.files.indexOf(pkg.main) >= 0, 'as is the entry point')
+  t.end()
+})
