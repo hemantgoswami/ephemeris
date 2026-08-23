@@ -94,10 +94,7 @@ test('the retrograde flag matches known retrograde windows', function (t) {
     {name: 'mars', iso: '2020-10-01T00:00:00Z', retrograde: true},
     {name: 'mars', iso: '2020-12-01T00:00:00Z', retrograde: false},
     // Jupiter retrograde 14 May - 13 September 2020
-    {name: 'jupiter', iso: '2020-06-20T00:00:00Z', retrograde: true},
-    // The sun and the moon never go retrograde as seen from the earth
-    {name: 'sun', iso: '2020-10-01T00:00:00Z', retrograde: false},
-    {name: 'moon', iso: '2020-10-01T00:00:00Z', retrograde: false}
+    {name: 'jupiter', iso: '2020-06-20T00:00:00Z', retrograde: true}
   ]
 
   cases.forEach(function (expected) {
@@ -221,6 +218,49 @@ test('rise and set do not depend on the time of day they are asked for', functio
     t.ok(rise < 5, iso + ' rise is within 5s of the midday answer, off by ' + rise.toFixed(2) + 's')
     t.ok(set < 5, iso + ' set is within 5s of the midday answer, off by ' + set.toFixed(2) + 's')
   })
+  t.end()
+})
+
+test('retrograde is only reported where it can happen', function (t) {
+  // The sun and the moon are never overtaken by the earth, so they cannot
+  // appear to go backwards. Saying false would suggest the question had
+  // been asked and answered; there is no answer to give.
+  const dates = ['2015-08-10T17:09:01Z', '2020-10-01T00:00:00Z', '2026-04-18T00:00:00Z']
+
+  dates.forEach(function (iso) {
+    t.equal(observe('sun', iso).is_retrograde, undefined, 'the sun on ' + iso)
+    t.equal(observe('moon', iso).is_retrograde, undefined, 'the moon on ' + iso)
+    t.equal(observe('sirius', iso).is_retrograde, undefined, 'a star on ' + iso)
+
+    // but their motion is still reported, and still forwards
+    t.ok(observe('sun', iso).apparentLongitudeDdPerDay > 0, 'the sun still moves forwards')
+    t.ok(observe('moon', iso).apparentLongitudeDdPerDay > 0, 'the moon still moves forwards')
+
+    // and the planets do get an answer
+    t.equal(typeof observe('mars', iso).is_retrograde, 'boolean', 'mars gets an answer')
+    t.equal(typeof observe('chiron', iso).is_retrograde, 'boolean', 'chiron gets an answer')
+  })
+  t.end()
+})
+
+test('the sun and the moon only ever move forwards', function (t) {
+  // Four centuries of sampling, so nobody is tempted to reintroduce a
+  // retrograde flag for them.
+  let slowestSun = Infinity
+  let slowestMoon = Infinity
+
+  for (let year = 1700; year <= 2100; year += 50) {
+    for (let day = 0; day < 365; day += 29) {
+      const when = new Date(Date.UTC(year, 0, 1) + day * 86400e3)
+      const sun = ephemeris.getPlanet('sun', when, 0, 0, 0).observed.sun
+      const moon = ephemeris.getPlanet('moon', when, 0, 0, 0).observed.moon
+      slowestSun = Math.min(slowestSun, sun.apparentLongitudeDdPerDay)
+      slowestMoon = Math.min(slowestMoon, moon.apparentLongitudeDdPerDay)
+    }
+  }
+
+  t.ok(slowestSun > 0, 'slowest solar motion seen was ' + slowestSun.toFixed(5) + ' deg/day')
+  t.ok(slowestMoon > 0, 'slowest lunar motion seen was ' + slowestMoon.toFixed(5) + ' deg/day')
   t.end()
 })
 
