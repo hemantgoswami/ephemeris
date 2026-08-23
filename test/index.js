@@ -361,8 +361,9 @@ test('getBodyNames is the documented list', function (t) {
 
 test('the module exports exactly the documented functions', function (t) {
   t.deepEqual(Object.keys(ephemeris).sort(), [
-    'astronomyEngine', 'backend', 'backends', 'getAllPlanets', 'getBody',
-    'getBodyNames', 'getPlanet', 'registerBackend', 'swisseph', 'use'
+    'astronomyEngine', 'backend', 'backends', 'ephemerisFiles',
+    'fetchEphemeris', 'getAllPlanets', 'getBody', 'getBodyNames', 'getPlanet',
+    'registerBackend', 'swisseph', 'use'
   ], 'public surface')
   t.end()
 })
@@ -937,5 +938,87 @@ test('every available backend meets the same contract', function (t) {
   })
 
   ephemeris.use('moshier')
+  t.end()
+})
+
+/*
+ * Fetching the Swiss Ephemeris data files. Nothing here touches the network:
+ * these check the catalogue, the pinning and the guards around it.
+ */
+
+test('the ephemeris file catalogue is pinned and checksummed', function (t) {
+  const ephe = ephemeris.ephemerisFiles
+
+  t.ok(/^[0-9a-f]{40}$/.test(ephe.commit), 'pinned to a commit, not a branch')
+  t.ok(ephe.baseUrl.indexOf(ephe.commit) > 0, 'the base url carries that commit')
+  t.ok(ephe.defaultFiles.length >= 4, ephe.defaultFiles.length + ' files listed')
+
+  ephe.defaultFiles.forEach(function (name) {
+    const entry = ephe.files[name]
+    t.ok(entry.purpose && entry.purpose.length > 0, name + ' says what it is for')
+    t.ok(entry.bytes > 1000, name + ' declares a size')
+    t.ok(/^[0-9a-f]{64}$/.test(entry.sha256), name + ' has a sha256')
+    t.equal(ephe.urlFor(name), ephe.baseUrl + '/' + name, name + ' resolves to a pinned url')
+  })
+
+  const mb = ephe.totalBytes() / 1048576
+  t.ok(mb > 1 && mb < 4, 'the whole set is ' + mb.toFixed(1) + ' MB')
+
+  t.throws(function () {
+    ephe.urlFor('nope.se1')
+  }, /Unknown ephemeris file/, 'an unknown file is refused')
+  t.end()
+})
+
+test('fetching refuses an unknown file before doing anything', function (t) {
+  // The name check has to happen before the directory is created, or a typo
+  // leaves an empty folder behind.
+  const fs = require('fs')
+  const target = path.join(__dirname, '..', 'should-not-exist-ephe')
+
+  ephemeris.fetchEphemeris({ephePath: target, files: ['nope.se1']})
+    .then(function () {
+      t.fail('it should have refused')
+      t.end()
+    })
+    .catch(function (error) {
+      t.ok(/Unknown ephemeris file/.test(error.message), 'refused: ' + error.message.slice(0, 40))
+      t.equal(fs.existsSync(target), false, 'and created no directory')
+      t.end()
+    })
+})
+
+test('the fetch command ships and is wired up', function (t) {
+  const fs = require('fs')
+  const pkg = require('../package.json')
+  const binPath = pkg.bin['ephemeris-fetch-ephe']
+
+  t.ok(binPath, 'package.json declares the command')
+  t.ok(fs.existsSync(path.join(__dirname, '..', binPath)), 'and the file is there')
+  t.ok(pkg.files.indexOf('bin') >= 0, 'and bin/ ships')
+
+  const help = execFileSync(process.execPath, [path.join(__dirname, '..', binPath), '--help'],
+    {encoding: 'utf8'})
+  t.ok(help.indexOf('ephemeris-fetch-ephe') >= 0, 'help names the command')
+  t.ok(help.indexOf('AGPL') >= 0, 'and states the licence of what it downloads')
+  ephemeris.ephemerisFiles.defaultFiles.forEach(function (name) {
+    t.ok(help.indexOf(name) >= 0, 'help lists ' + name)
+  })
+  t.end()
+})
+
+test('nothing downloads on its own', function (t) {
+  const pkg = require('../package.json')
+  const hooks = ['preinstall', 'install', 'postinstall', 'prepare']
+
+  hooks.forEach(function (hook) {
+    t.equal(pkg.scripts[hook], undefined,
+      'no ' + hook + ' script, so installing never reaches the network')
+  })
+
+  // and the calculation path must not mention fetch at all
+  const fs = require('fs')
+  const core = fs.readFileSync(path.join(__dirname, '..', 'src', 'backends', 'swisseph.js'), 'utf8')
+  t.equal(/\bfetch\s*\(/.test(core), false, 'the backend never downloads during a calculation')
   t.end()
 })

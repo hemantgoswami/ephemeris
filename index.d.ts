@@ -257,6 +257,43 @@ declare const ephemeris: {
 
   /** astronomy-engine, MIT licensed, which you install yourself. */
   astronomyEngine(): ephemeris.Backend
+
+  /**
+   * Fetch the Swiss Ephemeris data files into a directory.
+   *
+   * Explicit on purpose. There is no postinstall hook and nothing downloads
+   * during a calculation, so this happens when you call it and not
+   * otherwise. Downloads are pinned to a commit and checksummed, and files
+   * already present with the right checksum are left alone.
+   *
+   * The files are Swiss Ephemeris data, licensed AGPL-3.0 or commercially
+   * by Astrodienst.
+   */
+  fetchEphemeris(options?: {
+    /** Where to put them. Defaults to './ephe'. */
+    ephePath?: string
+    /** Which to fetch. Defaults to all of them, about 2 MB. */
+    files?: string[]
+    onProgress?: (event: {
+      file: string
+      status: 'present' | 'fetching' | 'fetched'
+      url?: string
+      bytes?: number
+    }) => void
+  }): Promise<{
+    ephePath: string
+    files: Array<{file: string, status: string, path: string, bytes?: number}>
+  }>
+
+  /** What fetchEphemeris knows how to download, and from where. */
+  ephemerisFiles: {
+    commit: string
+    baseUrl: string
+    defaultFiles: string[]
+    files: {[name: string]: {purpose: string, bytes: number, sha256: string}}
+    urlFor (name: string): string
+    totalBytes (names?: string[]): number
+  }
 }
 
 export = ephemeris

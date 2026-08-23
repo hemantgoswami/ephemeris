@@ -8,6 +8,9 @@
   },
   "main": "index.js",
   "types": "index.d.ts",
+  "bin": {
+    "ephemeris-fetch-ephe": "bin/fetch-ephe.js"
+  },
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -42,6 +45,7 @@
     "index.js",
     "index.d.ts",
     "src",
+    "bin",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
