@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.1.1
+* Restores the `3.0.1` changelog entry, which was lost when the lunar node
+  work renamed that heading to `3.1.0` on the assumption the two would ship
+  together. They did not: 3.0.1 was already released. The entry now sits
+  with the version that actually carried it.
+* Adds a `2.1.0` entry, reconstructed from the published tarballs. That
+  version has been on npm since July 2025 with nothing written about it.
+* Adds a test comparing the git tags, which the release workflow creates for
+  every publish, against the changelog headings, so a released version
+  cannot go undocumented again.
+* Documentation and tests only.
+
 ## 3.1.0
 * Adds the lunar nodes as bodies: `rahu` and `ketu` for the mean nodes, and
   `trueRahu` and `trueKetu` for the osculating ones. They come back from
@@ -14,6 +26,8 @@
   These are tropical longitudes of date, like everything else here. There is
   no ayanamsa, so `rahu` is not the sidereal Rahu until you subtract one.
   Nothing that already existed changed value.
+
+## 3.0.1
 * Moves the development and release instructions out of the README and into
   `CONTRIBUTING.md`, which is not in `files` and so does not ship. npm
   renders the README as the package page, so those sections were showing up
@@ -21,8 +35,8 @@
 * Moves the changelog into this file. The README keeps a pointer and the one
   note that matters before upgrading. npm has no changelog of its own, it
   only renders the README, so the release notes on GitHub are now the
-  per-version view and this file is the full history. Both are documentation
-  only.
+  per-version view and this file is the full history.
+* Documentation only.
 
 ## 3.0.0 Breaking Changes - Please read carefully
 * Reports `is_retrograde` only for bodies that can actually be retrograde,
@@ -81,6 +95,15 @@
 
 ## 2.2.0 Feature added
 * Adds retrograde flag for planets
+
+## 2.1.0
+* Released 26th July 2025
+* Drops the `postinstall` build step and the generated `build/` directory,
+  so installing no longer runs a script
+* Drops the `path` dependency and adds ESLint and a mise config
+* Moves `custom.constant.js` under `src/`
+* Reconstructed after the fact from the published tarballs. It was tagged
+  and published from a commit that is no longer in the repository history.
 
 ## 2.0.0 Breaking Changes - Please read carefully
 * Released 5th July 2020

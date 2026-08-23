@@ -592,6 +592,47 @@ test('the changelog ships and the release notes are wired to it', function (t) {
   t.end()
 })
 
+test('every version that was ever released has a changelog entry', function (t) {
+  const fs = require('fs')
+  const root = path.join(__dirname, '..')
+
+  // The release workflow tags every publish, so the tags are the record of
+  // what actually shipped. The checks above only ever look at versions the
+  // changelog already claims, so they cannot notice an entry being renamed
+  // away from a version that is out in the world.
+  if (!fs.existsSync(path.join(root, '.git'))) {
+    t.skip('not a git checkout, so there are no tags to compare against')
+    return t.end()
+  }
+
+  let tags
+  try {
+    tags = execFileSync('git', ['tag', '--list', 'v*'],
+      {cwd: root, encoding: 'utf8'}).trim()
+  } catch {
+    t.skip('git is not available here')
+    return t.end()
+  }
+
+  if (!tags) {
+    t.skip('no tags in this checkout, so nothing to compare (needs fetch-depth 0)')
+    return t.end()
+  }
+
+  const released = tags.split('\n').map(function (tag) { return tag.trim().replace(/^v/, '') })
+  const changelog = fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8')
+  const documented = changelog.split('\n')
+    .filter(function (line) { return /^## \d/.test(line) })
+    .map(function (line) { return line.replace(/^## /, '').split(' ')[0] })
+
+  t.ok(released.length > 0, 'found ' + released.length + ' released versions')
+  released.forEach(function (version) {
+    t.ok(documented.indexOf(version) >= 0,
+      version + ' was released, so it is in the changelog')
+  })
+  t.end()
+})
+
 /*
  * Lunar nodes. Rahu and Ketu are points where the moon's orbit crosses the
  * ecliptic, carried as pseudo bodies.
