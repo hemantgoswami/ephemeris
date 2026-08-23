@@ -236,5 +236,13 @@ module.exports = {
   backends: function () { return registry.list() },
   registerBackend: function (backend) { return registry.register(backend).name },
   swisseph,
-  astronomyEngine
+  astronomyEngine,
+
+  /**
+   * Fetch the Swiss Ephemeris data files. Explicit on purpose: there is no
+   * postinstall hook and nothing downloads while you are asking for a
+   * planet. Equivalent to the ephemeris-fetch-ephe command.
+   */
+  fetchEphemeris: require('./src/fetch-ephe'),
+  ephemerisFiles: require('./src/ephe-files')
 }

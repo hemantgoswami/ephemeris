@@ -64,6 +64,17 @@ module.exports = function swisseph (options) {
     ? (settings.ephePath ? constants.SEFLG_SWIEPH : constants.SEFLG_MOSEPH) | constants.SEFLG_SPEED
     : 0
 
+  const HOW_TO_FIX = ' Run: npx ephemeris-fetch-ephe --dir <dir>, then pass ' +
+    'that directory as ephePath.'
+
+  function missingData (message) {
+    // A missing .se1 or sefstars.txt is the common case and is fixable, so
+    // say how rather than just reporting the file name.
+    return /not found|could not find star/i.test(message)
+      ? message + '.' + HOW_TO_FIX
+      : message
+  }
+
   return {
     name: 'swisseph',
     engine: 'sweph',
@@ -94,7 +105,7 @@ module.exports = function swisseph (options) {
         // A missing sefstars.txt comes back as flag -1 with a row of zeroes
         // rather than as a thrown error, so check the flag, not just data.
         if (!found.data || found.error || found.flag < 0) {
-          return {error: found.error || 'Swiss Ephemeris could not resolve the star ' + star}
+          return {error: missingData(found.error || 'Swiss Ephemeris could not resolve the star ' + star)}
         }
         return {
           longitude: found.data[0],
@@ -117,7 +128,7 @@ module.exports = function swisseph (options) {
       // Same again: a missing data file yields a value and an error, and in
       // some modes silently falls back to Moshier. Refuse both.
       if (!result.data || result.error || result.flag < 0) {
-        return {error: result.error || 'Swiss Ephemeris returned no data for this body'}
+        return {error: missingData(result.error || 'Swiss Ephemeris returned no data for this body')}
       }
 
       let longitude = result.data[0]

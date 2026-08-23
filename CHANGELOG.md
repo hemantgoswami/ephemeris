@@ -33,6 +33,16 @@
   recorded as a known gap.
 * Documents how to obtain the Swiss Ephemeris data files, which the previous
   note assumed you already had.
+* Adds `npx ephemeris-fetch-ephe` and `ephemeris.fetchEphemeris()` to fetch
+  them, about 2.1 MB. Downloads are pinned to an upstream commit and checked
+  against a recorded SHA-256, so the same bytes arrive every time and a
+  substituted or truncated file is refused rather than written. Running it
+  again leaves good files alone.
+  Neither is automatic. There is no postinstall hook and nothing downloads
+  during a calculation, because a library that reaches the network mid
+  calculation fails in CI, behind a proxy and on an airgapped machine. A
+  Swiss Ephemeris body that needs a missing file now names the command in
+  its `unavailableReason`.
 
 ## 3.1.1
 * Restores the `3.0.1` changelog entry, which was lost when the lunar node

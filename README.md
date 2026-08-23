@@ -255,19 +255,51 @@ Chiron, no fixed stars, and the same numbers you had. The data files are
 what make it worth installing.
 
 `sweph` bundles none, which is deliberate and is why it is 6 MB rather than
-30. Fetch only the ones you need from the official Swiss Ephemeris
-repository:
+30. There is a command to fetch them:
 
 ```bash
-mkdir -p ephe && cd ephe
-BASE=https://raw.githubusercontent.com/aloistr/swisseph/master/ephe
-curl -O $BASE/sepl_18.se1     # planets,  473 kB
-curl -O $BASE/semo_18.se1     # moon,     1.2 MB
-curl -O $BASE/seas_18.se1     # asteroids incl. Chiron, 218 kB
-curl -O $BASE/sefstars.txt    # fixed stars, 133 kB
+npx ephemeris-fetch-ephe --dir ./ephe
 ```
 
-**2.1 MB in total**, and it downloads in about a second. Then:
+```
+  fetching       sepl_18.se1 ... 473 kB
+  fetching       semo_18.se1 ... 1274 kB
+  fetching       seas_18.se1 ... 218 kB
+  fetching       sefstars.txt ... 133 kB
+
+Ready in /your/project/ephe
+```
+
+**2.1 MB in total**, about a second. Run it again and it leaves the files
+alone; corrupt one and it replaces it. `--only sepl_18.se1,semo_18.se1`
+takes a subset, and `--help` lists what is available.
+
+Downloads are pinned to a specific upstream commit and verified against a
+recorded SHA-256, so you get the same bytes every time and a substituted or
+truncated file is refused rather than written. The same thing is available
+programmatically:
+
+```javascript
+await ephemeris.fetchEphemeris({ ephePath: './ephe' });
+```
+
+**It is never automatic, and that is deliberate.** There is no postinstall
+hook, and nothing downloads while you are asking for a planet. A library
+that reaches the network mid-calculation breaks in CI, behind a corporate
+proxy, and on an airgapped machine, and does it at the least convenient
+moment. This package dropped a postinstall script back in 2.1.0 and is not
+getting another one. The data files are also Swiss Ephemeris licensed, so
+fetching them should be something you chose.
+
+When a body needs a file you do not have, the reason says so and names the
+command:
+
+```
+SwissEph file 'seas_18.se1' not found in PATH '.'.
+Run: npx ephemeris-fetch-ephe --dir <dir>, then pass that directory as ephePath.
+```
+
+Then:
 
 ```javascript
 ephemeris.use(ephemeris.swisseph({ ephePath: './ephe' }));
