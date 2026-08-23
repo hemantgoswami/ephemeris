@@ -500,3 +500,25 @@ test('the published package points at its type definitions', function (t) {
   t.ok(pkg.files.indexOf(pkg.main) >= 0, 'as is the entry point')
   t.end()
 })
+
+test('maintainer only documentation stays out of the published package', function (t) {
+  const fs = require('fs')
+  const pkg = require('../package.json')
+
+  // npm renders the README as the package page, so anything shipped is on
+  // display to everyone installing the library. CONTRIBUTING.md carries the
+  // release runbook and belongs in the repository only.
+  const repoOnly = ['CONTRIBUTING.md']
+
+  repoOnly.forEach(function (name) {
+    t.ok(fs.existsSync(path.join(__dirname, '..', name)), name + ' exists in the repo')
+    t.equal(pkg.files.indexOf(name), -1, name + ' is not in files, so it does not ship')
+  })
+
+  const readme = fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf8')
+  t.equal(readme.indexOf('Trusted publishers'), -1,
+    'the shipped README does not carry the release setup')
+  t.equal(readme.indexOf('Workflow filename'), -1,
+    'nor the workflow name it depends on')
+  t.end()
+})

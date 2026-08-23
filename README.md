@@ -64,6 +64,11 @@ report `undefined` rather than a permanent `false`; their
 `apparentLongitudeDdPerDay` is still given, and is always positive. A star
 reports `undefined` for both, since it does not move against the ecliptic.
 
+Rise and set times are the analytic approximation from `transit.js`. They
+agree with a bisection on the library's own elevation to within a few
+seconds, at every latitude tested up to 78 degrees north. A body that never
+rises or sets on a given day simply has no rise and set fields.
+
 #### TypeScript
 
 Types ship with the package, hand written in `index.d.ts`, so there is
@@ -162,74 +167,19 @@ do not have them.
 }
 ```
 
-### Development
+### Contributing
 
-```
-yarn install
-yarn run lint      # eslint, flat config in eslint.config.js
-yarn run test      # tape, runs lint first
-```
-
-With [mise](https://mise.jdx.dev) installed, `mise run test`, `mise run lint`
-and `mise run lintfix` do the same.
-
-`.github/workflows/ci.yml` runs the same lint and tests on every pull
-request and every push to `main`, across Node 22, 24 and 26. Node 24 is
-the version the dev toolchain pins in `mise.toml`.
-
-`no-var` and `prefer-const` are errors, not warnings, so the old ES5 style
-cannot creep back one file at a time. `index.d.ts` is maintained by hand and
-is not generated from the sources.
-
-### Releasing
-
-Merging to `main` is the release. `.github/workflows/release.yml` checks
-every push to `main`: if the version in `package.json` is not on npm yet, it
-lints, tests, publishes, then creates the `v<version>` tag and a GitHub
-Release whose notes are the changelog entry for that version. A push that
-does not change the version does nothing and passes.
-
-So to ship a release:
-
-1. Bump `version` in `package.json` and add a `#### <version>` changelog
-   entry below, on a branch
-2. Merge it to `main`
-
-That is the whole process. There is no tag to push and no release to create
-by hand; the workflow does both after the publish succeeds, so a tag only
-ever exists for a version that actually shipped.
-
-Because any merge that bumps the version ships to npm, treat the version
-field as the release switch: leave it alone in ordinary pull requests.
-
-Authentication is npm trusted publishing, so there is no token stored in the
-repository. The one time setup on npmjs.com, under the ephemeris package,
-Settings, Trusted publishers, is a GitHub Actions publisher with:
-
-| Field | Value |
-| --- | --- |
-| Organization or user | `hemantgoswami` |
-| Repository | `ephemeris` |
-| Workflow filename | `release.yml` |
-| Environment | leave blank |
-
-The workflow filename has to match exactly, and the environment field has to
-be blank because the job does not declare one. Renaming or moving the
-workflow means updating the trusted publisher entry, or the publish is
-rejected.
-
-Rise and set times are the analytic approximation from `transit.js`. They
-agree with a bisection on the library's own elevation to within a few
-seconds, at every latitude tested up to 78 degrees north. A body that never
-rises or sets on a given day simply has no rise and set fields.
-
-Known gap: `processor.test()` in `src/astronomy/moshier/processor.js` is a
-self check inherited from the original port. Its expected topocentric and
-refraction values have never matched what this code produces, so it is not
-part of `yarn run test`. The apparent geocentric positions it checks do
-match.
+Setting the project up, the lint and test commands, and how a release is
+cut are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Changelog
+
+#### 3.0.1
+* Moves the development and release instructions out of the README and into
+  `CONTRIBUTING.md`, which is not in `files` and so does not ship. npm
+  renders the README as the package page, so those sections were showing up
+  there as a maintainer runbook in front of anyone looking at the library.
+  No code change.
 
 #### 3.0.0 Breaking Changes - Please read carefully
 * Reports `is_retrograde` only for bodies that can actually be retrograde,
