@@ -1,6 +1,19 @@
 # Changelog
 
-## 3.0.1
+## 3.1.0
+* Adds the lunar nodes as bodies: `rahu` and `ketu` for the mean nodes, and
+  `trueRahu` and `trueKetu` for the osculating ones. They come back from
+  `getAllPlanets` like anything else, and `getPlanet` accepts them.
+  The mean node was already being computed inside the library and thrown
+  away: `gplan` derives the moon's mean longitude and its mean distance from
+  the node, and the node is the difference. It agrees with Meeus 47.7 to
+  within 0.34 arcsec from 1700 to 2150. The true node comes from the
+  orbital plane the moon is on at the instant, and lands within 0.37 arcsec
+  of the moon's own longitude at a northward ecliptic crossing, which is the
+  definition of the node.
+  These are tropical longitudes of date, like everything else here. There is
+  no ayanamsa, so `rahu` is not the sidereal Rahu until you subtract one.
+  Nothing that already existed changed value.
 * Moves the development and release instructions out of the README and into
   `CONTRIBUTING.md`, which is not in `files` and so does not ship. npm
   renders the README as the package page, so those sections were showing up
@@ -8,8 +21,8 @@
 * Moves the changelog into this file. The README keeps a pointer and the one
   note that matters before upgrading. npm has no changelog of its own, it
   only renders the README, so the release notes on GitHub are now the
-  per-version view and this file is the full history.
-* No code change in either.
+  per-version view and this file is the full history. Both are documentation
+  only.
 
 ## 3.0.0 Breaking Changes - Please read carefully
 * Reports `is_retrograde` only for bodies that can actually be retrograde,

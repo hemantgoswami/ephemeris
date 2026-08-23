@@ -33,9 +33,39 @@ const venus = ephemeris.getPlanet('venus', dateObj, 10.0014, 53.5653, 0);
 
 // the names getPlanet accepts
 ephemeris.getBodyNames();
-// [ 'sun', 'mercury', 'venus', 'moon', 'mars', 'jupiter',
-//   'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'sirius' ]
+// [ 'sun', 'mercury', 'venus', 'moon', 'mars', 'jupiter', 'saturn',
+//   'uranus', 'neptune', 'pluto', 'chiron', 'sirius',
+//   'rahu', 'ketu', 'trueRahu', 'trueKetu' ]
 ```
+
+#### Lunar nodes: Rahu and Ketu
+
+The two points where the moon's orbit crosses the ecliptic are included as
+bodies, so they come back from `getAllPlanets` like anything else.
+
+```javascript
+const nodes = ephemeris.getAllPlanets(dateObj, 10.0014, 53.5653, 0).observed;
+
+nodes.rahu.apparentLongitudeDd;      // 342.16922, mean ascending node
+nodes.ketu.apparentLongitudeDd;      // 162.16922, always rahu + 180
+nodes.trueRahu.apparentLongitudeDd;  // 340.95728, osculating
+nodes.trueKetu.apparentLongitudeDd;  // 160.95728
+```
+
+| | `rahu` and `ketu` | `trueRahu` and `trueKetu` |
+| --- | --- | --- |
+| from | the moon's mean elements | the orbital plane the moon is on right now |
+| motion | steady -0.052954 degrees a day, always retrograde | wanders, and moves forwards about a quarter of the time |
+| differ from the mean by | - | up to 1.9 degrees |
+| usually wanted by | Vedic work | much Western practice, matching Swiss Ephemeris `SE_TRUE_NODE` |
+
+A node is a direction, not an object, so `geocentricDistanceKm` is always
+`-1` and there is no rise, set or altitude for it.
+
+**These are tropical longitudes**, of date, exactly like every other
+longitude here. Sidereal work needs an ayanamsa subtracted, and this library
+does not provide one, so `rahu` is not the sidereal Rahu until you subtract
+your chosen ayanamsa yourself.
 
 The date is read in UTC. Passing `null` as the date uses the current time.
 `getPlanet` throws if it is given a name that is not in `getBodyNames()`.

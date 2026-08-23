@@ -4,6 +4,7 @@ const delta = require('./delta')
 const julian = require('./julian')
 const kepler = require('./kepler')
 const moon = require('./moon')
+const node = require('./node')
 const planet = require('./planet')
 const star = require('./star')
 const sun = require('./sun')
@@ -77,7 +78,9 @@ processor.calc = function (date, body) {
       moon.calc()
       break
     default:
-      if (body.raMotion) { // star
+      if (body.lunarNode) { // a point on the ecliptic, not a body
+        node.calc(date, body)
+      } else if (body.raMotion) { // star
         star.calc(body)
       } else { // planet
         planet.calc(body)
