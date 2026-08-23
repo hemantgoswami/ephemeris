@@ -170,7 +170,7 @@ kepler.calc = function (date, body, rect, polar) {
         r = meandistance * (1 - eccent * eccent) / (1 + eccent * Math.cos(W))
       }
     }
-// parabcon:
+    // parabcon:
     /* The heliocentric ecliptic longitude of the object
      * is given by
      *   tan(longitude - ascnode) = cos(inclination) * tan(alat)
@@ -185,7 +185,7 @@ kepler.calc = function (date, body, rect, polar) {
     W = sino * Math.sin(inclination)
     W = Math.asin(W)
   }
-// kepdon:
+  // kepdon:
 
   /* Convert to rectangular coordinates,
    * using the perturbed latitude.

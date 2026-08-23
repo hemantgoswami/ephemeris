@@ -17,7 +17,12 @@ run = "yarn run test"
 
 [tasks.lint]
 description = "Lint the code"
-run = "eslint . -f"
+run = "yarn run lint"
+
+[tasks.lintfix]
+description = "Lint the code and apply the fixes it can make"
+alias = "lf"
+run = "yarn run lint:fix"
 
 [tasks.info]
 description = "Print project information"

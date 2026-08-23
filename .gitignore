@@ -1,1 +1,20 @@
 play
+
+# Dependencies
+node_modules
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# Editors and OS
+.idea
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*

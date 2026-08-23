@@ -14,6 +14,40 @@ var moshier = {
 
 var processor = {}
 
+/**
+ * Interval, in days, over which apparent ecliptic longitude is sampled to
+ * decide whether a body is moving direct or retrograde. One hour is short
+ * enough to place a station within an hour of the real one, and long enough
+ * that even Pluto's motion stays far above floating point noise.
+ */
+var RETROGRADE_SAMPLE_DAYS = 1 / 24
+
+/**
+ * Build a date record offset from the given one by a number of days. The
+ * shift goes through the julian day so it is independent of the host
+ * machine's timezone and stays valid for dates outside the Date range.
+ */
+function shiftDate (date, days) {
+  var shifted = common.copy({}, date)
+  julian.calc(shifted)
+  return julian.toGregorian({julian: shifted.julian + days})
+}
+
+/**
+ * Signed difference between two ecliptic longitudes in degrees, normalised
+ * into (-180, 180] so a body crossing the 0/360 boundary keeps its sign.
+ */
+function longitudeDifference (after, before) {
+  var difference = (after - before) % 360
+  if (difference > 180) {
+    difference -= 360
+  }
+  if (difference <= -180) {
+    difference += 360
+  }
+  return difference
+}
+
 processor.calc = function (date, body) {
   constant.body = body
 
@@ -31,31 +65,6 @@ processor.calc = function (date, body) {
     date.universalDate.hours + ':' +
     date.universalDate.minutes + ':' +
     (date.universalDate.seconds + date.universalDate.milliseconds / 1000)
-
-  // Adding another date to check if a planet is in retrograde position
-  var retro_date = new Date(date.year, date.month-1, date.day, date.hours, date.minutes, date.seconds)
-  retro_date.setUTCHours(retro_date.getUTCHours() - 1)
-  constant.retro_date = {
-    day: retro_date.getUTCDate(),
-    month: retro_date.getUTCMonth()+1,
-    year: retro_date.getUTCFullYear(),
-    hours: retro_date.getUTCHours(),
-    minutes: retro_date.getUTCMinutes(),
-    seconds: retro_date.getUTCSeconds()
-  }
-  julian.calc(constant.retro_date)
-  delta.calc(constant.retro_date)
-  constant.retro_date.universalDate = julian.toGregorian({
-    julian: date.universal
-  })
-
-  constant.retro_date.universalDateString =
-      constant.retro_date.universalDate.day + '.' +
-      constant.retro_date.universalDate.month + '.' +
-      constant.retro_date.universalDate.year + ' ' +
-      constant.retro_date.universalDate.hours + ':' +
-      constant.retro_date.universalDate.minutes + ':' +
-      (constant.retro_date.universalDate.seconds + constant.retro_date.universalDate.milliseconds / 1000)
 
   // First calculate the earth
   kepler.calc(date, moshier.body.earth)
@@ -75,6 +84,29 @@ processor.calc = function (date, body) {
       }
       break
   }
+}
+
+/**
+ * Calculate a body and, for anything that moves against the ecliptic, the
+ * direction and rate of its apparent motion. The body is calculated twice:
+ * once a short interval before the requested date and once at the date
+ * itself, so the state left behind is always the state for the date asked
+ * for.
+ */
+processor.calcWithMotion = function (date, body) {
+  if (body.raMotion) { // a star, which has no apparent retrograde motion
+    this.calc(date, body)
+    return
+  }
+
+  this.calc(shiftDate(date, -RETROGRADE_SAMPLE_DAYS), body)
+  var before = body.position.apparentLongitude
+
+  this.calc(date, body)
+
+  var motion = longitudeDifference(body.position.apparentLongitude, before)
+  body.position.apparentLongitudeMotion = motion / RETROGRADE_SAMPLE_DAYS
+  body.position.is_retrograde = motion < 0
 }
 
 processor.ecliptic = function (date, observer, body) {
