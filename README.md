@@ -226,6 +226,14 @@ match.
 ### Changelog
 
 #### 3.0.0 Breaking Changes - Please read carefully
+* Removes the unreachable iterative rise and set solver from `transit.js`,
+  about 300 lines. It was never called from anywhere, in any commit, and the
+  `kepler` call inside it was wrong from the initial 2018 commit, so it threw
+  the moment it ran. Nothing changes for callers: the approximate times were
+  always the ones being reported. Removing it also drops the last circular
+  import in the package, `altaz` and `transit`, which made requiring
+  `src/astronomy/moshier/transit` before the package entry point return a
+  half built module.
 * Fixes rise, set and meridian times falling outside the day they belong
   to. They are measured from the start of the UT day holding the requested
   instant, but the instant itself is terrestrial time, and nothing wrapped
