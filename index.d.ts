@@ -16,6 +16,16 @@ declare namespace ephemeris {
     | 'pluto'
     | 'chiron'
     | 'sirius'
+    | LunarNode
+
+  /**
+   * The lunar nodes, where the moon's orbit crosses the ecliptic. Rahu is
+   * the ascending node and Ketu the descending one, always 180 degrees
+   * apart. The unprefixed pair are the mean nodes, from the moon's mean
+   * elements; the true pair are the osculating nodes, from the orbital
+   * plane the moon is on at the instant. They differ by up to 1.9 degrees.
+   */
+  type LunarNode = 'rahu' | 'ketu' | 'trueRahu' | 'trueKetu'
 
   /** A calendar date broken out of a julian day. */
   interface UniversalDate {
@@ -99,7 +109,11 @@ declare namespace ephemeris {
      * positive. Undefined for stars, which have no such motion.
      */
     apparentLongitudeDdPerDay: number | undefined
-    /** Distance from the earth where the body reports one, else a sentinel. */
+    /**
+     * Distance from the earth where the body reports one, else a sentinel.
+     * Always -1 for the lunar nodes, which are directions rather than
+     * objects and so have no distance.
+     */
     geocentricDistanceKm: number
     /**
      * True when apparent longitude is decreasing.

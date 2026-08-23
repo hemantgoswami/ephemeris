@@ -308,8 +308,32 @@ const OBSERVED_KEYS = [
 
 const BODY_NAMES = [
   'sun', 'mercury', 'venus', 'moon', 'mars', 'jupiter',
-  'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'sirius'
+  'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'sirius',
+  'rahu', 'ketu', 'trueRahu', 'trueKetu'
 ]
+
+const MEAN_NODES = ['rahu', 'ketu']
+const TRUE_NODES = ['trueRahu', 'trueKetu']
+const ALL_NODES = MEAN_NODES.concat(TRUE_NODES)
+
+/** Meeus, Astronomical Algorithms, equation 47.7. */
+function meeusMeanNode (julian) {
+  const T = (julian - 2451545.0) / 36525
+  const omega = 125.0445479 - 1934.1362891 * T + 0.0020754 * T * T +
+    T * T * T / 467441 - T * T * T * T / 60616000
+  return ((omega % 360) + 360) % 360
+}
+
+function separation (a, b) {
+  let difference = a - b
+  if (difference > 180) {
+    difference -= 360
+  }
+  if (difference <= -180) {
+    difference += 360
+  }
+  return difference
+}
 
 test('the result keeps its documented shape', function (t) {
   const result = ephemeris.getAllPlanets(at('2015-08-10T17:09:01Z'),
@@ -565,5 +589,149 @@ test('the changelog ships and the release notes are wired to it', function (t) {
   // an entry written under a mistyped heading.
   t.equal(versions[0], pkg.version,
     'the newest changelog entry is ' + versions[0] + ', the version being released')
+  t.end()
+})
+
+/*
+ * Lunar nodes. Rahu and Ketu are points where the moon's orbit crosses the
+ * ecliptic, carried as pseudo bodies.
+ */
+
+test('the mean node agrees with Meeus over four centuries', function (t) {
+  const julian = require('../src/astronomy/moshier/julian')
+
+  for (let year = 1700; year <= 2150; year += 50) {
+    const when = new Date(Date.UTC(year, 0, 1, 12))
+    const mine = observe('rahu', when.toISOString()).apparentLongitudeDd
+    const theirs = meeusMeanNode(julian.calc({
+      year, month: 1, day: 1, hours: 12, minutes: 0, seconds: 0
+    }))
+    const arcsec = Math.abs(separation(mine, theirs)) * 3600
+
+    t.ok(arcsec < 2, year + ': ' + mine.toFixed(5) + ' vs Meeus ' +
+      theirs.toFixed(5) + ', ' + arcsec.toFixed(2) + ' arcsec apart')
+  }
+  t.end()
+})
+
+test('the true node is where the moon actually crosses the ecliptic', function (t) {
+  // At the instant the moon crosses the ecliptic going north, its longitude
+  // is the ascending node. That is the definition, so it is the check.
+  function latitude (when) {
+    return ephemeris.getPlanet('moon', when, 0, 0, 0)
+      .observed.moon.raw.position.polar.latitude
+  }
+  function longitude (when) {
+    const radians = ephemeris.getPlanet('moon', when, 0, 0, 0)
+      .observed.moon.raw.position.polar.longitude
+    return ((radians * 180 / Math.PI) % 360 + 360) % 360
+  }
+
+  const step = 6 * 3600e3
+  let previous = latitude(new Date(Date.UTC(2026, 0, 1)))
+  let found = 0
+
+  for (let t0 = Date.UTC(2026, 0, 1) + step; t0 < Date.UTC(2026, 11, 31) && found < 6; t0 += step) {
+    const current = latitude(new Date(t0))
+    if (previous < 0 && current >= 0) {
+      let low = t0 - step
+      let high = t0
+      for (let i = 0; i < 50; i++) {
+        const mid = (low + high) / 2
+        if (latitude(new Date(mid)) < 0) {
+          low = mid
+        } else {
+          high = mid
+        }
+      }
+      const when = new Date((low + high) / 2)
+      const node = ephemeris.getPlanet('trueRahu', when, 0, 0, 0)
+        .observed.trueRahu.apparentLongitudeDd
+      const arcsec = Math.abs(separation(node, longitude(when))) * 3600
+
+      t.ok(arcsec < 2, when.toISOString().slice(0, 16) + ': trueRahu is ' +
+        arcsec.toFixed(2) + ' arcsec from the moon at the crossing')
+      found++
+    }
+    previous = current
+  }
+
+  t.equal(found, 6, 'found six northward crossings to check')
+  t.end()
+})
+
+test('ketu is exactly opposite rahu', function (t) {
+  const dates = ['1900-06-15T00:00:00Z', '2026-01-01T00:00:00Z', '2099-11-02T18:30:00Z']
+
+  dates.forEach(function (iso) {
+    const result = ephemeris.getAllPlanets(at(iso), 0, 0, 0).observed
+    const mean = separation(result.ketu.apparentLongitudeDd, result.rahu.apparentLongitudeDd)
+    const real = separation(result.trueKetu.apparentLongitudeDd, result.trueRahu.apparentLongitudeDd)
+
+    t.ok(Math.abs(Math.abs(mean) - 180) < 1e-9, iso + ' ketu is 180 from rahu')
+    t.ok(Math.abs(Math.abs(real) - 180) < 1e-9, iso + ' trueKetu is 180 from trueRahu')
+  })
+  t.end()
+})
+
+test('the mean node crawls backwards at a fixed rate', function (t) {
+  const dates = ['1850-04-01T00:00:00Z', '2026-01-01T00:00:00Z', '2140-09-09T00:00:00Z']
+
+  dates.forEach(function (iso) {
+    MEAN_NODES.forEach(function (name) {
+      const node = observe(name, iso)
+      t.equal(node.is_retrograde, true, name + ' is retrograde on ' + iso)
+      t.ok(Math.abs(node.apparentLongitudeDdPerDay - -0.052954) < 1e-4,
+        name + ' moves ' + node.apparentLongitudeDdPerDay.toFixed(6) + ' deg/day')
+    })
+  })
+  t.end()
+})
+
+test('the true node wobbles around the mean and sometimes goes direct', function (t) {
+  let direct = 0
+  let samples = 0
+  let widest = 0
+
+  for (let day = 0; day < 400; day += 3) {
+    const when = new Date(Date.UTC(2026, 0, 1) + day * 86400e3)
+    const result = ephemeris.getAllPlanets(when, 0, 0, 0).observed
+    widest = Math.max(widest, Math.abs(separation(
+      result.trueRahu.apparentLongitudeDd, result.rahu.apparentLongitudeDd)))
+    if (!result.trueRahu.is_retrograde) {
+      direct++
+    }
+    samples++
+  }
+
+  t.ok(direct > 0, 'trueRahu was direct in ' + direct + ' of ' + samples + ' samples')
+  t.ok(direct < samples, 'and retrograde in the rest')
+  t.ok(widest > 0.5 && widest < 3,
+    'it strayed at most ' + widest.toFixed(4) + ' degrees from the mean node')
+  t.end()
+})
+
+test('nodes are directions, so they carry no distance and no altaz', function (t) {
+  ALL_NODES.forEach(function (name) {
+    const node = observe(name, '2026-01-01T00:00:00Z')
+
+    t.equal(node.geocentricDistanceKm, -1, name + ' has the no-distance sentinel')
+    t.equal(node.raw.position.altaz, undefined, name + ' has no altitude or azimuth')
+    t.equal(node.raw.position.polar, undefined, name + ' has no rectangular position')
+    t.ok(node.apparentLongitudeDms360.length > 0, name + ' still has a longitude string')
+  })
+  t.end()
+})
+
+test('adding the nodes left the other bodies alone', function (t) {
+  // The true node computes the moon at three epochs. If that leaked into the
+  // moon's own entry this would move.
+  const result = ephemeris.getAllPlanets(at('2015-08-10T17:09:01Z'),
+    BERLIN.longitude, BERLIN.latitude, BERLIN.height)
+
+  t.equal(result.observed.moon.apparentLongitudeDms360, '92°41\'17"', 'moon unchanged')
+  t.equal(result.observed.sun.apparentLongitudeDms360, '137°45\'39"', 'sun unchanged')
+  t.equal(result.observed.moon.apparentLongitudeDd, 92.68823373136327, 'moon to full precision')
+  t.ok(result.observed.moon.raw.position.altaz.transit, 'moon still has its transit block')
   t.end()
 })

@@ -206,6 +206,32 @@ const body = {
     ra: 0.0,
     dec: 0.0,
     equinox: {julian: 0.0}
+  },
+
+  /*
+   * Lunar nodes
+   *
+   * Not bodies, but the two points where the moon's orbit crosses the
+   * ecliptic. Rahu is the ascending node, going north, and Ketu the
+   * descending one, exactly 180 degrees away.
+   *
+   * rahu and ketu are the mean nodes, from the moon's mean elements, which
+   * always move backwards at a steady 0.0530 degrees a day. trueRahu and
+   * trueKetu are the osculating nodes, from the orbital plane the moon is
+   * actually on, which wander up to about 1.9 degrees either side of the
+   * mean and move forwards roughly a quarter of the time.
+   */
+  rahu: {
+    lunarNode: 'meanAscending'
+  },
+  ketu: {
+    lunarNode: 'meanDescending'
+  },
+  trueRahu: {
+    lunarNode: 'trueAscending'
+  },
+  trueKetu: {
+    lunarNode: 'trueDescending'
   }
 }
 
