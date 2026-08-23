@@ -147,7 +147,7 @@ With [mise](https://mise.jdx.dev) installed, `mise run test`, `mise run lint`
 and `mise run lintfix` do the same.
 
 `.github/workflows/ci.yml` runs the same lint and tests on every pull
-request and every push to `master`, across Node 20, 22 and 24.
+request and every push to `main`, across Node 20, 22 and 24.
 
 ### Releasing
 
@@ -171,9 +171,12 @@ means updating the trusted publisher entry, or the publish is rejected.
 To cut a release:
 
 1. Bump `version` in `package.json` and add a changelog entry, on a branch
-2. Merge it to `master`
-3. `gh release create v2.3.0 --title v2.3.0 --notes "..."`, or use the
-   GitHub UI
+2. Merge it to `main`
+3. Publish a GitHub Release tagged `v2.3.0`, from Releases in the GitHub UI
+   or with `gh release create v2.3.0 --title v2.3.0 --notes "..."`
+
+Merging on its own publishes nothing. The release in step 3 is what starts
+the workflow.
 
 The workflow refuses to publish if the tag does not match the version in
 `package.json`, or if that version is already on npm. Running it by hand
