@@ -58,6 +58,27 @@ and the instant itself, so a station lands within about an hour of the real
 one. Stars report `undefined` for both motion fields, since retrograde
 motion does not apply to them.
 
+#### TypeScript
+
+Types ship with the package, hand written in `index.d.ts`, so there is
+nothing to install from DefinitelyTyped.
+
+```typescript
+import ephemeris = require('ephemeris');
+
+const all = ephemeris.getAllPlanets(new Date(), 10.0014, 53.5653, 0);
+const lon: number = all.observed.venus.apparentLongitudeDd;
+
+// getPlanet narrows the result to the body you asked for, so
+// one.observed.moon type checks and one.observed.venus does not
+const one = ephemeris.getPlanet('moon', null, 0, 0, 0);
+```
+
+`BodyName`, `ObservedBody`, `Observer`, `DateReport` and `Result` are all
+exported for use in your own signatures. Note that `is_retrograde` and
+`apparentLongitudeDdPerDay` are typed as possibly undefined, because stars
+do not have them.
+
 #### Sample output
 
 ```javascript
@@ -150,6 +171,10 @@ and `mise run lintfix` do the same.
 request and every push to `main`, across Node 22, 24 and 26. Node 24 is
 the version the dev toolchain pins in `mise.toml`.
 
+`no-var` and `prefer-const` are errors, not warnings, so the old ES5 style
+cannot creep back one file at a time. `index.d.ts` is maintained by hand and
+is not generated from the sources.
+
 ### Releasing
 
 Merging to `main` is the release. `.github/workflows/release.yml` checks
@@ -196,6 +221,13 @@ match.
 ### Changelog
 
 #### 3.0.0 Breaking Changes - Please read carefully
+* Ships TypeScript definitions in `index.d.ts`. `getPlanet` is generic, so
+  its result is narrowed to the body requested.
+* Modernises the source to ES2022 declarations. Every `var` became `let` or
+  `const`, and `common.copy` takes rest parameters instead of reading
+  `arguments`. The calculation itself is untouched and the output is byte
+  identical, verified across five dates from 1900 to 2099 including the
+  topocentric and transit values.
 * Requires Node 22 or newer. The calculation code is untouched and still
   produces byte identical results on older versions, but `engines` now
   states what is actually tested and supported. This matters because Yarn

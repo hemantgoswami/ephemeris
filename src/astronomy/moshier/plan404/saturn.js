@@ -1,4 +1,4 @@
-var saturn = {
+const saturn = {
   maxargs: 9,
   max_harmonic: [0, 0, 1, 0, 8, 18, 9, 5, 0],
   max_power_of_t: 7,

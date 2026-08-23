@@ -1,18 +1,18 @@
-var aberration = require('./aberration')
-var altaz = require('./altaz')
-var constant = require('./constant')
-var deflection = require('./deflection')
-var epsilon = require('./epsilon')
-var fk4fk5 = require('./fk4fk5')
-var nutation = require('./nutation')
-var precess = require('./precess')
-var util = require('./util')
+const aberration = require('./aberration')
+const altaz = require('./altaz')
+const constant = require('./constant')
+const deflection = require('./deflection')
+const epsilon = require('./epsilon')
+const fk4fk5 = require('./fk4fk5')
+const nutation = require('./nutation')
+const precess = require('./precess')
+const util = require('./util')
 
-var moshier = {
+const moshier = {
   body: require('./body')
 }
 
-var star = {}
+const star = {}
 
 star.calc = function (body) {
   if (!body.isPrepared) {
@@ -23,22 +23,23 @@ star.calc = function (body) {
 }
 
 star.reduce = function (body) {
-  var q = {}, polar = {}
-  var epoch // double
+  const q = {}, polar = {}
+  let epoch // double
+  let m // space motion
 
   /* Convert from RA and Dec to equatorial rectangular direction */
   do {
-    var cosdec = Math.cos(body.dec)
-    var sindec = Math.sin(body.dec)
-    var cosra = Math.cos(body.ra)
-    var sinra = Math.sin(body.ra)
+    const cosdec = Math.cos(body.dec)
+    const sindec = Math.sin(body.dec)
+    const cosra = Math.cos(body.ra)
+    const sinra = Math.sin(body.ra)
     q.longitude = cosra * cosdec
     q.latitude = sinra * cosdec
     q.distance = sindec
 
     /* space motion */
-    var vpi = 21.094952663 * body.velocity * body.parallax
-    var m = {
+    const vpi = 21.094952663 * body.velocity * body.parallax
+    m = {
       longitude: -body.raMotion * cosdec * sinra
         - body.decMotion * sindec * cosra
         + vpi * q.longitude,
@@ -58,7 +59,7 @@ star.reduce = function (body) {
     }
   } while (epoch == constant.b1950)
 
-  var e = {
+  let e = {
     longitude: moshier.body.earth.position.rect.longitude,
     latitude: moshier.body.earth.position.rect.latitude,
     distance: moshier.body.earth.position.rect.distance
@@ -68,8 +69,8 @@ star.reduce = function (body) {
   precess.calc(e, {julian: epoch}, -1)
 
   /* Correct for proper motion and parallax */
-  var T = (moshier.body.earth.position.date.julian - epoch) / 36525
-  var p = {
+  const T = (moshier.body.earth.position.date.julian - epoch) / 36525
+  const p = {
     longitude: q.longitude + T * m.longitude - body.parallax * e.longitude,
     latitude: q.latitude + T * m.latitude - body.parallax * e.latitude,
     distance: q.distance + T * m.distance - body.parallax * e.distance
@@ -94,7 +95,7 @@ star.reduce = function (body) {
   p.latitude /= constant.EO
   p.distance /= constant.EO
 
-  var temp = {
+  let temp = {
     longitude: p.longitude,
     latitude: p.latitude,
     distance: p.distance
@@ -145,7 +146,7 @@ star.reduce = function (body) {
 
   // prepare for display
   body.position.apparentLongitude = body.position.apparent.dRA
-  var dmsLongitude = util.dms(body.position.apparentLongitude)
+  const dmsLongitude = util.dms(body.position.apparentLongitude)
   body.position.apparentLongitudeString =
     dmsLongitude.degree + '\u00B0' +
     dmsLongitude.minutes + '\'' +
@@ -196,8 +197,8 @@ star.prepare = function (body) {
   /* read the declination */
   if (!body.dec) {
     /* the '-' sign may appaer at any part of hmsDec */
-    var sign = body.hmsDec.hours < 0 || body.hmsDec.minutes < 0 || body.hmsDec.seconds < 0 ? -1 : 1
-    var z = (3600 * Math.abs(body.hmsDec.hours) + 60 * Math.abs(body.hmsDec.minutes) + Math.abs(body.hmsDec.seconds)) / constant.RTS
+    const sign = body.hmsDec.hours < 0 || body.hmsDec.minutes < 0 || body.hmsDec.seconds < 0 ? -1 : 1
+    const z = (3600 * Math.abs(body.hmsDec.hours) + 60 * Math.abs(body.hmsDec.minutes) + Math.abs(body.hmsDec.seconds)) / constant.RTS
     body.dec = sign < 0 ? -z : z
   }
 

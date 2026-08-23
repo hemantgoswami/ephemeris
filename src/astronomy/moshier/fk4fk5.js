@@ -1,7 +1,7 @@
-var constant = require('./constant')
-var util = require('./util')
+const constant = require('./constant')
+const util = require('./util')
 
-var fk4fk5 = {
+const fk4fk5 = {
   /* Factors to eliminate E terms of aberration */
   A: [-1.62557e-6, -3.1919e-7, -1.3843e-7],
   Ad: [1.244e-3, -1.579e-3, -6.60e-4],
@@ -40,16 +40,16 @@ fk4fk5.calc = function (p, m, el) {
   m.distance *= constant.RTS
 
   /* motion must be in arc seconds per century */
-  var a = this.A[0] * p.longitude
+  let a = this.A[0] * p.longitude
     + this.A[1] * p.latitude
     + this.A[2] * p.distance
 
-  var b = this.Ad[0] * p.longitude
+  let b = this.Ad[0] * p.longitude
     + this.Ad[1] * p.latitude
     + this.Ad[2] * p.distance
 
   /* Remove E terms of aberration from FK4 */
-  var R = [
+  const R = [
     p.longitude - this.A[0] + a * p.longitude,
     p.latitude - this.A[1] + a * p.latitude,
     p.distance - this.A[2] + a * p.distance,
@@ -58,15 +58,15 @@ fk4fk5.calc = function (p, m, el) {
     m.distance - this.Ad[2] + b * p.distance
   ]
 
-  var u_i = 0
-  var v_i = 0
+  let u_i = 0
+  let v_i = 0
 
   /* Perform matrix multiplication */
-  var v = this.Mat
-  var M = []
-  for (var i = 0; i < 6; i++) {
+  const v = this.Mat
+  const M = []
+  for (let i = 0; i < 6; i++) {
     M[i] = 0.0
-    for (var j = 0; j < 6; j++) {
+    for (let j = 0; j < 6; j++) {
       M[i] += R[u_i++] * v[v_i++] // *u++ * *v++;
     }
   }
@@ -81,7 +81,7 @@ fk4fk5.calc = function (p, m, el) {
    * in radian measure.
    */
   b = p.longitude * p.longitude + p.latitude * p.latitude
-  var c = b + p.distance * p.distance
+  let c = b + p.distance * p.distance
   a = Math.sqrt(c)
 
   el.ra = util.zatan2(p.longitude, p.latitude)

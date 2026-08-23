@@ -1,6 +1,6 @@
-var constant = require('./constant')
+const constant = require('./constant')
 
-var delta = {}
+const delta = {}
 
 /**
  * Morrison and Stephenson (2004)
@@ -86,9 +86,9 @@ delta.TABEND = 2011
 delta.TABSIZ = delta.TABEND - delta.TABSTART + 1
 
 delta.calc = function (date) {
-  var p, B // double
-  var diff = [0, 0, 0, 0, 0, 0] // int
-  var i, iy // int
+  let p, B // double
+  const diff = [0, 0, 0, 0, 0, 0] // int
+  let i, iy // int
 
   if (constant.dtgiven) {
     date.delta = constant.dtgiven
@@ -103,21 +103,21 @@ delta.calc = function (date) {
        and long-term curve evaluated at 100 years later. */
 
       /* Last tabulated delta T value. */
-      var a = this.dt[this.TABSIZ - 1] / 100
+      const a = this.dt[this.TABSIZ - 1] / 100
       /* Approximate slope in past 10 years. */
-      var b = (this.dt[this.TABSIZ - 1] - this.dt[this.TABSIZ - 11]) / 1000
+      const b = (this.dt[this.TABSIZ - 1] - this.dt[this.TABSIZ - 11]) / 1000
 
       /* Long-term curve 100 years hence. */
       B = (this.TABEND + 100 - 1820) / 100
-      var m0 = 32 * B * B - 20
+      const m0 = 32 * B * B - 20
       /* Its slope. */
-      var m1 = 0.64 * B
+      const m1 = 0.64 * B
 
       /* Solve for remaining coefficients of an interpolation polynomial
        that agrees in value and slope at both ends of the 100-year
        interval. */
-      var d = 2.0e-6 * (50 * (m1 + b) - m0 + a)
-      var c = 1.0e-4 * (m0 - a - 100 * b - 1.0e6 * d)
+      const d = 2.0e-6 * (50 * (m1 + b) - m0 + a)
+      const c = 1.0e-4 * (m0 - a - 100 * b - 1.0e6 * d)
 
       /* Note, the polynomial coefficients do not depend on Y.
        A given tabulation and long-term formula
@@ -161,7 +161,7 @@ delta.calc = function (date) {
       iy = Math.floor(p - this.TABSTART)
       /* Zeroth order estimate is value at start of year */
       date.delta = this.dt[iy]
-      var k = iy + 1
+      let k = iy + 1
       if (k < this.TABSIZ) {
         /* The fraction of tabulation interval */
         p = date.j2000 - p

@@ -1,30 +1,30 @@
-var common = require('../../common')
-var altaz = require('./altaz')
-var body = require('./body')
-var constant = require('./constant')
-var constellation = require('./constellation')
-var epsilon = require('./epsilon')
-var kepler = require('./kepler')
-var lonlat = require('./lonlat')
-var nutation = require('./nutation')
-var precess = require('./precess')
-var util = require('./util')
+const common = require('../../common')
+const altaz = require('./altaz')
+const body = require('./body')
+const constant = require('./constant')
+const constellation = require('./constellation')
+const epsilon = require('./epsilon')
+const kepler = require('./kepler')
+const lonlat = require('./lonlat')
+const nutation = require('./nutation')
+const precess = require('./precess')
+const util = require('./util')
 
-var sun = {}
+const sun = {}
 
 sun.calc = function () {
-  var t // double
+  let t // double
 
   body.sun.position = body.sun.position || {}
 
   /* Display ecliptic longitude and latitude. */
-  var ecr = {
+  let ecr = {
     longitude: -body.earth.position.rect.longitude,
     latitude: -body.earth.position.rect.latitude,
     distance: -body.earth.position.rect.distance
   }
 
-  var pol = body.sun.position.equinoxEclipticLonLat = lonlat.calc(ecr, body.earth.position.date, true) // TDT
+  let pol = body.sun.position.equinoxEclipticLonLat = lonlat.calc(ecr, body.earth.position.date, true) // TDT
 
   /* Philosophical note: the light time correction really affects
    * only the Sun's barycentric position; aberration is due to
@@ -36,7 +36,7 @@ sun.calc = function () {
    * correction, however.
    */
   pol.distance = body.earth.position.polar.distance // eapolar[2];
-  for (var i = 0; i < 2; i++) {
+  for (let i = 0; i < 2; i++) {
     t = pol.distance / 173.1446327
     /* Find the earth at time TDT - t */
     kepler.calc({julian: body.earth.position.date.julian - t}, body.earth, ecr, pol)
@@ -50,7 +50,7 @@ sun.calc = function () {
   }
 
   /* position now */
-  var rec = {
+  let rec = {
     longitude: -body.earth.position.rect.longitude, // -rearth[0];
     latitude: -body.earth.position.rect.latitude, // -rearth[1];
     distance: -body.earth.position.rect.distance // -rearth[2];
@@ -72,7 +72,7 @@ sun.calc = function () {
   /* Estimate rate of change of RA and Dec
    * for use by altaz().
    */
-  var d = util.deltap(ecr, rec)
+  const d = util.deltap(ecr, rec)
   /* see util.dms() */
   constant.dradt = d.dr
   constant.ddecdt = d.dd
@@ -104,10 +104,10 @@ sun.calc = function () {
   body.sun.position.apparent = util.showrd(ecr, pol)
 
   /* Show it in ecliptic coordinates */
-  var y = epsilon.coseps * rec.latitude + epsilon.sineps * rec.distance
+  let y = epsilon.coseps * rec.latitude + epsilon.sineps * rec.distance
   y = util.zatan2(rec.longitude, y) + nutation.nutl
   body.sun.position.apparentLongitude = constant.RTD * y
-  var dmsLongitude = util.dms(y)
+  const dmsLongitude = util.dms(y)
   body.sun.position.apparentLongitudeString =
     dmsLongitude.degree + '\u00B0' +
     dmsLongitude.minutes + '\'' +

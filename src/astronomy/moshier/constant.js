@@ -1,4 +1,4 @@
-var constant = {
+const constant = {
   /* Standard epochs.  Note Julian epochs (J) are measured in
    * years of 365.25 days.
    */

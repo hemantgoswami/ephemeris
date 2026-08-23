@@ -1,4 +1,4 @@
-var mercury = {
+const mercury = {
   maxargs: 9,
   max_harmonic: [11, 14, 10, 11, 4, 5, 2, 0, 0],
   max_power_of_t: 6,

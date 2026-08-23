@@ -1,7 +1,7 @@
-var constant = require('./constant')
-var util = require('./util')
+const constant = require('./constant')
+const util = require('./util')
 
-var diurnal = {
+const diurnal = {
   /** Earth radii per au. */
   DISFAC: 0.0
 }
@@ -12,15 +12,15 @@ var diurnal = {
  * annual aberration.  However, the correction is small.
  */
 diurnal.aberration = function (last, ra, dec) {
-  var lha = last - ra
-  var coslha = Math.cos(lha)
-  var sinlha = Math.sin(lha)
-  var cosdec = Math.cos(dec)
-  var sindec = Math.sin(dec)
-  var coslat = Math.cos(constant.DTR * constant.tlat)
+  const lha = last - ra
+  const coslha = Math.cos(lha)
+  const sinlha = Math.sin(lha)
+  const cosdec = Math.cos(dec)
+  const sindec = Math.sin(dec)
+  const coslat = Math.cos(constant.DTR * constant.tlat)
 
-  var N = cosdec != 0.0 ? 1.5472e-6 * constant.trho * coslat * coslha / cosdec : 0.0
-  var D = 1.5472e-6 * constant.trho * coslat * sinlha * sindec
+  const N = cosdec != 0.0 ? 1.5472e-6 * constant.trho * coslat * coslha / cosdec : 0.0
+  const D = 1.5472e-6 * constant.trho * coslat * sinlha * sindec
 
   return {
     ra: ra + N,
@@ -37,42 +37,42 @@ diurnal.parallax = function (last, ra, dec, dist) {
    */
   if (dist > 1758.8) {
     return {
-      ra: ra,
-      dec: dec
+      ra,
+      dec
     }
   }
 
   this.DISFAC = constant.au / (0.001 * constant.aearth)
-  var cosdec = Math.cos(dec)
-  var sindec = Math.sin(dec)
+  const cosdec = Math.cos(dec)
+  const sindec = Math.sin(dec)
 
   /* Observer's astronomical latitude */
-  var x = constant.tlat * constant.DTR
-  var coslat = Math.cos(x)
-  var sinlat = Math.sin(x)
+  let x = constant.tlat * constant.DTR
+  const coslat = Math.cos(x)
+  const sinlat = Math.sin(x)
 
   /* Convert to equatorial rectangular coordinates
    * in which unit distance = earth radius
    */
-  var D = dist * this.DISFAC
-  var p = {
+  let D = dist * this.DISFAC
+  const p = {
     longitude: D * cosdec * Math.cos(ra),
     latitude: D * cosdec * Math.sin(ra),
     distance: D * sindec
   }
-  var dp = {
+  const dp = {
     longitude: -constant.trho * coslat * Math.cos(last),
     latitude: -constant.trho * coslat * Math.sin(last),
     distance: -constant.trho * sinlat
   }
 
   x = p.longitude + dp.longitude
-  var y = p.latitude + dp.latitude
-  var z = p.distance + dp.distance
+  const y = p.latitude + dp.latitude
+  const z = p.distance + dp.distance
   /* topocentric distance */
   D = Math.sqrt(x * x + y * y + z * z)
 
-  var result = util.showcor(p, dp)
+  const result = util.showcor(p, dp)
   return {
     ra: util.zatan2(x, y),
     dec: Math.asin(z / D),

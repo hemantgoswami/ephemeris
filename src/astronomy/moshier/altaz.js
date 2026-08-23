@@ -1,11 +1,11 @@
-var constant = require('./constant')
-var diurnal = require('./diurnal')
-var refraction = require('./refraction')
-var sidereal = require('./sidereal')
-var transit = require('./transit')
-var util = require('./util')
+const constant = require('./constant')
+const diurnal = require('./diurnal')
+const refraction = require('./refraction')
+const sidereal = require('./sidereal')
+const transit = require('./transit')
+const util = require('./util')
 
-var altaz = {
+const altaz = {
   azimuth: 0.0,
   elevation: 0.0,
   refracted_elevation: 0.0
@@ -15,11 +15,11 @@ altaz.calc = function (pol, date) {
   // var TPI = 2 * Math.PI
 
   /** local apparent sidereal time, seconds converted to radians */
-  var last = sidereal.calc(date, constant.tlong) * constant.DTR / 240
+  const last = sidereal.calc(date, constant.tlong) * constant.DTR / 240
   /** local hour angle, radians */
-  var lha = last - pol.longitude
+  let lha = last - pol.longitude
 
-  var result = {
+  const result = {
     dLocalApparentSiderealTime: last,
     localApparentSiderealTime: util.hms(last)
   }
@@ -37,8 +37,8 @@ altaz.calc = function (pol, date) {
    */
 
   result.diurnalAberration = diurnal.aberration(last, pol.longitude, pol.latitude)
-  var ra = result.diurnalAberration.ra
-  var dec = result.diurnalAberration.dec
+  let ra = result.diurnalAberration.ra
+  let dec = result.diurnalAberration.dec
 
   /* Do rise, set, and transit times
    transit.js takes diurnal parallax into account,
@@ -55,21 +55,21 @@ altaz.calc = function (pol, date) {
   /* diurab( last, &ra, &dec ); */
 
   /* Convert ra and dec to altitude and azimuth */
-  var cosdec = Math.cos(dec)
-  var sindec = Math.sin(dec)
+  const cosdec = Math.cos(dec)
+  let sindec = Math.sin(dec)
   lha = last - ra
-  var coslha = Math.cos(lha)
-  var sinlha = Math.sin(lha)
+  let coslha = Math.cos(lha)
+  let sinlha = Math.sin(lha)
 
   /* Use the geodetic latitude for altitude and azimuth */
-  x = constant.DTR * constant.glat
-  var coslat = Math.cos(x)
-  var sinlat = Math.sin(x)
+  let x = constant.DTR * constant.glat
+  const coslat = Math.cos(x)
+  const sinlat = Math.sin(x)
 
-  var N = -cosdec * sinlha
-  var D = sindec * coslat - cosdec * coslha * sinlat
-  var az = constant.RTD * util.zatan2(D, N)
-  var alt = sindec * sinlat + cosdec * coslha * coslat
+  const N = -cosdec * sinlha
+  let D = sindec * coslat - cosdec * coslha * sinlat
+  const az = constant.RTD * util.zatan2(D, N)
+  let alt = sindec * sinlat + cosdec * coslha * coslat
   alt = constant.RTD * Math.asin(alt)
 
   /* Store results */
@@ -85,9 +85,9 @@ altaz.calc = function (pol, date) {
   this.refracted_elevation = alt
 
   /* Convert back to R.A. and Dec. */
-  var x = Math.cos(constant.DTR * alt)
-  var y = Math.sin(constant.DTR * alt)
-  var z = Math.cos(constant.DTR * az)
+  x = Math.cos(constant.DTR * alt)
+  let y = Math.sin(constant.DTR * alt)
+  let z = Math.cos(constant.DTR * az)
   sinlha = -x * Math.sin(constant.DTR * az)
   coslha = y * coslat - x * z * sinlat
   sindec = y * sinlat + x * z * coslat
@@ -118,8 +118,8 @@ altaz.calc = function (pol, date) {
   result.topocentric = {
     altitude: alt,
     azimuth: az,
-    ra: ra,
-    dec: dec,
+    ra,
+    dec,
     dRA: util.hms(ra),
     dDec: util.dms(dec)
   }

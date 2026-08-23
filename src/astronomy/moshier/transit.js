@@ -1,13 +1,13 @@
-var altaz = require('./altaz')
-var body = require('./body')
-var constant = require('./constant')
-var custom_constant = require('../../custom.constant')
-var delta = require('./delta')
-var julian = require('./julian')
-var kepler = require('./kepler')
-var util = require('./util')
+const altaz = require('./altaz')
+const body = require('./body')
+const constant = require('./constant')
+const custom_constant = require('../../custom.constant')
+const delta = require('./delta')
+const julian = require('./julian')
+const kepler = require('./kepler')
+const util = require('./util')
 
-var transit = {
+const transit = {
   /** Earth radii per au */
   DISFAC: 2.3454780e4,
 
@@ -39,18 +39,19 @@ var transit = {
  * assuming RA and Dec change uniformly with time
  */
 transit.calc = function (date, lha, dec) {
-  var NR = [], YR = []
+  const NR = [], YR = []
+  let D // parallax for the moon, rate denominator later
 
   this.f_trnsit = false
   /* Initialize to no-event flag value. */
   this.r_rise = -10.0
   this.r_set = -10.0
   /* observer's geodetic latitude, in radians */
-  var x = constant.glat * constant.DTR
-  var coslat = Math.cos(x)
-  var sinlat = Math.sin(x)
-  var cosdec = Math.cos(dec)
-  var sindec = Math.sin(dec)
+  let x = constant.glat * constant.DTR
+  const coslat = Math.cos(x)
+  const sinlat = Math.sin(x)
+  const cosdec = Math.cos(dec)
+  const sindec = Math.sin(dec)
 
   this.southern_hemisphere = sinlat < 0
 
@@ -59,7 +60,7 @@ transit.calc = function (date, lha, dec) {
   x = Math.floor(date.universal - 0.5) + 0.5 // UT
   x = (date.universal - x) * constant.TPI // UT
   /* adjust local hour angle */
-  var y = lha
+  let y = lha
   /* printf ("%.7f,", lha); */
   while (y < -Math.PI) {
     y += constant.TPI
@@ -67,12 +68,12 @@ transit.calc = function (date, lha, dec) {
   while (y > Math.PI) {
     y -= constant.TPI
   }
-  var lhay = y
+  const lhay = y
   y = y/(-constant.dradt/constant.TPI + 1.00273790934)
   this.r_trnsit = x - y
   /* printf ("rt %.7f ", r_trnsit); */
   /* Ordinarily never print here. */
-  var result = {
+  const result = {
     approxLocalMeridian: util.hms (this.r_trnsit),
     UTdate: this.r_trnsit/constant.TPI
   }
@@ -93,15 +94,16 @@ transit.calc = function (date, lha, dec) {
       /* Moon, elevation = -34' - semidiameter + parallax
        * semidiameter = 0.272453 * parallax + 0.0799"
        */
-      case 'moon':
-        var N = 1/(this.DISFAC*constant.body.position.polar.distance)
-        var D = Math.asin(N) /* the parallax */
+      case 'moon': {
+        const N = 1/(this.DISFAC*constant.body.position.polar.distance)
+        D = Math.asin(N) /* the parallax */
         this.semidiameter = 0.2725076*D + 3.874e-7
         NR[0] = NR[1] = -9.890199094634534e-3 - this.semidiameter + D
         this.semidiameter *= constant.RTD
         this.elevation_threshold = -34/60 - this.semidiameter
         NR[0] = NR[1] = Math.sin(NR[0])
         break
+      }
 
       /* Other object */
       default:
@@ -120,10 +122,10 @@ transit.calc = function (date, lha, dec) {
       /* Derivative of y with respect to declination
        * times rate of change of declination:
        */
-      var z = -constant.ddecdt*(sinlat + this.COSZEN*sindec)
+      let z = -constant.ddecdt*(sinlat + this.COSZEN*sindec)
       z /= constant.TPI*coslat*cosdec*cosdec
       /* Derivative of acos(y): */
-      var zArr = []
+      const zArr = []
       zArr[0] = z / Math.sqrt(1 - YR[0]*YR[0])
       zArr[1] = z / Math.sqrt(1 - YR[1]*YR[1])
       YR[0] = Math.acos(YR[0])
@@ -150,7 +152,7 @@ transit.calc = function (date, lha, dec) {
 
 /** Compute estimate of lunar rise and set times for iterative solution. */
 transit.iterator = function (time, callback) {
-  var date = {
+  const date = {
     julian: time
   }
 
@@ -165,12 +167,13 @@ transit.iterator = function (time, callback) {
 
 /** Iterative computation of rise, transit, and set times. */
 transit.iterateTransit = function (callback) {
-  var date, t0 // double
-  var isPrtrnsit = false
-  var loopctr = 0
+  let date, t0 // double
+  let result
+  let isPrtrnsit = false
+  let loopctr = 0
   // var retry = 0;
   /* Start iteration at time given by the user. */
-  var t1 = body.earth.position.date.universal // UT
+  let t1 = body.earth.position.date.universal // UT
 
   /* Find transit time. */
   do {
@@ -187,8 +190,8 @@ transit.iterateTransit = function (callback) {
   if (loopctr <= 10) {
     this.t_trnsit = t1
     this.elevation_trnsit = altaz.elevation
-    var trnsit1 = this.r_trnsit
-    var set1 = this.r_set
+    const trnsit1 = this.r_trnsit
+    const set1 = this.r_set
     if (!this.f_trnsit) {
       /* Rise or set time not found. Apply a search technique to
        check near inferior transit if object is above horizon now. */
@@ -200,7 +203,7 @@ transit.iterateTransit = function (callback) {
       // goto prtrnsit;
     } else {
       /* Set current date to be that of the transit just found. */
-      var date_trnsit = date
+      const date_trnsit = date
       t1 = date + this.r_rise / constant.TPI
       /* Choose rising no later than transit. */
       if (t1 >= this.t_trnsit) {
@@ -234,7 +237,7 @@ transit.iterateTransit = function (callback) {
       } while (Math.abs (t1 - t0) > .0001)
 
       if (!isPrtrnsit) {
-        var rise1 = this.r_rise
+        const rise1 = this.r_rise
         this.t_rise = t1
 
         /* Set current date to be that of the transit. */
@@ -279,7 +282,7 @@ transit.iterateTransit = function (callback) {
       }
     }
     // prtrnsit:
-    var result = {}
+    result = {}
     result.localMeridianTransit = julian.toGregorian ({julian: this.t_trnsit})
     if (this.t_rise != -1.0) {
       result.riseDate = julian.toGregorian ({julian: this.t_rise})
@@ -315,18 +318,18 @@ transit.iterateTransit = function (callback) {
  * or next inferior transits to find an event more reliably.
  */
 transit.noRiseSet = function (callback) {
-  var t_trnsit0 = this.t_trnsit // double
-  var el_trnsit0 = this.elevation_trnsit // double
+  const t_trnsit0 = this.t_trnsit // double
+  const el_trnsit0 = this.elevation_trnsit // double
 
   /* Step time toward previous inferior transit to find
    whether a rise event was missed. The step size is a function
    of the azimuth and decreases near the transit time. */
-  var t_above = t_trnsit0
-  var el_above = el_trnsit0
-  var t_below = -1.0
-  var el_below = el_above
-  var t = t_trnsit0 - 0.25
-  var e = 1.0
+  let t_above = t_trnsit0
+  let el_above = el_trnsit0
+  let t_below = -1.0
+  let el_below = el_above
+  let t = t_trnsit0 - 0.25
+  let e = 1.0
   while (e > 0.005) {
     this.iterator (t, callback)
     if (altaz.elevation > this.elevation_threshold) {
@@ -424,14 +427,14 @@ transit.noRiseSet = function (callback) {
  * after the event has been bracketed in time.
  */
 transit.searchHalve = function (t1, y1, t2, y2, callback) {
-  var e2 = y2 - this.elevation_threshold
-  var tm = 0.5 * (t1 + t2)
+  let e2 = y2 - this.elevation_threshold
+  let tm = 0.5 * (t1 + t2)
 
   while (Math.abs(t2 - t1) > .00001) {
     /* Evaluate at middle of current interval. */
     tm = 0.5 * (t1 + t2)
     this.iterator (tm, callback)
-    var em = altaz.elevation - this.elevation_threshold
+    const em = altaz.elevation - this.elevation_threshold
     /* Replace the interval boundary whose error has the same sign as em. */
     if (em * e2 > 0) {
       t2 = tm

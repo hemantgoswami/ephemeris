@@ -1,4 +1,4 @@
-var moonlat = {
+const moonlat = {
   maxargs: 14,
   max_harmonic: [0, 26, 29, 8, 3, 5, 0, 0, 0, 6, 5, 3, 5, 1, 0, 0, 0, 0],
   max_power_of_t: 3,

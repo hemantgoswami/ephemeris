@@ -1,18 +1,18 @@
-var aberration = require('./aberration')
-var altaz = require('./altaz')
-var constant = require('./constant')
-var epsilon = require('./epsilon')
-var gplan = require('./gplan')
-var lonlat = require('./lonlat')
-var nutation = require('./nutation')
-var precess = require('./precess')
-var util = require('./util')
+const aberration = require('./aberration')
+const altaz = require('./altaz')
+const constant = require('./constant')
+const epsilon = require('./epsilon')
+const gplan = require('./gplan')
+const lonlat = require('./lonlat')
+const nutation = require('./nutation')
+const precess = require('./precess')
+const util = require('./util')
 
-var moshier = {
+const moshier = {
   body: require('./body')
 }
 
-var moon = {
+const moon = {
   /** Right Ascension */
   ra: 0.0,
   /** Declination */
@@ -25,7 +25,7 @@ var moon = {
  * phase of the Moon, etc. for AA.ARC.
  */
 moon.calc = function () {
-  var moonpp = {}, moonpol = {}
+  const moonpp = {}, moonpol = {}
 
   moshier.body.moon.position = {
     polar: {},
@@ -33,7 +33,7 @@ moon.calc = function () {
   }
 
   /** Geometric equatorial coordinates of the earth. */
-  var re = {
+  const re = {
     longitude: moshier.body.earth.position.rect.longitude,
     latitude: moshier.body.earth.position.rect.latitude,
     distance: moshier.body.earth.position.rect.distance
@@ -45,8 +45,8 @@ moon.calc = function () {
 
   /* Calculate for 0.001 day ago */
   this.calcll({julian: moshier.body.earth.position.date.julian - 0.001}, moonpp, moonpol) // TDT - 0.001
-  var ra0 = this.ra
-  var dec0 = this.dec
+  const ra0 = this.ra
+  const dec0 = this.dec
 
   /* Calculate for present instant. */
   moshier.body.moon.position.nutation = this.calcll(moshier.body.earth.position.date, moonpp, moonpol).nutation
@@ -76,7 +76,7 @@ moon.calc = function () {
    */
 
   /* Get apparent coordinates for the earth. */
-  var z = Math.sqrt(re.longitude * re.longitude
+  let z = Math.sqrt(re.longitude * re.longitude
     + re.latitude * re.latitude + re.distance * re.distance
   )
 
@@ -95,10 +95,10 @@ moon.calc = function () {
   re.latitude *= z
   re.distance *= z
 
-  var pe = lonlat.calc(re, moshier.body.earth.position.date, false)
+  const pe = lonlat.calc(re, moshier.body.earth.position.date, false)
 
   /* Find sun-moon-earth angles */
-  var qq = {
+  const qq = {
     longitude: re.longitude + moonpp.longitude,
     latitude: re.latitude + moonpp.latitude,
     distance: re.distance + moonpp.distance
@@ -115,7 +115,7 @@ moon.calc = function () {
     distance: moonpol.distance / constant.Rearth
   }
   moshier.body.moon.position.apparentLongitude = moshier.body.moon.position.apparentGeocentric.dLongitude
-  var dmsLongitude = util.dms(moshier.body.moon.position.apparentGeocentric.longitude)
+  const dmsLongitude = util.dms(moshier.body.moon.position.apparentGeocentric.longitude)
   moshier.body.moon.position.apparentLongitudeString =
     dmsLongitude.degree + '\u00B0' +
     dmsLongitude.minutes + '\'' +
@@ -128,7 +128,7 @@ moon.calc = function () {
 
   moshier.body.moon.position.geocentricDistance = moonpol.distance / constant.Rearth
 
-  var x = constant.Rearth / moonpol.distance
+  let x = constant.Rearth / moonpol.distance
   moshier.body.moon.position.dHorizontalParallax = Math.asin(x)
   moshier.body.moon.position.horizontalParallax = util.dms(Math.asin(x))
 
@@ -154,7 +154,7 @@ moon.calc = function () {
   x = moonpol.longitude - pe.longitude
   x = util.modtp(x) * constant.RTD
   /* difference in longitude */
-  var y = Math.floor(x / 90)
+  let y = Math.floor(x / 90)
   /* number of quarters */
   x = x - y * 90
   /* phase angle mod 90 degrees */
@@ -179,7 +179,7 @@ moon.calc = function () {
   }
 
   /* Compute and display topocentric position (altaz.js) */
-  var pp = {
+  const pp = {
     longitude: this.ra,
     latitude: this.dec,
     distance: moonpol.distance
@@ -209,10 +209,10 @@ moon.calcll = function (date, rect, pol) {
   pol.longitude -= 0.0118 * constant.DTR * constant.Rearth / pol.distance
 
   /* convert to equatorial system of date */
-  var cosB = Math.cos(pol.latitude)
-  var sinB = Math.sin(pol.latitude)
-  var cosL = Math.cos(pol.longitude)
-  var sinL = Math.sin(pol.longitude)
+  const cosB = Math.cos(pol.latitude)
+  const sinB = Math.sin(pol.latitude)
+  let cosL = Math.cos(pol.longitude)
+  let sinL = Math.sin(pol.longitude)
   rect.longitude = cosB * cosL
   rect.latitude = epsilon.coseps * cosB * sinL - epsilon.sineps * sinB
   rect.distance = epsilon.sineps * cosB * sinL + epsilon.coseps * sinB
@@ -221,13 +221,13 @@ moon.calcll = function (date, rect, pol) {
   precess.calc(rect, {julian: moshier.body.earth.position.date.julian}, 1) // TDT
 
   /* Find Euclidean vectors and angles between earth, object, and the sun */
-  var pp = {
+  const pp = {
     longitude: rect.longitude * pol.distance,
     latitude: rect.latitude * pol.distance,
     distance: rect.distance * pol.distance
   }
 
-  var qq = {
+  const qq = {
     longitude: moshier.body.earth.position.rect.longitude + pp.longitude,
     latitude: moshier.body.earth.position.rect.latitude + pp.latitude,
     distance: moshier.body.earth.position.rect.distance + pp.distance
@@ -252,7 +252,7 @@ moon.calcll = function (date, rect, pol) {
   precess.calc(rect, {julian: moshier.body.earth.position.date.julian}, -1) // TDT
 
   /* Correct for nutation at date TDT. */
-  var result = {
+  const result = {
     nutation: nutation.calc({julian: moshier.body.earth.position.date.julian}, rect) // TDT
   }
 
@@ -264,8 +264,8 @@ moon.calcll = function (date, rect, pol) {
    equator into the ecliptic of date. */
   cosL = Math.cos(epsilon.eps + nutation.nuto)
   sinL = Math.sin(epsilon.eps + nutation.nuto)
-  var y = cosL * rect.latitude + sinL * rect.distance
-  var z = -sinL * rect.latitude + cosL * rect.distance
+  const y = cosL * rect.latitude + sinL * rect.distance
+  const z = -sinL * rect.latitude + cosL * rect.distance
   pol.longitude = util.zatan2(rect.longitude, y)
   pol.latitude = Math.asin(z)
 

@@ -1,7 +1,7 @@
-var constant = require('./constant')
-var epsilon = require('./epsilon')
+const constant = require('./constant')
+const epsilon = require('./epsilon')
 
-var precess = {
+const precess = {
   /* In WILLIAMS and SIMON, Laskar's terms of order higher than t^4
    have been retained, because Simon et al mention that the solution
    is the same except for the lower order terms. */
@@ -41,8 +41,8 @@ var precess = {
  * to go from J2000 to J2.
  */
 precess.calc = function (R, date, direction) {
-  var p_i = 0
-  var i // int
+  let p_i = 0
+  let i // int
 
   if (date.julian == constant.j2000) {
     return
@@ -50,7 +50,7 @@ precess.calc = function (R, date, direction) {
   /* Each precession angle is specified by a polynomial in
    * T = Julian centuries from J2000.0.  See AA page B18.
    */
-  var T = (date.julian - constant.j2000) / 36525
+  let T = (date.julian - constant.j2000) / 36525
 
   /* Implementation by elementary rotations using Laskar's expansions.
    * First rotate about the x axis from the initial equator
@@ -63,8 +63,8 @@ precess.calc = function (R, date, direction) {
     /* From J2000 */
     epsilon.calc({julian: constant.j2000})
   }
-  var z = epsilon.coseps * R.latitude + epsilon.sineps * R.distance
-  var x = {
+  let z = epsilon.coseps * R.latitude + epsilon.sineps * R.distance
+  const x = {
     longitude: R.longitude,
     latitude: z,
     distance: -epsilon.sineps * R.latitude + epsilon.coseps * R.distance
@@ -73,8 +73,8 @@ precess.calc = function (R, date, direction) {
   /* Precession in longitude */
   T /= 10
   /* thousands of years */
-  var p = this.pAcof
-  var pA = p[p_i++] // *p++;
+  let p = this.pAcof
+  let pA = p[p_i++] // *p++;
   for (i = 0; i < 9; i++) {
     pA = pA * T + p[p_i++] // *p++;
   }
@@ -83,15 +83,15 @@ precess.calc = function (R, date, direction) {
   /* Node of the moving ecliptic on the J2000 ecliptic. */
   p = this.nodecof
   p_i = 0
-  var W = p[p_i++] // *p++;
+  let W = p[p_i++] // *p++;
   for (i = 0; i < 10; i++) {
     W = W * T + p[p_i++] // *p++;
   }
 
   /* Rotate about z axis to the node. */
   z = direction == 1 ? W + pA : W
-  var B = Math.cos(z)
-  var A = Math.sin(z)
+  let B = Math.cos(z)
+  let A = Math.sin(z)
   z = B * x.longitude + A * x.latitude
   x.latitude = -A * x.longitude + B * x.latitude
   x.longitude = z

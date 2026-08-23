@@ -1,13 +1,20 @@
-var common = {}
+const common = {}
 
-common.copy = function (target /*, source ... */) {
+/**
+ * Copy the own enumerable properties of every source onto the target.
+ *
+ * Sources are applied back to front, so where two of them carry the same
+ * key the earliest source wins. That is the opposite of Object.assign, and
+ * callers rely on it, so keep the direction of the loop.
+ */
+common.copy = function (target, ...sources) {
   if (target) {
-    for (var i = arguments.length - 1; i > 0; i--) {
-      var source = arguments [i]
+    for (let i = sources.length - 1; i >= 0; i--) {
+      const source = sources[i]
       if (source) {
-        for (var key in source) {
+        for (const key in source) {
           if (Object.prototype.hasOwnProperty.call(source, key)) {
-            target [key] = source [key]
+            target[key] = source[key]
           }
         }
       }

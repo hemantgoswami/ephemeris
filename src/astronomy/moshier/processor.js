@@ -1,18 +1,18 @@
-var common = require('../../common')
-var constant = require('./constant')
-var delta = require('./delta')
-var julian = require('./julian')
-var kepler = require('./kepler')
-var moon = require('./moon')
-var planet = require('./planet')
-var star = require('./star')
-var sun = require('./sun')
+const common = require('../../common')
+const constant = require('./constant')
+const delta = require('./delta')
+const julian = require('./julian')
+const kepler = require('./kepler')
+const moon = require('./moon')
+const planet = require('./planet')
+const star = require('./star')
+const sun = require('./sun')
 
-var moshier = {
+const moshier = {
   body: require('./body')
 }
 
-var processor = {}
+const processor = {}
 
 /**
  * Interval, in days, over which apparent ecliptic longitude is sampled to
@@ -20,7 +20,7 @@ var processor = {}
  * enough to place a station within an hour of the real one, and long enough
  * that even Pluto's motion stays far above floating point noise.
  */
-var RETROGRADE_SAMPLE_DAYS = 1 / 24
+const RETROGRADE_SAMPLE_DAYS = 1 / 24
 
 /**
  * Build a date record offset from the given one by a number of days. The
@@ -28,7 +28,7 @@ var RETROGRADE_SAMPLE_DAYS = 1 / 24
  * machine's timezone and stays valid for dates outside the Date range.
  */
 function shiftDate (date, days) {
-  var shifted = common.copy({}, date)
+  const shifted = common.copy({}, date)
   julian.calc(shifted)
   return julian.toGregorian({julian: shifted.julian + days})
 }
@@ -38,7 +38,7 @@ function shiftDate (date, days) {
  * into (-180, 180] so a body crossing the 0/360 boundary keeps its sign.
  */
 function longitudeDifference (after, before) {
-  var difference = (after - before) % 360
+  let difference = (after - before) % 360
   if (difference > 180) {
     difference -= 360
   }
@@ -100,11 +100,11 @@ processor.calcWithMotion = function (date, body) {
   }
 
   this.calc(shiftDate(date, -RETROGRADE_SAMPLE_DAYS), body)
-  var before = body.position.apparentLongitude
+  const before = body.position.apparentLongitude
 
   this.calc(date, body)
 
-  var motion = longitudeDifference(body.position.apparentLongitude, before)
+  const motion = longitudeDifference(body.position.apparentLongitude, before)
   body.position.apparentLongitudeMotion = motion / RETROGRADE_SAMPLE_DAYS
   body.position.is_retrograde = motion < 0
 }
@@ -134,8 +134,8 @@ processor.test = function () {
   this.init()
 
   // test the moon
-  var date = {year: 1986, month: 1, day: 1, hours: 1, minutes: 52, seconds: 0}
-  var body = moshier.body.moon
+  let date = {year: 1986, month: 1, day: 1, hours: 1, minutes: 52, seconds: 0}
+  let body = moshier.body.moon
   this.calc(date, body)
 
   common.assert(date.julian, 2446431.577777778)

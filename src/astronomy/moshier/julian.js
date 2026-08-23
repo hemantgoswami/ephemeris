@@ -1,16 +1,16 @@
-var common = require('../../common')
-var constant = require('./constant')
-var util = require('./util')
+const common = require('../../common')
+const constant = require('./constant')
+const util = require('./util')
 
-var julian = {}
+const julian = {}
 
 julian.calc = function (date) {
-  var b = 0
+  let b = 0
 
   /* The origin should be chosen to be a century year
    * that is also a leap year.  We pick 4801 B.C.
    */
-  var year = date.year + 4800
+  let year = date.year + 4800
   if (date.year < 0) {
     year += 1
   }
@@ -20,15 +20,15 @@ julian.calc = function (date) {
    * days per calendar month.  It starts at 122 = March; January
    * and February come after December.
    */
-  var month = date.month
+  let month = date.month
   if (month <= 2) {
     month += 12
     year -= 1
   }
-  var e = Math.floor((306 * (month + 1)) / 10)
+  const e = Math.floor((306 * (month + 1)) / 10)
 
   // number of centuries
-  var centuries = Math.floor(year / 100)
+  const centuries = Math.floor(year / 100)
 
   if (date.year <= 1582) {
     if (date.year == 1582) {
@@ -45,7 +45,7 @@ julian.calc = function (date) {
   }
 
   // Julian calendar years and leap years
-  var c = Math.floor((36525 * year) / 100)
+  const c = Math.floor((36525 * year) / 100)
 
   /* Add up these terms, plus offset from J 0 to 1 Jan 4801 B.C.
    * Also fudge for the 122 days from the month algorithm.
@@ -65,18 +65,18 @@ julian.calc = function (date) {
 }
 
 julian.toGregorian = function (date) {
-  var J = date.julian
+  const J = date.julian
 
   /* January 1.0, 1 A.D. */
-  var BC = J < 1721423.5 ? 1 : 0
+  const BC = J < 1721423.5 ? 1 : 0
 
-  var jd = Math.floor(J + 0.5)
+  const jd = Math.floor(J + 0.5)
   /* round Julian date up to integer */
 
   /* Find the number of Gregorian centuries
    * since March 1, 4801 B.C.
    */
-  var a = Math.floor((100 * jd + 3204500) / 3652425)
+  const a = Math.floor((100 * jd + 3204500) / 3652425)
 
   /* Transform to Julian calendar by adding in Gregorian century years
    * that are not leap years.
@@ -84,7 +84,7 @@ julian.toGregorian = function (date) {
    * Add 122 days for magic arithmetic algorithm.
    * Add four years to ensure the first leap year is detected.
    */
-  var c = jd + 1486
+  let c = jd + 1486
   if (jd >= 2299160.5) {
     c += a - Math.floor(a / 4)
   } else {
@@ -93,26 +93,26 @@ julian.toGregorian = function (date) {
   /* Offset 122 days, which is where the magic arithmetic
    * month formula sequence starts (March 1 = 4 * 30.6 = 122.4).
    */
-  var d = Math.floor((100 * c - 12210) / 36525)
+  const d = Math.floor((100 * c - 12210) / 36525)
   /* Days in that many whole Julian years */
-  var x = Math.floor((36525 * d) / 100)
+  let x = Math.floor((36525 * d) / 100)
 
   /* Find month and day. */
-  var y = Math.floor(((c - x) * 100) / 3061)
-  var day = Math.floor(c - x - Math.floor((306 * y) / 10))
-  var month = Math.floor(y - 1)
+  const y = Math.floor(((c - x) * 100) / 3061)
+  const day = Math.floor(c - x - Math.floor((306 * y) / 10))
+  let month = Math.floor(y - 1)
   if (y > 13) {
     month -= 12
   }
 
   /* Get the year right. */
-  var year = d - 4715
+  let year = d - 4715
   if (month > 2) {
     year -= 1
   }
 
   /* Fractional part of day. */
-  var dd = day + J - jd + 0.5
+  let dd = day + J - jd + 0.5
 
   if (BC) {
     year = year - 1

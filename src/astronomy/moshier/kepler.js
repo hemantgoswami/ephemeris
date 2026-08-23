@@ -1,13 +1,13 @@
-var constant = require('./constant')
-var epsilon = require('./epsilon')
-var gplan = require('./gplan')
-var precess = require('./precess')
-var util = require('./util')
+const constant = require('./constant')
+const epsilon = require('./epsilon')
+const gplan = require('./gplan')
+const precess = require('./precess')
+const util = require('./util')
 
-var kepler = {}
+const kepler = {}
 
 kepler.calc = function (date, body, rect, polar) {
-  var alat, E, M, W, temp, r // double
+  let alat, E, M, W, temp, r // double
 
   polar = polar || {}
 
@@ -28,15 +28,15 @@ kepler.calc = function (date, body, rect, polar) {
     // goto kepdon;
   } else {
     /* Decant the parameters from the data structure */
-    var epoch = body.epoch
-    var inclination = body.inclination
-    var ascnode = body.node * constant.DTR
-    var argperih = body.perihelion
+    const epoch = body.epoch
+    let inclination = body.inclination
+    const ascnode = body.node * constant.DTR
+    const argperih = body.perihelion
     /* semimajor axis */
-    var meandistance = body.semiAxis
-    var dailymotion = body.dailyMotion
-    var eccent = body.eccentricity
-    var meananomaly = body.anomaly
+    let meandistance = body.semiAxis
+    let dailymotion = body.dailyMotion
+    const eccent = body.eccentricity
+    let meananomaly = body.anomaly
     /* Check for parabolic orbit. */
     if (eccent == 1.0) {
       /* meandistance = perihelion distance, q
@@ -175,8 +175,8 @@ kepler.calc = function (date, body, rect, polar) {
      * is given by
      *   tan(longitude - ascnode) = cos(inclination) * tan(alat)
      */
-    var coso = Math.cos(alat)
-    var sino = Math.sin(alat)
+    const coso = Math.cos(alat)
+    const sino = Math.sin(alat)
     inclination *= constant.DTR
     W = sino * Math.cos(inclination)
     E = util.zatan2(coso, W) + ascnode
@@ -192,7 +192,7 @@ kepler.calc = function (date, body, rect, polar) {
    */
   rect = rect || {}
   rect.distance = r * Math.sin(W)
-  var cosa = Math.cos(W)
+  const cosa = Math.cos(W)
   rect.latitude = r * cosa * Math.sin(E)
   rect.longitude = r * cosa * Math.cos(E)
 
@@ -241,9 +241,9 @@ kepler.calc = function (date, body, rect, polar) {
   // not defined
   if (arguments.length < 3) {
     body.position = {
-      date: date,
-      rect: rect,
-      polar: polar
+      date,
+      rect,
+      polar
     }
   }
 }
@@ -256,7 +256,7 @@ kepler.calc = function (date, body, rect, polar) {
  * return = Earth's distance to the Sun (au)
  */
 kepler.embofs = function (date, ea) {
-  var pm = {}
+  const pm = {}
 
   /* Compute the vector Moon - Earth. */
   gplan.moon(date, pm)
@@ -267,7 +267,7 @@ kepler.embofs = function (date, ea) {
   precess.calc(pm, date, 1)
 
   /* Adjust the coordinates of the Earth */
-  var a = 1 / (constant.emrat + 1)
+  const a = 1 / (constant.emrat + 1)
 
   ea.longitude = ea.longitude - a * pm.longitude
   ea.latitude = ea.latitude - a * pm.latitude
@@ -280,19 +280,19 @@ kepler.embofs = function (date, ea) {
 }
 
 kepler.init = function () {
-  var u = constant.glat * constant.DTR
+  let u = constant.glat * constant.DTR
 
   /* Reduction from geodetic latitude to geocentric latitude
    * AA page K5
    */
-  var co = Math.cos(u)
-  var si = Math.sin(u)
-  var fl = 1 - 1 / constant.flat
+  const co = Math.cos(u)
+  let si = Math.sin(u)
+  let fl = 1 - 1 / constant.flat
   fl = fl * fl
   si = si * si
   u = 1 / Math.sqrt(co * co + fl * si)
-  var a = constant.aearth * u + constant.height
-  var b = constant.aearth * fl * u + constant.height
+  const a = constant.aearth * u + constant.height
+  const b = constant.aearth * fl * u + constant.height
   constant.trho = Math.sqrt(a * a * co * co + b * b * si)
   constant.tlat = constant.RTD * Math.acos(a * co / constant.trho)
   if (constant.glat < 0) {
