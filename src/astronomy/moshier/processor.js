@@ -87,14 +87,26 @@ processor.calc = function (date, body) {
 }
 
 /**
- * Calculate a body and, for anything that moves against the ecliptic, the
- * direction and rate of its apparent motion. The body is calculated twice:
- * once a short interval before the requested date and once at the date
- * itself, so the state left behind is always the state for the date asked
- * for.
+ * Bodies whose apparent longitude only ever increases as seen from the
+ * earth. Retrograde motion is what a planet appears to do when the earth
+ * overtakes it, or it overtakes the earth; the sun and the moon are never
+ * in that geometry, so the question does not apply to them and they report
+ * no answer rather than a permanent false.
+ */
+const ALWAYS_DIRECT = ['sun', 'moon']
+
+/**
+ * Calculate a body and the rate of its apparent motion along the ecliptic.
+ * The body is calculated twice, once a short interval before the requested
+ * date and once at the date itself, so the state left behind is always the
+ * state for the date asked for.
+ *
+ * Retrograde is only reported for bodies that can actually be retrograde:
+ * the planets and the asteroids. A star does not move against the ecliptic
+ * at all, so it gets no motion either.
  */
 processor.calcWithMotion = function (date, body) {
-  if (body.raMotion) { // a star, which has no apparent retrograde motion
+  if (body.raMotion) { // a star
     this.calc(date, body)
     return
   }
@@ -106,7 +118,10 @@ processor.calcWithMotion = function (date, body) {
 
   const motion = longitudeDifference(body.position.apparentLongitude, before)
   body.position.apparentLongitudeMotion = motion / RETROGRADE_SAMPLE_DAYS
-  body.position.is_retrograde = motion < 0
+
+  if (ALWAYS_DIRECT.indexOf(body.key) < 0) {
+    body.position.is_retrograde = motion < 0
+  }
 }
 
 processor.ecliptic = function (date, observer, body) {

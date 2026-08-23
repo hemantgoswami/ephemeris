@@ -51,12 +51,18 @@ The date is read in UTC. Passing `null` as the date uses the current time.
 | `apparentLongitudeDd` | apparent ecliptic longitude in decimal degrees |
 | `apparentLongitudeDdPerDay` | apparent motion in longitude, decimal degrees per day; negative when retrograde |
 | `geocentricDistanceKm` | distance from the earth, where the body reports one |
-| `is_retrograde` | true when apparent longitude is decreasing |
+| `is_retrograde` | true when apparent longitude is decreasing; undefined where retrograde motion cannot happen |
 
 Apparent motion is measured between one hour before the requested instant
 and the instant itself, so a station lands within about an hour of the real
-one. Stars report `undefined` for both motion fields, since retrograde
-motion does not apply to them.
+one.
+
+`is_retrograde` is only reported for bodies that can be retrograde, which
+means the planets and the asteroids. The sun and the moon are never
+overtaken by the earth, so they cannot appear to move backwards and they
+report `undefined` rather than a permanent `false`; their
+`apparentLongitudeDdPerDay` is still given, and is always positive. A star
+reports `undefined` for both, since it does not move against the ecliptic.
 
 #### TypeScript
 
@@ -226,6 +232,13 @@ match.
 ### Changelog
 
 #### 3.0.0 Breaking Changes - Please read carefully
+* Reports `is_retrograde` only for bodies that can actually be retrograde,
+  which means the planets and the asteroids. The sun and the moon are never
+  overtaken by the earth, so they cannot appear to move backwards; they now
+  report `undefined` rather than a permanent `false`, matching what stars
+  already did. Their `apparentLongitudeDdPerDay` is unaffected. Sampled over
+  four centuries, solar motion never drops below 0.95 degrees a day and
+  lunar motion never below 11.76, so there was never an answer to give.
 * Removes the unreachable iterative rise and set solver from `transit.js`,
   about 300 lines. It was never called from anywhere, in any commit, and the
   `kepler` call inside it was wrong from the initial 2018 commit, so it threw

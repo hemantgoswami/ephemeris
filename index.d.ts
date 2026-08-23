@@ -95,13 +95,18 @@ declare namespace ephemeris {
     apparentLongitudeDd: number
     /**
      * Apparent motion in longitude, decimal degrees per day, negative when
-     * retrograde. Undefined for stars, which have no such motion.
+     * retrograde. Reported for the sun and the moon too, where it is always
+     * positive. Undefined for stars, which have no such motion.
      */
     apparentLongitudeDdPerDay: number | undefined
     /** Distance from the earth where the body reports one, else a sentinel. */
     geocentricDistanceKm: number
     /**
-     * True when apparent longitude is decreasing. Undefined for stars.
+     * True when apparent longitude is decreasing.
+     *
+     * Undefined where the question does not apply: the sun and the moon are
+     * never overtaken by the earth so they cannot appear to go backwards,
+     * and a star does not move against the ecliptic at all.
      */
     is_retrograde: boolean | undefined
   }
