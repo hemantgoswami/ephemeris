@@ -1,10 +1,12 @@
 name: CI
 
 on:
+  # No branch filter on pull_request on purpose: every pull request gets
+  # checked whatever it targets, so renaming the default branch cannot
+  # silently switch CI off.
   pull_request:
-    branches: [master]
   push:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
