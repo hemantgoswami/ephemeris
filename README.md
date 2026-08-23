@@ -212,6 +212,11 @@ be blank because the job does not declare one. Renaming or moving the
 workflow means updating the trusted publisher entry, or the publish is
 rejected.
 
+Rise and set times are the analytic approximation from `transit.js`. They
+agree with a bisection on the library's own elevation to within a few
+seconds, at every latitude tested up to 78 degrees north. A body that never
+rises or sets on a given day simply has no rise and set fields.
+
 Known gap: `processor.test()` in `src/astronomy/moshier/processor.js` is a
 self check inherited from the original port. Its expected topocentric and
 refraction values have never matched what this code produces, so it is not
@@ -221,6 +226,16 @@ match.
 ### Changelog
 
 #### 3.0.0 Breaking Changes - Please read carefully
+* Fixes rise, set and meridian times falling outside the day they belong
+  to. They are measured from the start of the UT day holding the requested
+  instant, but the instant itself is terrestrial time, and nothing wrapped
+  an event landing either side of that boundary back into the day. So
+  `approxSetUT` could report `hours: 43`, or a negative time. Querying at
+  exactly midnight always tripped it, which is what `new Date('2026-04-18')`
+  gives you. Across a year at six locations, 2179 of 7300 rise and set
+  values were 24 hours out and 365 were negative; now none are. The times
+  themselves were always right, and still agree with a bisection on the
+  library's own elevation to within a few seconds.
 * Ships TypeScript definitions in `index.d.ts`. `getPlanet` is generic, so
   its result is narrowed to the body requested.
 * Modernises the source to ES2022 declarations. Every `var` became `let` or

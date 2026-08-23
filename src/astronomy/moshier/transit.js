@@ -38,6 +38,23 @@ const transit = {
  * Calculate time of transit
  * assuming RA and Dec change uniformly with time
  */
+/**
+ * Reduce a time of day expressed as an angle into [0, 2pi).
+ *
+ * Rise, set and transit are measured from the start of the UT day holding
+ * the requested instant, but the instant itself is terrestrial time. An
+ * event just either side of that boundary therefore lands outside the day
+ * and has to be wrapped back in, otherwise util.hms reports hours like 28
+ * or 43, or a negative time.
+ */
+function timeOfDay (angle) {
+  let wrapped = angle % constant.TPI
+  if (wrapped < 0) {
+    wrapped += constant.TPI
+  }
+  return wrapped
+}
+
 transit.calc = function (date, lha, dec) {
   const NR = [], YR = []
   let D // parallax for the moon, rate denominator later
@@ -70,7 +87,7 @@ transit.calc = function (date, lha, dec) {
   }
   const lhay = y
   y = y/(-constant.dradt/constant.TPI + 1.00273790934)
-  this.r_trnsit = x - y
+  this.r_trnsit = timeOfDay(x - y)
   /* printf ("rt %.7f ", r_trnsit); */
   /* Ordinarily never print here. */
   const result = {
@@ -131,10 +148,10 @@ transit.calc = function (date, lha, dec) {
       YR[0] = Math.acos(YR[0])
       YR[1] = Math.acos(YR[1])
       D = -constant.dradt/constant.TPI + 1.00273790934
-      this.r_rise = x - (lhay + YR[0])*(1 + zArr[0])/D
-      this.r_set = x - (lhay - YR[0])*(1 - zArr[0])/D
-      this.r_sanatan_rise = x - (lhay + YR[1])*(1 + zArr[1])/D
-      this.r_sanatan_set = x - (lhay - YR[1])*(1 - zArr[1])/D
+      this.r_rise = timeOfDay(x - (lhay + YR[0])*(1 + zArr[0])/D)
+      this.r_set = timeOfDay(x - (lhay - YR[0])*(1 - zArr[0])/D)
+      this.r_sanatan_rise = timeOfDay(x - (lhay + YR[1])*(1 + zArr[1])/D)
+      this.r_sanatan_set = timeOfDay(x - (lhay - YR[1])*(1 - zArr[1])/D)
       /* Ordinarily never print here. */
 
       result.dApproxRiseUT = this.r_rise

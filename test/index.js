@@ -160,3 +160,78 @@ test('results do not depend on the timezone of the host machine', function (t) {
   t.equal(runIn('Pacific/Pago_Pago'), utc, 'same result at UTC-11')
   t.end()
 })
+
+/*
+ * Rise, set and transit. These are the approximate times transit.js derives
+ * analytically; they agree with a bisection on the library's own elevation
+ * to within a few seconds, so what is worth guarding is the bookkeeping
+ * around them rather than the astronomy.
+ */
+const HOURS_PER_RADIAN = 12 / Math.PI
+
+function transitOf (iso, longitude, latitude) {
+  return ephemeris.getPlanet('sun', at(iso), longitude, latitude, 0)
+    .observed.sun.raw.position.altaz.transit
+}
+
+test('rise, set and transit are always a time within the day', function (t) {
+  const places = [
+    ['London', -0.1276, 51.5072],
+    ['Nairobi', 36.8219, -1.2921],
+    ['Reykjavik', -21.9426, 64.1466],
+    ['Wellington', 174.78, -41.29]
+  ]
+  const fields = [
+    'dApproxRiseUT', 'dApproxSetUT', 'dApproxSanatanRiseUT', 'dApproxSanatanSetUT'
+  ]
+
+  places.forEach(function (place) {
+    // Midnight matters: new Date('2026-04-18') lands exactly here, and the
+    // day the times are measured from is a UT day while the instant asked
+    // for is terrestrial time.
+    ;['2026-04-18T00:00:00Z', '2026-04-18T12:00:00Z', '2026-12-21T00:00:00Z'].forEach(function (iso) {
+      const transit = transitOf(iso, place[1], place[2])
+      const meridian = transit.UTdate * 2 * Math.PI * HOURS_PER_RADIAN
+      t.ok(meridian >= 0 && meridian < 24,
+        place[0] + ' ' + iso + ' meridian ' + meridian.toFixed(4) + ' h is within the day')
+
+      fields.forEach(function (field) {
+        if (transit[field] === undefined) {
+          return // no event that day
+        }
+        const hours = transit[field] * HOURS_PER_RADIAN
+        t.ok(hours >= 0 && hours < 24,
+          place[0] + ' ' + iso + ' ' + field + ' ' + hours.toFixed(4) + ' h is within the day')
+      })
+    })
+  })
+  t.end()
+})
+
+test('rise and set do not depend on the time of day they are asked for', function (t) {
+  const noon = transitOf('2026-04-18T12:00:00Z', -0.1276, 51.5072)
+
+  ;['2026-04-18T00:00:00Z', '2026-04-18T03:00:00Z', '2026-04-18T23:00:00Z'].forEach(function (iso) {
+    const other = transitOf(iso, -0.1276, 51.5072)
+    const rise = Math.abs(other.dApproxRiseUT - noon.dApproxRiseUT) * HOURS_PER_RADIAN * 3600
+    const set = Math.abs(other.dApproxSetUT - noon.dApproxSetUT) * HOURS_PER_RADIAN * 3600
+    // The times drift by a fraction of a second across the day because the
+    // sun really does move; a whole hour apart would mean the day boundary
+    // had been mishandled.
+    t.ok(rise < 5, iso + ' rise is within 5s of the midday answer, off by ' + rise.toFixed(2) + 's')
+    t.ok(set < 5, iso + ' set is within 5s of the midday answer, off by ' + set.toFixed(2) + 's')
+  })
+  t.end()
+})
+
+test('a body that never rises or sets reports no rise or set', function (t) {
+  const midnightSun = transitOf('2026-06-21T12:00:00Z', 15.6469, 78.2232)
+  const polarNight = transitOf('2026-12-21T12:00:00Z', 15.6469, 78.2232)
+
+  t.equal(midnightSun.dApproxRiseUT, undefined, 'no sunrise under the midnight sun')
+  t.equal(midnightSun.dApproxSetUT, undefined, 'no sunset under the midnight sun')
+  t.equal(polarNight.dApproxRiseUT, undefined, 'no sunrise in the polar night')
+  t.equal(polarNight.dApproxSetUT, undefined, 'no sunset in the polar night')
+  t.ok(midnightSun.approxLocalMeridian, 'the meridian crossing is still reported')
+  t.end()
+})
