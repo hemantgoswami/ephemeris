@@ -522,3 +522,48 @@ test('maintainer only documentation stays out of the published package', functio
     'nor the workflow name it depends on')
   t.end()
 })
+
+test('the changelog ships and the release notes are wired to it', function (t) {
+  const fs = require('fs')
+  const pkg = require('../package.json')
+  const changelogPath = path.join(__dirname, '..', 'CHANGELOG.md')
+
+  t.ok(fs.existsSync(changelogPath), 'CHANGELOG.md exists')
+  t.ok(pkg.files.indexOf('CHANGELOG.md') >= 0, 'and ships, unlike CONTRIBUTING.md')
+
+  // The release workflow fills the GitHub Release body from this script. If
+  // the version has no entry it prints a pointer instead, which would ship a
+  // release with no notes, so check the entry is really there.
+  function notesFor (version) {
+    return execFileSync(process.execPath,
+      [path.join(__dirname, '..', '.github', 'release-notes.js'), version],
+      {encoding: 'utf8'}).trim()
+  }
+
+  const current = notesFor(pkg.version)
+  t.ok(current.length > 0, 'the current version has release notes')
+  t.equal(current.indexOf('See CHANGELOG.md'), -1,
+    'version ' + pkg.version + ' has a real entry, not the fallback')
+
+  // and every version the changelog claims to document resolves
+  const changelog = fs.readFileSync(changelogPath, 'utf8')
+  const versions = changelog.split('\n')
+    .filter(function (line) { return /^## \d/.test(line) })
+    .map(function (line) { return line.replace(/^## /, '').split(' ')[0] })
+
+  t.ok(versions.length >= 5, 'found ' + versions.length + ' documented versions')
+  versions.forEach(function (version) {
+    const notes = notesFor(version)
+    t.equal(notes.indexOf('See CHANGELOG.md'), -1, version + ' resolves to a real entry')
+  })
+
+  t.equal(notesFor('9.9.9').indexOf('See CHANGELOG.md'), 0,
+    'an undocumented version falls back rather than failing')
+
+  // Not self referential, unlike the loop above: the newest heading has to
+  // be the version about to ship, which catches a bump without an entry and
+  // an entry written under a mistyped heading.
+  t.equal(versions[0], pkg.version,
+    'the newest changelog entry is ' + versions[0] + ', the version being released')
+  t.end()
+})
