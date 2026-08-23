@@ -60,6 +60,21 @@ This file is deliberately left out of the `files` list in `package.json`, so
 it stays in the repository and does not ship to npm, where the README is
 rendered as the package page.
 
+## Testing the optional backends
+
+The Swiss Ephemeris and astronomy-engine adapters have no engine installed
+by default, so the conformance block in the test suite only exercises what
+is present. To cover all three:
+
+```
+npm install --no-save sweph astronomy-engine
+yarn run test
+```
+
+That takes the suite from 561 assertions to 681. Do not add either engine to
+`devDependencies`: `sweph` carries Swiss Ephemeris, which is AGPL-3.0, and
+contributors should opt into that deliberately rather than by cloning.
+
 ## Known gaps
 
 `processor.test()` in `src/astronomy/moshier/processor.js` is a self check

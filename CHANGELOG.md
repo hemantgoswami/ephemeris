@@ -1,5 +1,30 @@
 # Changelog
 
+## 3.2.0
+* Makes the calculation engine pluggable. The built in Moshier engine stays
+  the default and nothing about a plain install changes: still no
+  dependencies, still pure JavaScript, still the same numbers.
+* Adds adapters for two other engines, neither of them a dependency. Install
+  `sweph` for Swiss Ephemeris, or `astronomy-engine` for a pure JavaScript
+  MIT licensed alternative, then `ephemeris.use(...)`. Both are registered
+  whichever is installed, so `ephemeris.backends()` reports what is usable
+  here and why not when it is not.
+  Note that Swiss Ephemeris is AGPL-3.0 or commercially licensed, which is
+  stricter than this package and reaches hosted services. Installing it is a
+  licensing decision, which is why it is not installed for you.
+* Every backend returns the whole catalogue, so the result shape never
+  depends on the engine. A body a backend cannot produce comes back with the
+  same keys, every value `null`, `available: false` and a reason that is
+  often actionable, rather than throwing or being silently absent.
+* Adds `getBody`, for anything the catalogue does not name: numbered minor
+  planets, fixed stars, or an engine's own identifiers. Takes one spec or a
+  list, and unresolvable entries get the same template.
+* Adds `available`, `unavailableReason` and `backend` to every observed
+  body, and `backend` to the result. Additive; no existing field changed
+  name, type or value.
+* Adds `use`, `backend`, `backends` and `registerBackend`, so you can plug in
+  your own engine. `src/backends/registry.js` documents the contract.
+
 ## 3.1.1
 * Restores the `3.0.1` changelog entry, which was lost when the lunar node
   work renamed that heading to `3.1.0` on the assumption the two would ship
