@@ -143,6 +143,37 @@ yarn run test      # tape, runs lint first
 With [mise](https://mise.jdx.dev) installed, `mise run test`, `mise run lint`
 and `mise run lintfix` do the same.
 
+### Releasing
+
+Releases are published to npm by `.github/workflows/release.yml` when a
+GitHub Release is published. The workflow authenticates with npm trusted
+publishing, so there is no token stored in the repository.
+
+One time setup on npmjs.com, under the ephemeris package, Settings, Trusted
+publishers, add a GitHub Actions publisher with:
+
+| Field | Value |
+| --- | --- |
+| Organization or user | `hemantgoswami` |
+| Repository | `ephemeris` |
+| Workflow filename | `release.yml` |
+| Environment | leave blank |
+
+The workflow filename has to match exactly. Renaming or moving the workflow
+means updating the trusted publisher entry, or the publish is rejected.
+
+To cut a release:
+
+1. Bump `version` in `package.json` and add a changelog entry, on a branch
+2. Merge it to `master`
+3. `gh release create v2.3.0 --title v2.3.0 --notes "..."`, or use the
+   GitHub UI
+
+The workflow refuses to publish if the tag does not match the version in
+`package.json`, or if that version is already on npm. Running it by hand
+from the Actions tab does everything except the publish, which is a cheap
+way to check a version packs correctly before cutting the release.
+
 Known gap: `processor.test()` in `src/astronomy/moshier/processor.js` is a
 self check inherited from the original port. Its expected topocentric and
 refraction values have never matched what this code produces, so it is not
