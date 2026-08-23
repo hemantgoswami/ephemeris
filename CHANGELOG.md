@@ -24,6 +24,15 @@
   name, type or value.
 * Adds `use`, `backend`, `backends` and `registerBackend`, so you can plug in
   your own engine. `src/backends/registry.js` documents the contract.
+* Fixes `sirius.apparentLongitudeDd`, which reported right ascension in
+  radians while every other body reported degrees. It is now degrees, so
+  101.4549 where it used to say 1.7707, and it finally agrees with the
+  `101 degrees 27' 17"` string printed beside it. The strings themselves are
+  unchanged. Note that for a star the underlying quantity is still right
+  ascension rather than ecliptic longitude, which is an older problem and is
+  recorded as a known gap.
+* Documents how to obtain the Swiss Ephemeris data files, which the previous
+  note assumed you already had.
 
 ## 3.1.1
 * Restores the `3.0.1` changelog entry, which was lost when the lunar node
