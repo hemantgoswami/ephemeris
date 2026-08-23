@@ -4,6 +4,16 @@ var constant = require('./src/astronomy/moshier/constant')
 var processor = require('./src/astronomy/moshier/processor')
 var body = require('./src/astronomy/moshier/body')
 
+// Keys on the body table that cannot be observed: the observer itself and
+// the table's own helper.
+var NOT_OBSERVABLE = ['earth', 'init']
+
+function observableNames () {
+  return Object.keys(body).filter(function (name) {
+    return NOT_OBSERVABLE.indexOf(name) < 0
+  })
+}
+
 function setUp (date, geodeticalLongitude, geodeticalLatitude, height) {
   var d = !date ? new Date() : date
   constant.tlong = geodeticalLongitude
@@ -11,7 +21,7 @@ function setUp (date, geodeticalLongitude, geodeticalLatitude, height) {
   constant.height = height
   constant.date = {
     day: d.getUTCDate(),
-    month: d.getUTCMonth()+1,
+    month: d.getUTCMonth() + 1,
     year: d.getUTCFullYear(),
     hours: d.getUTCHours(),
     minutes: d.getUTCMinutes(),
@@ -20,125 +30,78 @@ function setUp (date, geodeticalLongitude, geodeticalLatitude, height) {
   processor.init()
 }
 
-// Example call: getAllPlanets(new Date(), 10.0014, 53.5653, 0);
-function getAllPlanets (date, geodeticalLongitude, geodeticalLatitude, height) {
+function describeDate (date) {
+  return {
+    gregorianTerrestrial: [date.day, date.month, date.year].join('.') +
+      ' ' + [date.hours, date.minutes, date.seconds].join(':'),
+    gregorianTerrestrialRaw: date,
+    gregorianUniversal: date.universalDateString,
+    gregorianDelta: '00:00:' + date.delta,
+    julianTerrestrial: date.julian,
+    julianUniversal: date.universal,
+    julianDelta: date.delta / 86400
+  }
+}
 
+function describeObserver () {
+  return {
+    name: 'earth',
+    longitudeGeodetic: constant.tlong,
+    longitudeGeocentric: constant.tlong,
+    latitudeGeodetic: constant.glat,
+    latitudeGeocentric: constant.tlat,
+    heightGeodetic: constant.height,
+    heightGeocentric: constant.trho * constant.aearth / 1000
+  }
+}
+
+function describeBody (observed) {
+  return {
+    name: observed.key,
+    raw: observed,
+    apparentLongitudeDms30: observed.position.apparentLongitude30String,
+    apparentLongitudeDms360: observed.position.apparentLongitudeString,
+    apparentLongitudeDd: observed.position.apparentLongitude,
+    apparentLongitudeDdPerDay: observed.position.apparentLongitudeMotion,
+    geocentricDistanceKm: observed.position.geocentricDistance,
+    is_retrograde: observed.position.is_retrograde
+  }
+}
+
+function observe (names, date, geodeticalLongitude, geodeticalLatitude, height) {
   setUp(date, geodeticalLongitude, geodeticalLatitude, height)
 
-  var ret = {
-    date: undefined,
-    observer: undefined,
-    observed: {}
-  }
-  date = constant.date
-  var observables = Object.keys(body)
-
-  for (var i = 0; i < observables.length; i++) {
-
-    var observeMe = observables[i]
-    if (['earth', 'init'].indexOf(observeMe) >= 0) {
-      continue
-    }
-
-    constant.body = body[observeMe]
-
-    processor.calc(date, constant.body)
-
-    if (ret.date === undefined) {
-      ret.date = {
-        gregorianTerrestrial: [date.day, date.month, date.year].join('.')
-          + ' ' + [date.hours, date.minutes, date.seconds].join(':'),
-        gregorianTerrestrialRaw: date,
-        gregorianUniversal: constant.date.universalDateString,
-        gregorianDelta: '00:00:' + constant.date.delta,
-        julianTerrestrial: constant.date.julian,
-        julianUniversal: constant.date.universal,
-        julianDelta: constant.date.delta / 86400
-      }
-    }
-
-    if (ret.observer === undefined) {
-      ret.observer = {
-        name: 'earth',
-        longitudeGeodetic: constant.tlong,
-        longitudeGeocentric: constant.tlong,
-        latitudeGeodetic: constant.glat,
-        latitudeGeocentric: constant.tlat,
-        heightGeodetic: constant.height,
-        heightGeocentric: constant.trho * constant.aearth / 1000
-      }
-    }
-
-    ret.observed[constant.body.key] = {
-      name: constant.body.key,
-      raw: constant.body,
-      apparentLongitudeDms30: constant.body.position.apparentLongitude30String,
-      apparentLongitudeDms360: constant.body.position.apparentLongitudeString,
-      apparentLongitudeDd: constant.body.position.apparentLongitude,
-      geocentricDistanceKm: constant.body.position.geocentricDistance,
-      is_retrograde: constant.body.position.is_retrograde
-    }
-
+  var observed = {}
+  for (var i = 0; i < names.length; i++) {
+    constant.body = body[names[i]]
+    processor.calcWithMotion(constant.date, constant.body)
+    observed[constant.body.key] = describeBody(constant.body)
   }
 
-  return ret
+  return {
+    date: describeDate(constant.date),
+    observer: describeObserver(),
+    observed: observed
+  }
+}
+
+// Example call: getAllPlanets(new Date(), 10.0014, 53.5653, 0);
+function getAllPlanets (date, geodeticalLongitude, geodeticalLatitude, height) {
+  return observe(observableNames(), date, geodeticalLongitude, geodeticalLatitude, height)
 }
 
 // Example call: getPlanet('moon', new Date(), 10.0014, 53.5653, 0);
 function getPlanet (planetName, date, geodeticalLongitude, geodeticalLatitude, height) {
-
-  setUp(date, geodeticalLongitude, geodeticalLatitude, height)
-
-  var ret = {
-    date: undefined,
-    observer: undefined,
-    observed: {}
-  }
-  date = constant.date
-
-  constant.body = body[planetName]
-
-  processor.calc(date, constant.body)
-
-  if (ret.date === undefined) {
-    ret.date = {
-      gregorianTerrestrial: [date.day, date.month, date.year].join('.')
-        + ' ' + [date.hours, date.minutes, date.seconds].join(':'),
-      gregorianTerrestrialRaw: date,
-      gregorianUniversal: constant.date.universalDateString,
-      gregorianDelta: '00:00:' + constant.date.delta,
-      julianTerrestrial: constant.date.julian,
-      julianUniversal: constant.date.universal,
-      julianDelta: constant.date.delta / 86400
-    }
+  if (observableNames().indexOf(planetName) < 0) {
+    throw new Error('Unknown body "' + planetName + '". Known bodies are: ' +
+      observableNames().join(', ') + '.')
   }
 
-  if (ret.observer === undefined) {
-    ret.observer = {
-      name: 'earth',
-      longitudeGeodetic: constant.tlong,
-      longitudeGeocentric: constant.tlong,
-      latitudeGeodetic: constant.glat,
-      latitudeGeocentric: constant.tlat,
-      heightGeodetic: constant.height,
-      heightGeocentric: constant.trho * constant.aearth / 1000
-    }
-  }
-
-  ret.observed[constant.body.key] = {
-    name: constant.body.key,
-    raw: constant.body,
-    apparentLongitudeDms30: constant.body.position.apparentLongitude30String,
-    apparentLongitudeDms360: constant.body.position.apparentLongitudeString,
-    apparentLongitudeDd: constant.body.position.apparentLongitude,
-    geocentricDistanceKm: constant.body.position.geocentricDistance,
-    is_retrograde: constant.body.position.is_retrograde
-  }
-
-  return ret
+  return observe([planetName], date, geodeticalLongitude, geodeticalLatitude, height)
 }
 
 module.exports = {
   getAllPlanets: getAllPlanets,
-  getPlanet: getPlanet
+  getPlanet: getPlanet,
+  getBodyNames: observableNames
 }

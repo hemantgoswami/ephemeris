@@ -47,7 +47,6 @@ moon.calc = function () {
   this.calcll({julian: moshier.body.earth.position.date.julian - 0.001}, moonpp, moonpol) // TDT - 0.001
   var ra0 = this.ra
   var dec0 = this.dec
-  var lon0 = moonpol.longitude
 
   /* Calculate for present instant. */
   moshier.body.moon.position.nutation = this.calcll(moshier.body.earth.position.date, moonpp, moonpol).nutation
@@ -72,10 +71,9 @@ moon.calc = function () {
   constant.dradt = 1000 * constant.dradt
   constant.ddecdt = 1000 * (this.dec - dec0)
 
-  /* Rate of change in longitude, degrees per day
-   * used for phase of the moon
+  /* The rate of change in longitude is not derived here; the public API
+   * reports it as apparentLongitudeMotion, sampled over a longer interval.
    */
-  lon0 = 1000 * constant.RTD * (moonpol.longitude - lon0)
 
   /* Get apparent coordinates for the earth. */
   var z = Math.sqrt(re.longitude * re.longitude

@@ -16,37 +16,9 @@ common.copy = function (target /*, source ... */) {
   return target
 }
 
-common.is = function (object, type) {
-  var typeName = Object.prototype.toString.call(object).slice(8, -1)
-  return (
-    object !== undefined &&
-    object !== null &&
-    type.name === typeName
-  )
-}
-
-common.make = function (context, path) {
-  if (common.is(context, String)) {
-    path = context
-    context = document
-  }
-
-  if (path) {
-    var paths = path.split('.')
-    var key = paths.shift()
-    context [key] = context [key] || {}
-    context = common.make(context [key], paths.join('.'))
-  }
-  return context
-}
-
-common.define = function (context, path, object) {
-  common.copy(common.make(context, path), object)
-}
-
 common.assert = function (variable, value) {
   if (variable != value) {
-    throw 'Assertion failed: ' + variable + ' != ' + value + '!'
+    throw new Error('Assertion failed: ' + variable + ' != ' + value + '!')
   }
 }
 
