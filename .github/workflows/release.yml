@@ -31,6 +31,10 @@ jobs:
     steps:
       - name: Check out the commit
         uses: actions/checkout@v4
+        with:
+          # Tags, so the test that every released version has a changelog
+          # entry has something to compare against.
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
