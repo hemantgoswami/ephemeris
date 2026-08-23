@@ -82,6 +82,9 @@ The date is read in UTC. Passing `null` as the date uses the current time.
 | `apparentLongitudeDdPerDay` | apparent motion in longitude, decimal degrees per day; negative when retrograde |
 | `geocentricDistanceKm` | distance from the earth, where the body reports one |
 | `is_retrograde` | true when apparent longitude is decreasing; undefined where retrograde motion cannot happen |
+| `available` | false when the current backend cannot produce this body; every value field is then null |
+| `unavailableReason` | why, when `available` is false |
+| `backend` | which backend produced, or failed to produce, this body |
 
 Apparent motion is measured between one hour before the requested instant
 and the instant itself, so a station lands within about an hour of the real
@@ -196,6 +199,132 @@ do not have them.
   }
 }
 ```
+
+### Backends
+
+The calculation engine is pluggable. The built in one is Moshier's analytic
+theory, the same engine this package has always used: no dependencies, no
+data files, works in a browser. Two adapters ship alongside it for engines
+you install yourself.
+
+```javascript
+const ephemeris = require('ephemeris');
+
+ephemeris.backend();    // 'moshier'
+ephemeris.backends();   // every backend and whether it is usable here
+```
+
+| backend | engine to install | licence of that engine | bodies | notes |
+| --- | --- | --- | --- | --- |
+| `moshier` | none, built in | GPL-3.0, this package | all 16 | the default. Pure JS, ~142 kB, browser safe |
+| `swisseph` | `sweph` | **AGPL-3.0 or commercial** | all 16, plus asteroids and stars with data files | ~6 MB, prebuilt binaries, no compiler needed |
+| `astronomy-engine` | `astronomy-engine` | MIT | sun, moon, planets | ~1.8 MB, pure JS, no Chiron, no stars, no nodes |
+
+Neither engine is a dependency of this package, so a plain
+`npm install ephemeris` still pulls nothing else. Installing one is your
+decision, and with Swiss Ephemeris it is a licensing decision: AGPL-3.0
+reaches hosted services, which GPL-3.0 does not, so a closed source product
+behind an API typically needs Astrodienst's commercial licence. That is
+precisely why it is not installed for you.
+
+#### Switching
+
+```javascript
+// after: npm install sweph
+ephemeris.use(ephemeris.swisseph({ ephePath: './ephe' }));
+
+// after: npm install astronomy-engine
+ephemeris.use(ephemeris.astronomyEngine());
+
+ephemeris.use('moshier');   // back to the built in one
+```
+
+Switching throws if the engine is missing, rather than quietly falling back
+to a different one and leaving you to wonder why the numbers moved:
+
+```
+Backend "swisseph" is not usable: the sweph package is not installed:
+Cannot find module 'sweph'. Try: npm install sweph
+```
+
+Without data files, Swiss Ephemeris runs in its own Moshier mode, which is
+the same theory the built in backend uses, so it buys nothing. Point
+`ephePath` at a directory of `.se1` files for the JPL accuracy that makes it
+worth the install. About 1.9 MB covers 1800 to 2400.
+
+#### When a body is not available
+
+Every backend returns the whole catalogue, so the shape of the result never
+depends on which engine is in use. A body the backend cannot produce comes
+back with the same keys and every value `null`:
+
+```javascript
+ephemeris.use(ephemeris.astronomyEngine());
+ephemeris.getAllPlanets(new Date(), 0, 0, 0).observed.chiron;
+// {
+//   name: 'chiron',
+//   available: false,
+//   unavailableReason: 'the astronomy-engine backend does not provide chiron',
+//   backend: 'astronomy-engine',
+//   raw: null,
+//   apparentLongitudeDms30: null,
+//   apparentLongitudeDms360: null,
+//   apparentLongitudeDd: null,
+//   apparentLongitudeDdPerDay: null,
+//   geocentricDistanceKm: null,
+//   is_retrograde: null
+// }
+```
+
+Check `available` before reading a longitude. The reason is often
+actionable: with Swiss Ephemeris installed but no data files, asking for
+Chiron says `SwissEph file 'seas_18.se1' not found`, which tells you exactly
+what to fetch.
+
+#### Asking for things the catalogue does not name
+
+`getBody` takes a body specification instead of a name, for numbered minor
+planets, fixed stars, or an engine's own identifiers. It accepts one or a
+list, and returns the same envelope as `getAllPlanets`.
+
+```javascript
+ephemeris.use(ephemeris.swisseph({ ephePath: './ephe' }));
+
+ephemeris.getBody({ asteroid: 433 }, date, lon, lat, 0);      // Eros
+ephemeris.getBody({ star: 'Aldebaran' }, date, lon, lat, 0);
+ephemeris.getBody({ id: 12 }, date, lon, lat, 0);             // SE_MEAN_APOG, Lilith
+ephemeris.getBody(['mars', { asteroid: 433 }], date, lon, lat, 0);
+```
+
+Results are keyed by a readable rendering of the specification, so
+`{asteroid: 433}` lands under `asteroid:433` and `{star: 'Aldebaran'}` under
+`star:Aldebaran`. Anything the backend cannot resolve gets the unavailable
+template, so a mixed request never fails as a whole.
+
+#### Writing your own
+
+A backend is a plain object. `src/backends/registry.js` documents the
+contract in full; the short version:
+
+```javascript
+ephemeris.registerBackend({
+  name: 'mine',
+  available: true,
+  bodies: ['sun', 'moon'],
+  supports (spec) { return this.bodies.indexOf(spec.name) >= 0 },
+  calc (date, spec) {
+    // date.julian is terrestrial time, date.universal is UT
+    return { longitude: 123.456, motion: 0.98, distance: -1, raw: null };
+  }
+});
+ephemeris.use('mine');
+```
+
+Core owns the envelope: the observer, the date arithmetic, the
+degrees-minutes-seconds strings and the retrograde rules. A backend supplies
+longitude, motion and distance and nothing else, which is what keeps every
+engine's output directly comparable. Return `null` or `{error: 'why'}` for a
+body you cannot do, and core fills in the template.
 
 ### Contributing
 

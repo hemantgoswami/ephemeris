@@ -282,7 +282,7 @@ test('a body that never rises or sets reports no rise or set', function (t) {
  * the change was deliberate, update the list and say so in the changelog.
  */
 
-const RESULT_KEYS = ['date', 'observer', 'observed']
+const RESULT_KEYS = ['backend', 'date', 'observer', 'observed']
 
 const DATE_KEYS = [
   'gregorianTerrestrial', 'gregorianTerrestrialRaw', 'gregorianUniversal',
@@ -301,7 +301,8 @@ const OBSERVER_KEYS = [
 ]
 
 const OBSERVED_KEYS = [
-  'name', 'raw', 'apparentLongitudeDms30', 'apparentLongitudeDms360',
+  'name', 'available', 'unavailableReason', 'backend', 'raw',
+  'apparentLongitudeDms30', 'apparentLongitudeDms360',
   'apparentLongitudeDd', 'apparentLongitudeDdPerDay', 'geocentricDistanceKm',
   'is_retrograde'
 ]
@@ -359,8 +360,10 @@ test('getBodyNames is the documented list', function (t) {
 })
 
 test('the module exports exactly the documented functions', function (t) {
-  t.deepEqual(Object.keys(ephemeris).sort(),
-    ['getAllPlanets', 'getBodyNames', 'getPlanet'], 'public surface')
+  t.deepEqual(Object.keys(ephemeris).sort(), [
+    'astronomyEngine', 'backend', 'backends', 'getAllPlanets', 'getBody',
+    'getBodyNames', 'getPlanet', 'registerBackend', 'swisseph', 'use'
+  ], 'public surface')
   t.end()
 })
 
@@ -774,5 +777,146 @@ test('adding the nodes left the other bodies alone', function (t) {
   t.equal(result.observed.sun.apparentLongitudeDms360, '137°45\'39"', 'sun unchanged')
   t.equal(result.observed.moon.apparentLongitudeDd, 92.68823373136327, 'moon to full precision')
   t.ok(result.observed.moon.raw.position.altaz.transit, 'moon still has its transit block')
+  t.end()
+})
+
+/*
+ * Backends. The engines behind the optional ones are not dependencies, so
+ * whatever is installed here is what gets exercised. Moshier is always
+ * present, and the conformance block runs over everything available.
+ */
+
+test('the three backends are registered, whether or not their engine is here', function (t) {
+  const listed = ephemeris.backends()
+  const names = listed.map(function (b) { return b.name }).sort()
+
+  t.deepEqual(names, ['astronomy-engine', 'moshier', 'swisseph'], 'all three listed')
+  t.equal(ephemeris.backend(), 'moshier', 'moshier is the default')
+
+  listed.forEach(function (b) {
+    t.equal(typeof b.available, 'boolean', b.name + ' declares availability')
+    t.ok(Array.isArray(b.bodies) && b.bodies.length > 0, b.name + ' declares its bodies')
+    if (!b.available) {
+      t.ok(b.unavailableReason && b.unavailableReason.length > 0,
+        b.name + ' says why not: ' + b.unavailableReason)
+    }
+  })
+
+  const moshier = listed.filter(function (b) { return b.name === 'moshier' })[0]
+  t.equal(moshier.available, true, 'the built in backend is always available')
+  t.equal(moshier.engine, null, 'and needs no package')
+  t.ok(moshier.range && moshier.range.from < moshier.range.to, 'and declares a range')
+  t.end()
+})
+
+test('choosing a backend that is not here fails loudly', function (t) {
+  t.throws(function () {
+    ephemeris.use('nope')
+  }, /No backend named "nope"/, 'an unknown name')
+
+  const missing = ephemeris.backends().filter(function (b) { return !b.available })
+  missing.forEach(function (b) {
+    t.throws(function () {
+      ephemeris.use(b.name)
+    }, /is not usable/, b.name + ' refuses rather than silently using another engine')
+  })
+
+  t.equal(ephemeris.backend(), 'moshier', 'a failed switch leaves the selection alone')
+  t.end()
+})
+
+test('an unavailable body is templated, not thrown', function (t) {
+  // Ask the built in backend for something only Swiss Ephemeris could do.
+  const result = ephemeris.getBody({asteroid: 433}, at('2026-01-01T00:00:00Z'), 0, 0, 0)
+  const entry = result.observed['asteroid:433']
+
+  t.ok(entry, 'the entry exists under a readable key')
+  t.equal(entry.available, false, 'flagged unavailable')
+  t.ok(entry.unavailableReason.length > 0, 'with a reason: ' + entry.unavailableReason)
+  t.equal(entry.apparentLongitudeDd, null, 'no longitude is invented')
+  t.equal(entry.is_retrograde, null, 'nor a retrograde flag')
+  t.equal(entry.backend, 'moshier', 'and it names the backend that could not do it')
+
+  // The template must be shape compatible, or callers have to special case it.
+  const real = result.observed['asteroid:433']
+  const known = ephemeris.getPlanet('mars', at('2026-01-01T00:00:00Z'), 0, 0, 0).observed.mars
+  t.deepEqual(Object.keys(real).sort(), Object.keys(known).sort(),
+    'the template carries the same keys as a real body')
+  t.end()
+})
+
+test('getBody takes names, specs, and lists of either', function (t) {
+  const when = at('2026-01-01T00:00:00Z')
+
+  const one = ephemeris.getBody('mars', when, 0, 0, 0)
+  t.equal(one.observed.mars.available, true, 'a plain name works')
+
+  const many = ephemeris.getBody(['mars', {asteroid: 433}, {star: 'Aldebaran'}], when, 0, 0, 0)
+  t.deepEqual(Object.keys(many.observed), ['mars', 'asteroid:433', 'star:Aldebaran'],
+    'each spec gets a readable key')
+  t.equal(many.observed.mars.available, true, 'the known one resolves')
+  t.equal(many.observed['star:Aldebaran'].available, false, 'the unknown one is templated')
+
+  t.throws(function () {
+    ephemeris.getBody(42, when, 0, 0, 0)
+  }, /named by a string, or described by an object/, 'a nonsense spec is rejected')
+  t.end()
+})
+
+test('getPlanet still refuses names outside the catalogue', function (t) {
+  t.throws(function () {
+    ephemeris.getPlanet('asteroid:433', at('2026-01-01T00:00:00Z'), 0, 0, 0)
+  }, /use getBody/, 'and points at the generic call')
+  t.end()
+})
+
+test('every available backend meets the same contract', function (t) {
+  const when = at('2026-01-01T00:00:00Z')
+  const available = ephemeris.backends().filter(function (b) { return b.available })
+  const reference = {}
+
+  t.ok(available.length >= 1, available.length + ' backend(s) available to check')
+
+  available.forEach(function (info) {
+    ephemeris.use(info.name)
+    const result = ephemeris.getAllPlanets(when, BERLIN.longitude, BERLIN.latitude, 0)
+
+    t.equal(result.backend, info.name, info.name + ' names itself in the result')
+    t.deepEqual(Object.keys(result.observed), BODY_NAMES,
+      info.name + ' returns the whole catalogue, available or not')
+    t.deepEqual(Object.keys(result).sort(), RESULT_KEYS.slice().sort(),
+      info.name + ' keeps the envelope')
+
+    BODY_NAMES.forEach(function (name) {
+      const entry = result.observed[name]
+      t.deepEqual(Object.keys(entry).sort(), OBSERVED_KEYS.slice().sort(),
+        info.name + ' ' + name + ' has the standard keys')
+
+      if (!entry.available) {
+        return
+      }
+      t.ok(entry.apparentLongitudeDd >= 0 && entry.apparentLongitudeDd < 360,
+        info.name + ' ' + name + ' longitude is in range')
+      t.ok(/^\d+°\d+'\d+"$/.test(entry.apparentLongitudeDms360),
+        info.name + ' ' + name + ' has a well formed dms string')
+      if (entry.is_retrograde !== undefined && entry.is_retrograde !== null) {
+        t.equal(entry.is_retrograde, entry.apparentLongitudeDdPerDay < 0,
+          info.name + ' ' + name + ' retrograde matches the sign of its motion')
+      }
+
+      // Backends should agree with each other to well under a degree.
+      if (reference[name] === undefined) {
+        reference[name] = entry.apparentLongitudeDd
+      } else {
+        let apart = entry.apparentLongitudeDd - reference[name]
+        if (apart > 180) { apart -= 360 }
+        if (apart <= -180) { apart += 360 }
+        t.ok(Math.abs(apart) < 0.1, info.name + ' ' + name + ' is within 0.1 deg of the first backend, ' +
+          (apart * 3600).toFixed(1) + ' arcsec')
+      }
+    })
+  })
+
+  ephemeris.use('moshier')
   t.end()
 })
