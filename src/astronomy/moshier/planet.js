@@ -1,21 +1,21 @@
-var aberration = require('./aberration')
-var altaz = require('./altaz')
-var constant = require('./constant')
-var constellation = require('./constellation')
-var deflection = require('./deflection')
-var epsilon = require('./epsilon')
-var kepler = require('./kepler')
-var light = require('./light')
-var lonlat = require('./lonlat')
-var nutation = require('./nutation')
-var precess = require('./precess')
-var util = require('./util')
+const aberration = require('./aberration')
+const altaz = require('./altaz')
+const constant = require('./constant')
+const constellation = require('./constellation')
+const deflection = require('./deflection')
+const epsilon = require('./epsilon')
+const kepler = require('./kepler')
+const light = require('./light')
+const lonlat = require('./lonlat')
+const nutation = require('./nutation')
+const precess = require('./precess')
+const util = require('./util')
 
-var moshier = {
+const moshier = {
   body: require('./body')
 }
 
-var planet = {}
+const planet = {}
 
 planet.calc = function (body) {
   this.prepare(body)
@@ -34,7 +34,7 @@ planet.calc = function (body) {
  */
 planet.reduce = function (body, q, e) {
   /* Save the geometric coordinates at TDT */
-  var temp = {
+  let temp = {
     longitude: q.longitude,
     latitude: q.latitude,
     distance: q.distance
@@ -42,13 +42,13 @@ planet.reduce = function (body, q, e) {
 
   /* Display ecliptic longitude and latitude, precessed to equinox
    of date. */
-  var polar = body.equinoxEclipticLonLat = lonlat.calc(q, moshier.body.earth.position.date, true)
+  const polar = body.equinoxEclipticLonLat = lonlat.calc(q, moshier.body.earth.position.date, true)
 
   /* Adjust for light time (planetary aberration) */
   light.calc(body, q, e)
 
   /* Find Euclidean vectors between earth, object, and the sun */
-  var p = {
+  const p = {
     longitude: q.longitude - e.longitude,
     latitude: q.latitude - e.latitude,
     distance: q.distance - e.distance
@@ -56,8 +56,8 @@ planet.reduce = function (body, q, e) {
 
   util.angles(p, q, e)
 
-  var b = temp.longitude - e.longitude
-  var a = b * b
+  let b = temp.longitude - e.longitude
+  let a = b * b
   b = temp.latitude - e.latitude
   a += b * b
   b = temp.distance - e.distance
@@ -76,16 +76,16 @@ planet.reduce = function (body, q, e) {
    * where V(1,0) = elemnt->mag is the magnitude at 1au from
    * both earth and sun and 100% illumination.
    */
-  var phase = 0.5 * (1 + constant.pq)
+  const phase = 0.5 * (1 + constant.pq)
   /* Fudge the phase for light leakage in magnitude estimation.
    * Note this phase term estimate does not reflect reality well.
    * Calculated magnitudes of Mercury and Venus are inaccurate.
    */
-  var x = 0.5 * (1.01 + 0.99 * constant.pq)
-  var magnitude = body.magnitude + 2.1715 * Math.log(constant.EO * constant.SO) - 1.085 * Math.log(x)
+  const x = 0.5 * (1.01 + 0.99 * constant.pq)
+  const magnitude = body.magnitude + 2.1715 * Math.log(constant.EO * constant.SO) - 1.085 * Math.log(x)
   body.position.approxVisual = {
-    magnitude: magnitude,
-    phase: phase
+    magnitude,
+    phase
   }
 
   /* Find unit vector from earth in direction of object */

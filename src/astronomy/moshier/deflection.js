@@ -1,10 +1,10 @@
-var constant = require('./constant')
-var util = require('./util')
+const constant = require('./constant')
+const util = require('./util')
 
-var deflection = {}
+const deflection = {}
 
 deflection.calc = function (p, q, e) {
-  var C = 1.974e-8 / (constant.SE * (1 + constant.qe))
+  const C = 1.974e-8 / (constant.SE * (1 + constant.qe))
 
   constant.dp.longitude = C * (constant.pq * e.longitude / constant.SE - constant.ep * q.longitude / constant.SO)
   constant.dp.latitude = C * (constant.pq * e.latitude / constant.SE - constant.ep * q.latitude / constant.SO)

@@ -6,22 +6,22 @@
  * to a pointer at the changelog when there is no entry for the version.
  */
 
-var fs = require('fs')
-var path = require('path')
+const fs = require('fs')
+const path = require('path')
 
-var version = process.argv[2]
+const version = process.argv[2]
 
 if (!version) {
   console.error('usage: node .github/release-notes.js <version>')
   process.exit(1)
 }
 
-var readme = fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf8')
-var lines = readme.split('\n')
-var heading = '#### ' + version
-var start = -1
+const readme = fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf8')
+const lines = readme.split('\n')
+const heading = '#### ' + version
+let start = -1
 
-for (var i = 0; i < lines.length; i++) {
+for (let i = 0; i < lines.length; i++) {
   if (lines[i] === heading || lines[i].indexOf(heading + ' ') === 0) {
     start = i + 1
     break
@@ -33,9 +33,9 @@ if (start < 0) {
   process.exit(0)
 }
 
-var body = []
+const body = []
 
-for (var j = start; j < lines.length; j++) {
+for (let j = start; j < lines.length; j++) {
   if (lines[j].indexOf('#### ') === 0 || lines[j].indexOf('### ') === 0) {
     break
   }

@@ -1,13 +1,13 @@
-var body = require('./body')
-var kepler = require('./kepler')
+const body = require('./body')
+const kepler = require('./kepler')
 
-var vearth = {
+const vearth = {
   jvearth: -1.0,
   vearth: {}
 }
 
 vearth.calc = function (date) {
-  var e = {}
+  const e = {}
 
   if (date.julian == this.jvearth) {
     return
@@ -18,7 +18,7 @@ vearth.calc = function (date) {
   /* calculate heliocentric position of the earth
    * as of a short time ago.
    */
-  var t = 0.005
+  const t = 0.005
   kepler.calc({julian: date.julian - t}, body.earth, e)
 
   this.vearth.longitude = (body.earth.position.rect.longitude - e.longitude) / t

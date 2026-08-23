@@ -1,12 +1,12 @@
 'use strict'
 
-var constant = require('./src/astronomy/moshier/constant')
-var processor = require('./src/astronomy/moshier/processor')
-var body = require('./src/astronomy/moshier/body')
+const constant = require('./src/astronomy/moshier/constant')
+const processor = require('./src/astronomy/moshier/processor')
+const body = require('./src/astronomy/moshier/body')
 
 // Keys on the body table that cannot be observed: the observer itself and
 // the table's own helper.
-var NOT_OBSERVABLE = ['earth', 'init']
+const NOT_OBSERVABLE = ['earth', 'init']
 
 function observableNames () {
   return Object.keys(body).filter(function (name) {
@@ -15,7 +15,7 @@ function observableNames () {
 }
 
 function setUp (date, geodeticalLongitude, geodeticalLatitude, height) {
-  var d = !date ? new Date() : date
+  const d = !date ? new Date() : date
   constant.tlong = geodeticalLongitude
   constant.glat = geodeticalLatitude
   constant.height = height
@@ -71,8 +71,8 @@ function describeBody (observed) {
 function observe (names, date, geodeticalLongitude, geodeticalLatitude, height) {
   setUp(date, geodeticalLongitude, geodeticalLatitude, height)
 
-  var observed = {}
-  for (var i = 0; i < names.length; i++) {
+  const observed = {}
+  for (let i = 0; i < names.length; i++) {
     constant.body = body[names[i]]
     processor.calcWithMotion(constant.date, constant.body)
     observed[constant.body.key] = describeBody(constant.body)
@@ -81,7 +81,7 @@ function observe (names, date, geodeticalLongitude, geodeticalLatitude, height) 
   return {
     date: describeDate(constant.date),
     observer: describeObserver(),
-    observed: observed
+    observed
   }
 }
 
@@ -101,7 +101,7 @@ function getPlanet (planetName, date, geodeticalLongitude, geodeticalLatitude, h
 }
 
 module.exports = {
-  getAllPlanets: getAllPlanets,
-  getPlanet: getPlanet,
+  getAllPlanets,
+  getPlanet,
   getBodyNames: observableNames
 }

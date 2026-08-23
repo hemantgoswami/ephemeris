@@ -1,6 +1,6 @@
-var constant = require('./constant')
+const constant = require('./constant')
 
-var epsilon = {
+const epsilon = {
   /* The results of the program are returned in these
    * global variables:
    */
@@ -18,7 +18,7 @@ epsilon.calc = function (date) {
   if (date.julian == this.jdeps) {
     return
   }
-  var T = (date.julian - 2451545) / 36525
+  let T = (date.julian - 2451545) / 36525
 
   /* DE403 values. */
   T /= 10

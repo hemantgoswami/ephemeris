@@ -1,4 +1,4 @@
-var pluto = {
+const pluto = {
   maxargs: 9,
   max_harmonic: [0, 0, 0, 0, 2, 2, 9, 13, 13],
   max_power_of_t: 7,

@@ -1,9 +1,9 @@
-var constant = require('./constant')
-var epsilon = require('./epsilon')
-var plan404 = require('./plan404')
-var util = require('./util')
+const constant = require('./constant')
+const epsilon = require('./epsilon')
+const plan404 = require('./plan404')
+const util = require('./util')
 
-var gplan = {
+const gplan = {
   /** From Simon et al (1994) */
   freqs: [
     /* Arc sec per 10000 Julian years. */
@@ -44,41 +44,41 @@ var gplan = {
 
 /** Routines to chew through tables of perturbations. */
 gplan.calc = function (date, body_ptable) {
-  var j, ip, nt // int
-  var su, cu // double
+  let j, ip, nt // int
+  let su, cu // double
 
-  var T = (date.julian - constant.j2000) / body_ptable.timescale
-  var n = body_ptable.maxargs
+  const T = (date.julian - constant.j2000) / body_ptable.timescale
+  const n = body_ptable.maxargs
   /* Calculate sin( i*MM ), etc. for needed multiple angles. */
-  for (var i = 0; i < n; i++) {
+  for (let i = 0; i < n; i++) {
     j = body_ptable.max_harmonic[i]
     if (j > 0) {
-      sr = (util.mods3600(this.freqs[i] * T) + this.phases[i]) * constant.STR
-      this.sscc(i, sr, j)
+      const arg = (util.mods3600(this.freqs[i] * T) + this.phases[i]) * constant.STR
+      this.sscc(i, arg, j)
     }
   }
 
   /* Point to start of table of arguments. */
-  var p = body_ptable.arg_tbl
+  const p = body_ptable.arg_tbl
 
   /* Point to tabulated cosine and sine amplitudes. */
-  var pl = body_ptable.lon_tbl
-  var pb = body_ptable.lat_tbl
-  var pr = body_ptable.rad_tbl
+  const pl = body_ptable.lon_tbl
+  const pb = body_ptable.lat_tbl
+  const pr = body_ptable.rad_tbl
 
-  var sl = 0.0
-  var sb = 0.0
-  var sr = 0.0
+  let sl = 0.0
+  let sb = 0.0
+  let sr = 0.0
 
-  var p_i = 0
-  var pl_i = 0
-  var pb_i = 0
-  var pr_i = 0
+  let p_i = 0
+  let pl_i = 0
+  let pb_i = 0
+  let pr_i = 0
 
   for (; ;) {
     /* argument of sine and cosine */
     /* Number of periodic arguments. */
-    var np = p[p_i++] // np = *p++
+    const np = p[p_i++] // np = *p++
     if (np < 0) {
       break
     }
@@ -104,16 +104,16 @@ gplan.calc = function (date, body_ptable) {
       sr += cu
       continue
     }
-    var k1 = false
-    var cv = 0.0
-    var sv = 0.0
+    let k1 = false
+    let cv = 0.0
+    let sv = 0.0
     for (ip = 0; ip < np; ip++) {
       /* What harmonic. */
       j = p[p_i++] // *p++;
       /* Which planet. */
-      var m = p[p_i++] - 1 // *p++ - 1
+      const m = p[p_i++] - 1 // *p++ - 1
       if (j) {
-        var k = j < 0 ? -j : j
+        let k = j < 0 ? -j : j
         k -= 1
         su = this.ss[m][k]
         /* sin(k*angle) */
@@ -127,7 +127,7 @@ gplan.calc = function (date, body_ptable) {
           k1 = true
         }
         else { /* combine angles */
-          var tmp = su * cv + cu * sv
+          const tmp = su * cv + cu * sv
           cv = cu * cv - su * sv
           sv = tmp
         }
@@ -173,21 +173,21 @@ gplan.calc = function (date, body_ptable) {
  * for required multiple angles
  */
 gplan.sscc = function (k, arg, n) {
-  var su = Math.sin(arg)
-  var cu = Math.cos(arg)
+  const su = Math.sin(arg)
+  const cu = Math.cos(arg)
   this.ss[k] = []
   this.cc[k] = []
   this.ss[k][0] = su
   /* sin(L) */
   this.cc[k][0] = cu
   /* cos(L) */
-  var sv = 2 * su * cu
-  var cv = cu * cu - su * su
+  let sv = 2 * su * cu
+  let cv = cu * cu - su * su
   this.ss[k][1] = sv
   /* sin(2L) */
   this.cc[k][1] = cv
-  for (var i = 2; i < n; i++) {
-    var s = su * cv + cu * sv
+  for (let i = 2; i < n; i++) {
+    const s = su * cv + cu * sv
     cv = cu * cv - su * sv
     sv = s
     this.ss[k][i] = sv
@@ -199,14 +199,14 @@ gplan.sscc = function (k, arg, n) {
 /** Compute mean elements at Julian date J. */
 gplan.meanElements = function (date) {
   /* Time variables. T is in Julian centuries. */
-  var T = (date.julian - 2451545.0) / 36525.0
-  var T2 = T * T
+  const T = (date.julian - 2451545.0) / 36525.0
+  const T2 = T * T
 
   /* Mean longitudes of planets (Simon et al, 1994)
    .047" subtracted from constant term for offset to DE403 origin. */
 
   /* Mercury */
-  var x = util.mods3600(538101628.6889819 * T + 908103.213)
+  let x = util.mods3600(538101628.6889819 * T + 908103.213)
   x += (6.39e-6 * T
     - 0.0192789) * T2
   this.Args[0] = constant.STR * x
@@ -354,15 +354,15 @@ gplan.meanElements = function (date) {
  * of the same list of arguments.
  */
 gplan.calc3 = function (date, body_ptable, body_number) {
-  var j, ip, nt // int
-  var su, cu // double
+  let j, ip, nt // int
+  let su, cu // double
 
   this.meanElements(date)
 
-  var T = (date.julian - constant.j2000) / body_ptable.timescale
-  var n = body_ptable.maxargs
+  const T = (date.julian - constant.j2000) / body_ptable.timescale
+  const n = body_ptable.maxargs
   /* Calculate sin( i*MM ), etc. for needed multiple angles. */
-  for (var i = 0; i < n; i++) {
+  for (let i = 0; i < n; i++) {
     j = body_ptable.max_harmonic[i]
     if (j > 0) {
       this.sscc(i, this.Args[i], j)
@@ -370,25 +370,25 @@ gplan.calc3 = function (date, body_ptable, body_number) {
   }
 
   /* Point to start of table of arguments. */
-  var p = body_ptable.arg_tbl
+  const p = body_ptable.arg_tbl
   /* Point to tabulated cosine and sine amplitudes. */
-  var pl = body_ptable.lon_tbl
-  var pb = body_ptable.lat_tbl
-  var pr = body_ptable.rad_tbl
+  const pl = body_ptable.lon_tbl
+  const pb = body_ptable.lat_tbl
+  const pr = body_ptable.rad_tbl
 
-  var sl = 0.0
-  var sb = 0.0
-  var sr = 0.0
+  let sl = 0.0
+  let sb = 0.0
+  let sr = 0.0
 
-  var p_i = 0
-  var pl_i = 0
-  var pb_i = 0
-  var pr_i = 0
+  let p_i = 0
+  let pl_i = 0
+  let pb_i = 0
+  let pr_i = 0
 
   for (; ;) {
     /* argument of sine and cosine */
     /* Number of periodic arguments. */
-    var np = p[p_i++] // *p++;
+    const np = p[p_i++] // *p++;
     if (np < 0) {
       break
     }
@@ -415,17 +415,17 @@ gplan.calc3 = function (date, body_ptable, body_number) {
       sr += cu
       continue
     }
-    var k1 = false
-    var cv = 0.0
-    var sv = 0.0
+    let k1 = false
+    let cv = 0.0
+    let sv = 0.0
     for (ip = 0; ip < np; ip++) {
       /* What harmonic. */
       j = p[p_i++] // *p++;
       /* Which planet. */
-      var m = p[p_i++] - 1 // *p++ - 1;
+      const m = p[p_i++] - 1 // *p++ - 1;
       if (j) {
         /* var k = abs (j); */
-        var k = j < 0 ? -j : j
+        let k = j < 0 ? -j : j
         k -= 1
         su = this.ss[m][k]
         /* sin(k*angle) */
@@ -439,7 +439,7 @@ gplan.calc3 = function (date, body_ptable, body_number) {
           k1 = true
         }
         else { /* combine angles */
-          var tmp = su * cv + cu * sv
+          const tmp = su * cv + cu * sv
           cv = cu * cv - su * sv
           sv = tmp
         }
@@ -472,7 +472,7 @@ gplan.calc3 = function (date, body_ptable, body_number) {
     }
     sr += cu * cv + su * sv
   }
-  var t = body_ptable.trunclvl
+  const t = body_ptable.trunclvl
   return {
     longitude: this.Args[body_number - 1] + constant.STR * t * sl,
     latitude: constant.STR * t * sb,
@@ -486,15 +486,15 @@ gplan.calc3 = function (date, body_ptable, body_number) {
  * of the same list of arguments.
  */
 gplan.calc2 = function (date, body_ptable) {
-  var j, ip, nt // int
-  var su, cu // double
+  let j, ip, nt // int
+  let su, cu // double
 
   this.meanElements(date)
 
-  var T = (date.julian - constant.j2000) / body_ptable.timescale
-  var n = body_ptable.maxargs
+  const T = (date.julian - constant.j2000) / body_ptable.timescale
+  const n = body_ptable.maxargs
   /* Calculate sin( i*MM ), etc. for needed multiple angles. */
-  for (var i = 0; i < n; i++) {
+  for (let i = 0; i < n; i++) {
     j = body_ptable.max_harmonic[i]
     if (j > 0) {
       this.sscc(i, this.Args[i], j)
@@ -502,21 +502,21 @@ gplan.calc2 = function (date, body_ptable) {
   }
 
   /* Point to start of table of arguments. */
-  var p = body_ptable.arg_tbl
+  const p = body_ptable.arg_tbl
   /* Point to tabulated cosine and sine amplitudes. */
-  var pl = body_ptable.lon_tbl
-  var pr = body_ptable.rad_tbl
+  const pl = body_ptable.lon_tbl
+  const pr = body_ptable.rad_tbl
 
-  var p_i = 0
-  var pl_i = 0
-  var pr_i = 0
-  var sl = 0.0
-  var sr = 0.0
+  let p_i = 0
+  let pl_i = 0
+  let pr_i = 0
+  let sl = 0.0
+  let sr = 0.0
 
   for (; ;) {
     /* argument of sine and cosine */
     /* Number of periodic arguments. */
-    var np = p[p_i++] // *p++;
+    const np = p[p_i++] // *p++;
     if (np < 0) {
       break
     }
@@ -537,17 +537,17 @@ gplan.calc2 = function (date, body_ptable) {
       sr += cu
       continue
     }
-    var k1 = false
-    var cv = 0.0
-    var sv = 0.0
+    let k1 = false
+    let cv = 0.0
+    let sv = 0.0
     for (ip = 0; ip < np; ip++) {
       /* What harmonic. */
       j = p[p_i++] // *p++;
       /* Which planet. */
-      var m = p[p_i++] - 1 // *p++ - 1;
+      const m = p[p_i++] - 1 // *p++ - 1;
       if (j) {
         /* var k = abs (j); */
-        var k = j < 0 ? -j : j
+        let k = j < 0 ? -j : j
         k -= 1
         su = this.ss[m][k]
         /* sin(k*angle) */
@@ -561,7 +561,7 @@ gplan.calc2 = function (date, body_ptable) {
           k1 = true
         }
         else { /* combine angles */
-          var tmp = su * cv + cu * sv
+          const tmp = su * cv + cu * sv
           cv = cu * cv - su * sv
           sv = tmp
         }
@@ -586,7 +586,7 @@ gplan.calc2 = function (date, body_ptable) {
     }
     sr += cu * cv + su * sv
   }
-  var t = body_ptable.trunclvl
+  const t = body_ptable.trunclvl
   return {
     longitude: t * sl,
     latitude: null,
@@ -599,13 +599,13 @@ gplan.calc2 = function (date, body_ptable) {
  * in one variable.
  */
 gplan.calc1 = function (date, body_ptable) {
-  var j, ip, nt // int
-  var su, cu // double
+  let j, ip, nt // int
+  let su, cu // double
 
-  var T = (date.julian - constant.j2000) / body_ptable.timescale
+  const T = (date.julian - constant.j2000) / body_ptable.timescale
   this.meanElements(date)
   /* Calculate sin( i*MM ), etc. for needed multiple angles. */
-  for (var i = 0; i < this.Args.length; i++) {
+  for (let i = 0; i < this.Args.length; i++) {
     j = body_ptable.max_harmonic[i]
     if (j > 0) {
       this.sscc(i, this.Args[i], j)
@@ -613,18 +613,18 @@ gplan.calc1 = function (date, body_ptable) {
   }
 
   /* Point to start of table of arguments. */
-  var p = body_ptable.arg_tbl
+  const p = body_ptable.arg_tbl
   /* Point to tabulated cosine and sine amplitudes. */
-  var pl = body_ptable.lon_tbl
+  const pl = body_ptable.lon_tbl
 
-  var sl = 0.0
-  var p_i = 0
-  var pl_i = 0
+  let sl = 0.0
+  let p_i = 0
+  let pl_i = 0
 
   for (; ;) {
     /* argument of sine and cosine */
     /* Number of periodic arguments. */
-    var np = p[p_i++] // *p++;
+    const np = p[p_i++] // *p++;
     if (np < 0) {
       break
     }
@@ -638,17 +638,17 @@ gplan.calc1 = function (date, body_ptable) {
       sl += cu
       continue
     }
-    var k1 = false
-    var cv = 0.0
-    var sv = 0.0
+    let k1 = false
+    let cv = 0.0
+    let sv = 0.0
     for (ip = 0; ip < np; ip++) {
       /* What harmonic. */
       j = p[p_i++] // *p++;
       /* Which planet. */
-      var m = p[p_i++] - 1 // *p++ - 1;
+      const m = p[p_i++] - 1 // *p++ - 1;
       if (j) {
         /* var k = abs (j); */
-        var k = j < 0 ? -j : j
+        let k = j < 0 ? -j : j
         k -= 1
         su = this.ss[m][k]
         /* sin(k*angle) */
@@ -662,7 +662,7 @@ gplan.calc1 = function (date, body_ptable) {
           k1 = true
         }
         else { /* combine angles */
-          var tmp = su * cv + cu * sv
+          const tmp = su * cv + cu * sv
           cv = cu * cv - su * sv
           sv = tmp
         }
@@ -684,8 +684,8 @@ gplan.calc1 = function (date, body_ptable) {
 
 /** Compute geocentric moon. */
 gplan.moon = function (date, rect, pol) {
-  var moonpol = this.calc2(date, plan404.moonlr)
-  var x = moonpol.longitude + this.LP_equinox
+  const moonpol = this.calc2(date, plan404.moonlr)
+  let x = moonpol.longitude + this.LP_equinox
   if (x < -6.48e5) {
     x += 1.296e6
   }
@@ -698,10 +698,10 @@ gplan.moon = function (date, rect, pol) {
   pol.distance = (1 + constant.STR * moonpol.distance) * plan404.moonlr.distance
   /* Convert ecliptic polar to equatorial rectangular coordinates. */
   epsilon.calc(date)
-  var cosB = Math.cos(pol.latitude)
-  var sinB = Math.sin(pol.latitude)
-  var cosL = Math.cos(pol.longitude)
-  var sinL = Math.sin(pol.longitude)
+  const cosB = Math.cos(pol.latitude)
+  const sinB = Math.sin(pol.latitude)
+  const cosL = Math.cos(pol.longitude)
+  const sinL = Math.sin(pol.longitude)
   rect.longitude = cosB * cosL * pol.distance
   rect.latitude = (epsilon.coseps * cosB * sinL - epsilon.sineps * sinB) * pol.distance
   rect.distance = (epsilon.sineps * cosB * sinL + epsilon.coseps * sinB) * pol.distance

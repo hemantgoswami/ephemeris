@@ -1,10 +1,10 @@
-var execFileSync = require('child_process').execFileSync
-var path = require('path')
-var test = require('tape')
+const execFileSync = require('child_process').execFileSync
+const path = require('path')
+const test = require('tape')
 
-var ephemeris = require('../')
+const ephemeris = require('../')
 
-var BERLIN = {longitude: 10.0014, latitude: 53.5653, height: 0}
+const BERLIN = {longitude: 10.0014, latitude: 53.5653, height: 0}
 
 function at (iso) {
   return new Date(iso)
@@ -16,7 +16,7 @@ function observe (name, iso) {
 }
 
 test('getAllPlanets reports the date, the observer and every body', function (t) {
-  var result = ephemeris.getAllPlanets(at('2015-08-10T17:09:01.000+00:00'),
+  const result = ephemeris.getAllPlanets(at('2015-08-10T17:09:01.000+00:00'),
     BERLIN.longitude, BERLIN.latitude, BERLIN.height)
 
   t.equal(result.date.gregorianTerrestrial, '10.8.2015 17:9:1', 'terrestrial date')
@@ -28,7 +28,7 @@ test('getAllPlanets reports the date, the observer and every body', function (t)
 })
 
 test('apparent longitudes match the published reference values', function (t) {
-  var result = ephemeris.getAllPlanets(at('2015-08-10T17:09:01.000+00:00'),
+  const result = ephemeris.getAllPlanets(at('2015-08-10T17:09:01.000+00:00'),
     BERLIN.longitude, BERLIN.latitude, BERLIN.height)
 
   t.equal(result.observed.sun.apparentLongitudeDms360, '137°45\'39"', 'sun in dms')
@@ -41,11 +41,11 @@ test('apparent longitudes match the published reference values', function (t) {
 })
 
 test('getPlanet agrees with getAllPlanets for the same instant', function (t) {
-  var date = at('2024-04-05T00:00:00.000Z')
-  var all = ephemeris.getAllPlanets(date, BERLIN.longitude, BERLIN.latitude, BERLIN.height)
+  const date = at('2024-04-05T00:00:00.000Z')
+  const all = ephemeris.getAllPlanets(date, BERLIN.longitude, BERLIN.latitude, BERLIN.height)
 
   ephemeris.getBodyNames().forEach(function (name) {
-    var one = ephemeris.getPlanet(name, date, BERLIN.longitude, BERLIN.latitude, BERLIN.height)
+    const one = ephemeris.getPlanet(name, date, BERLIN.longitude, BERLIN.latitude, BERLIN.height)
     t.equal(one.observed[name].apparentLongitudeDd, all.observed[name].apparentLongitudeDd, name)
   })
   t.end()
@@ -59,7 +59,7 @@ test('getPlanet rejects a body it does not know', function (t) {
 })
 
 test('getBodyNames leaves out the observer and the table helper', function (t) {
-  var names = ephemeris.getBodyNames()
+  const names = ephemeris.getBodyNames()
 
   t.equal(names.indexOf('earth'), -1, 'earth is the observer, not an observable')
   t.equal(names.indexOf('init'), -1, 'init is a helper, not a body')
@@ -68,9 +68,9 @@ test('getBodyNames leaves out the observer and the table helper', function (t) {
 })
 
 test('a missing date is read as now', function (t) {
-  var before = new Date()
-  var result = ephemeris.getAllPlanets(null, BERLIN.longitude, BERLIN.latitude, BERLIN.height)
-  var after = new Date()
+  const before = new Date()
+  const result = ephemeris.getAllPlanets(null, BERLIN.longitude, BERLIN.latitude, BERLIN.height)
+  const after = new Date()
 
   t.ok(result.date.gregorianTerrestrialRaw.year >= before.getUTCFullYear(), 'not before now')
   t.ok(result.date.gregorianTerrestrialRaw.year <= after.getUTCFullYear(), 'not after now')
@@ -83,7 +83,7 @@ test('a missing date is read as now', function (t) {
  * the turn.
  */
 test('the retrograde flag matches known retrograde windows', function (t) {
-  var cases = [
+  const cases = [
     // Venus retrograde 25 July - 6 September 2015
     {name: 'venus', iso: '2015-08-10T00:00:00Z', retrograde: true},
     {name: 'venus', iso: '2015-10-10T00:00:00Z', retrograde: false},
@@ -108,18 +108,18 @@ test('the retrograde flag matches known retrograde windows', function (t) {
 })
 
 test('the retrograde flag agrees with the change in longitude over a day', function (t) {
-  var dates = ['1900-03-01', '1986-01-01', '2015-08-10', '2020-06-20', '2024-04-05', '2099-12-31']
+  const dates = ['1900-03-01', '1986-01-01', '2015-08-10', '2020-06-20', '2024-04-05', '2099-12-31']
 
   dates.forEach(function (day) {
     ephemeris.getBodyNames().forEach(function (name) {
-      var now = observe(name, day + 'T12:00:00Z')
+      const now = observe(name, day + 'T12:00:00Z')
       if (now.is_retrograde === undefined) {
         return // stars carry no ecliptic motion
       }
 
-      var start = observe(name, day + 'T00:00:00Z').apparentLongitudeDd
-      var end = observe(name, day + 'T23:59:59Z').apparentLongitudeDd
-      var moved = ((end - start + 540) % 360) - 180
+      const start = observe(name, day + 'T00:00:00Z').apparentLongitudeDd
+      const end = observe(name, day + 'T23:59:59Z').apparentLongitudeDd
+      const moved = ((end - start + 540) % 360) - 180
 
       t.equal(now.is_retrograde, moved < 0, name + ' on ' + day +
         ' moved ' + moved.toFixed(5) + ' degrees')
@@ -129,11 +129,11 @@ test('the retrograde flag agrees with the change in longitude over a day', funct
 })
 
 test('the daily motion has the sign of the retrograde flag', function (t) {
-  var result = ephemeris.getAllPlanets(at('2015-08-10T17:09:01.000Z'),
+  const result = ephemeris.getAllPlanets(at('2015-08-10T17:09:01.000Z'),
     BERLIN.longitude, BERLIN.latitude, BERLIN.height)
 
   ephemeris.getBodyNames().forEach(function (name) {
-    var observed = result.observed[name]
+    const observed = result.observed[name]
     if (observed.is_retrograde === undefined) {
       return
     }
@@ -144,18 +144,18 @@ test('the daily motion has the sign of the retrograde flag', function (t) {
 })
 
 test('results do not depend on the timezone of the host machine', function (t) {
-  var script = 'var e = require(' + JSON.stringify(path.join(__dirname, '..')) + ');' +
+  const script = 'var e = require(' + JSON.stringify(path.join(__dirname, '..')) + ');' +
     'var r = e.getAllPlanets(new Date("2015-08-10T17:09:01.000Z"), 10.0014, 53.5653, 0);' +
     'console.log(Object.keys(r.observed).map(function (k) {' +
     '  return k + " " + r.observed[k].apparentLongitudeDd + " " + r.observed[k].is_retrograde;' +
     '}).join("|"))'
 
   function runIn (timezone) {
-    var env = Object.assign({}, process.env, {TZ: timezone})
-    return execFileSync(process.execPath, ['-e', script], {env: env, encoding: 'utf8'})
+    const env = Object.assign({}, process.env, {TZ: timezone})
+    return execFileSync(process.execPath, ['-e', script], {env, encoding: 'utf8'})
   }
 
-  var utc = runIn('UTC')
+  const utc = runIn('UTC')
   t.equal(runIn('Pacific/Kiritimati'), utc, 'same result at UTC+14')
   t.equal(runIn('Pacific/Pago_Pago'), utc, 'same result at UTC-11')
   t.end()

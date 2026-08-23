@@ -1,4 +1,4 @@
-var uranus = {
+const uranus = {
   maxargs: 9,
   max_harmonic: [0, 0, 0, 0, 5, 10, 9, 12, 0],
   max_power_of_t: 6,

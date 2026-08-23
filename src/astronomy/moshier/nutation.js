@@ -1,8 +1,8 @@
-var constant = require('./constant')
-var epsilon = require('./epsilon')
-var util = require('./util')
+const constant = require('./constant')
+const epsilon = require('./epsilon')
+const util = require('./util')
 
-var nutation = {
+const nutation = {
   /* The answers are posted here by nutlo(): */
   /** time to which the nutation applies */
   jdnut: {},
@@ -168,12 +168,12 @@ nutation.calc = function (date, p) {
   epsilon.calc(date)
   /* and also the obliquity of date */
 
-  var f = epsilon.eps + this.nuto
-  var ce = Math.cos(f)
-  var se = Math.sin(f)
-  var sino = Math.sin(this.nuto)
-  var cl = Math.cos(this.nutl)
-  var sl = Math.sin(this.nutl)
+  const f = epsilon.eps + this.nuto
+  const ce = Math.cos(f)
+  const se = Math.sin(f)
+  const sino = Math.sin(this.nuto)
+  const cl = Math.cos(this.nutl)
+  const sl = Math.sin(this.nutl)
 
   /* Apply adjustment
    * to equatorial rectangular coordinates of object.
@@ -183,7 +183,7 @@ nutation.calc = function (date, p) {
    * in longitude; rotate about new x axis back to equator of date
    * plus nutation in obliquity.
    */
-  var p1 = {
+  const p1 = {
     longitude: cl * p.longitude
       - sl * epsilon.coseps * p.latitude
       - sl * epsilon.sineps * p.distance,
@@ -195,13 +195,13 @@ nutation.calc = function (date, p) {
       + (cl * epsilon.sineps * se + epsilon.coseps * ce) * p.distance
   }
 
-  var dp = {
+  const dp = {
     longitude: p1.longitude - p.longitude,
     latitude: p1.latitude - p.latitude,
     distance: p1.distance - p.distance
   }
 
-  var result = util.showcor(p, dp)
+  const result = util.showcor(p, dp)
 
   p.longitude = p1.longitude
   p.latitude = p1.latitude
@@ -224,9 +224,9 @@ nutation.calclo = function (date) {
   /* Julian centuries from 2000 January 1.5,
    * barycentric dynamical time
    */
-  var T = (date.julian - 2451545) / 36525
-  var T2 = T * T
-  var T10 = T / 10
+  const T = (date.julian - 2451545) / 36525
+  const T2 = T * T
+  const T10 = T / 10
 
   /* Fundamental arguments in the FK5 reference system. */
 
@@ -234,34 +234,34 @@ nutation.calclo = function (date) {
    * longitude of the mean ascending node of the lunar orbit
    * on the ecliptic, measured from the mean equinox of date
    */
-  var OM = (util.mods3600(-6962890.539 * T + 450160.280) + (0.008 * T + 7.455) * T2)
+  const OM = (util.mods3600(-6962890.539 * T + 450160.280) + (0.008 * T + 7.455) * T2)
     * constant.STR
 
   /**
    * mean longitude of the Sun minus the
    * mean longitude of the Sun's perigee
    */
-  var MS = (util.mods3600(129596581.224 * T + 1287099.804) - (0.012 * T + 0.577) * T2)
+  const MS = (util.mods3600(129596581.224 * T + 1287099.804) - (0.012 * T + 0.577) * T2)
     * constant.STR
 
   /**
    * mean longitude of the Moon minus the
    * mean longitude of the Moon's perigee
    */
-  var MM = (util.mods3600(1717915922.633 * T + 485866.733) + (0.064 * T + 31.310) * T2)
+  const MM = (util.mods3600(1717915922.633 * T + 485866.733) + (0.064 * T + 31.310) * T2)
     * constant.STR
 
   /**
    * mean longitude of the Moon minus the
    * mean longitude of the Moon's node
    */
-  var FF = (util.mods3600(1739527263.137 * T + 335778.877) + (0.011 * T - 13.257) * T2)
+  const FF = (util.mods3600(1739527263.137 * T + 335778.877) + (0.011 * T - 13.257) * T2)
     * constant.STR
 
   /**
    * mean elongation of the Moon from the Sun.
    */
-  var DD = (util.mods3600(1602961601.328 * T + 1072261.307) + (0.019 * T - 6.891) * T2)
+  const DD = (util.mods3600(1602961601.328 * T + 1072261.307) + (0.019 * T - 6.891) * T2)
     * constant.STR
 
   /* Calculate sin( i*MM ), etc. for needed multiple angles */
@@ -271,49 +271,49 @@ nutation.calclo = function (date) {
   this.sscc(3, DD, 4)
   this.sscc(4, OM, 2)
 
-  var C = 0.0
-  var D = 0.0
-  var p = this.nt
+  let C = 0.0
+  let D = 0.0
+  const p = this.nt
   /* point to start of table */
 
-  var p_i = 0
+  let p_i = 0
 
-  for (var i = 0; i < 105; i++) {
+  for (let i = 0; i < 105; i++) {
     /* argument of sine and cosine */
-    var k
-    var k1 = false
-    var cv = 0.0
-    var sv = 0.0
-    for (var m = 0; m < 5; m++) {
-      var j = p[p_i++] // *p++;
+    let k
+    let k1 = false
+    let cv = 0.0
+    let sv = 0.0
+    for (let m = 0; m < 5; m++) {
+      const j = p[p_i++] // *p++;
       if (j) {
         k = j < 0 ? -j : j
-        var su = this.ss[m][k - 1]
+        let su = this.ss[m][k - 1]
         /* sin(k*angle) */
         if (j < 0) {
           su = -su
         }
-        var cu = this.cc[m][k - 1]
+        const cu = this.cc[m][k - 1]
         if (!k1) { /* set first angle */
           sv = su
           cv = cu
           k1 = true
         } else { /* combine angles */
-          var sw = su * cv + cu * sv
+          const sw = su * cv + cu * sv
           cv = cu * cv - su * sv
           sv = sw
         }
       }
     }
     /* longitude coefficient */
-    var f = p[p_i++] // *p++;
+    let f = p[p_i++] // *p++;
     k = p[p_i++] // *p++;
     if (k != 0) {
       f += T10 * k
     }
 
     /* obliquity coefficient */
-    var g = p[p_i++] // *p++;
+    let g = p[p_i++] // *p++;
     k = p[p_i++] // *p++;
     if (k != 0) {
       g += T10 * k
@@ -341,8 +341,8 @@ nutation.calclo = function (date) {
  * for required multiple angles
  */
 nutation.sscc = function (k, arg, n) {
-  var su = Math.sin(arg)
-  var cu = Math.cos(arg)
+  const su = Math.sin(arg)
+  const cu = Math.cos(arg)
   this.ss[k] = []
   this.cc[k] = []
 
@@ -350,13 +350,13 @@ nutation.sscc = function (k, arg, n) {
   /* sin(L) */
   this.cc[k][0] = cu
   /* cos(L) */
-  var sv = 2 * su * cu
-  var cv = cu * cu - su * su
+  let sv = 2 * su * cu
+  let cv = cu * cu - su * su
   this.ss[k][1] = sv
   /* sin(2L) */
   this.cc[k][1] = cv
-  for (var i = 2; i < n; i++) {
-    var s = su * cv + cu * sv
+  for (let i = 2; i < n; i++) {
+    const s = su * cv + cu * sv
     cv = cu * cv - su * sv
     sv = s
     this.ss[k][i] = sv

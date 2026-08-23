@@ -1,39 +1,39 @@
-var constant = require('./constant')
-var kepler = require('./kepler')
-var util = require('./util')
-var vearth = require('./vearth')
+const constant = require('./constant')
+const kepler = require('./kepler')
+const util = require('./util')
+const vearth = require('./vearth')
 
-var moshier = {
+const moshier = {
   body: require('./body')
 }
 
-var light = {}
+const light = {}
 
 light.calc = function (body, q, e) {
-  var p = {}
-  var t // double
+  const p = {}
+  let t // double
 
   /* save initial q-e vector for display */
-  var p0 = {
+  const p0 = {
     longitude: q.longitude - e.longitude,
     latitude: q.latitude - e.latitude,
     distance: q.distance - e.distance
   }
 
-  var E = Math.sqrt(e.longitude * e.longitude
+  const E = Math.sqrt(e.longitude * e.longitude
     + e.latitude * e.latitude
     + e.distance * e.distance)
 
-  for (var i = 0; i < 2; i++) {
+  for (let i = 0; i < 2; i++) {
     p.longitude = q.longitude - e.longitude
     p.latitude = q.latitude - e.latitude
     p.distance = q.distance - e.distance
 
-    var Q = q.longitude * q.longitude
+    let Q = q.longitude * q.longitude
       + q.latitude * q.latitude
       + q.distance * q.distance
 
-    var P = p.longitude * p.longitude
+    let P = p.longitude * p.longitude
       + p.latitude * p.latitude
       + p.distance * p.distance
 
@@ -71,7 +71,7 @@ light.calc = function (body, q, e) {
   p.latitude += vearth.vearth.latitude * t
   p.distance += vearth.vearth.distance * t
 
-  var d = util.deltap(p, p0)
+  const d = util.deltap(p, p0)
   /* see util.dms() */
   constant.dradt = d.dr
   constant.ddecdt = d.dd

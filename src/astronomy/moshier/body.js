@@ -1,4 +1,4 @@
-var plan404 = require('./plan404')
+const plan404 = require('./plan404')
 
 /**
  * body definition
@@ -37,7 +37,7 @@ var plan404 = require('./plan404')
  * raHight:      upper right ascension, in units of hours times 3600
  * dec0:         lower declination, in units of degrees times 3600
  */
-var body = {
+const body = {
   /**
    * Sun
    */
@@ -210,7 +210,7 @@ var body = {
 }
 
 body.init = function () {
-  for (var key in this) {
+  for (const key in this) {
     if (Object.prototype.hasOwnProperty.call(this, key) && key != 'init') {
       // fill the 'key'
       this [key].key = key

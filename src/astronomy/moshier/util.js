@@ -1,7 +1,7 @@
-var common = require('../../common')
-var constant = require('./constant')
+const common = require('../../common')
+const constant = require('./constant')
 
-var util = {}
+const util = {}
 
 util.mods3600 = function (value) {
   return value - 1.296e6 * Math.floor(value / 1.296e6)
@@ -9,7 +9,7 @@ util.mods3600 = function (value) {
 
 /** Reduce x modulo 2 pi */
 util.modtp = function (x) {
-  var y = x - Math.floor(x / constant.TPI) * constant.TPI
+  let y = x - Math.floor(x / constant.TPI) * constant.TPI
   while (y < 0) {
     y += constant.TPI
   }
@@ -21,7 +21,7 @@ util.modtp = function (x) {
 
 /** Reduce x modulo 360 degrees */
 util.mod360 = function (x) {
-  var y = x - Math.floor(x / 360) * 360
+  let y = x - Math.floor(x / 360) * 360
   while (y < 0) {
     y += 360
   }
@@ -33,7 +33,7 @@ util.mod360 = function (x) {
 
 /** Reduce x modulo 30 degrees */
 util.mod30 = function (x) {
-  var y = x - Math.floor(x / 30) * 30
+  let y = x - Math.floor(x / 30) * 30
   while (y < 0) {
     y += 30
   }
@@ -44,7 +44,7 @@ util.mod30 = function (x) {
 }
 
 util.zatan2 = function (x, y) {
-  var w = 0, code = 0
+  let w = 0, code = 0
 
   if (x < 0) {
     code = 2
@@ -92,18 +92,18 @@ util.tanh = function (x) {
 }
 
 util.hms = function (x) {
-  var s = x * constant.RTOH
+  let s = x * constant.RTOH
   if (s < 0) {
     s += 24
   }
-  var h = Math.floor(s)
+  let h = Math.floor(s)
   s -= h
   s *= 60
-  var m = Math.floor(s)
+  let m = Math.floor(s)
   s -= m
   s *= 60
   /* Handle shillings and pence roundoff. */
-  var sfrac = Math.floor(1000 * s + 0.5)
+  let sfrac = Math.floor(1000 * s + 0.5)
   if (sfrac >= 60000) {
     sfrac -= 60000
     m += 1
@@ -112,7 +112,7 @@ util.hms = function (x) {
       h += 1
     }
   }
-  var sint = Math.floor(sfrac / 1000)
+  const sint = Math.floor(sfrac / 1000)
   sfrac -= Math.floor(sint * 1000)
 
   return {
@@ -124,14 +124,14 @@ util.hms = function (x) {
 }
 
 util.dms = function (x) {
-  var s = x * constant.RTD
+  let s = x * constant.RTD
   if (s < 0) {
     s = -s
   }
-  var d = Math.floor(s)
+  const d = Math.floor(s)
   s -= d
   s *= 60
-  var m = Math.floor(s)
+  const m = Math.floor(s)
   s -= m
   s *= 60
 
@@ -147,12 +147,12 @@ util.dms = function (x) {
  * in arc seconds
  */
 util.showcor = function (p, dp) {
-  var p1 = {
+  const p1 = {
     longitude: p.longitude + dp.longitude,
     latitude: p.latitude + dp.latitude,
     distance: p.distance + dp.distance
   }
-  var d = util.deltap(p, p1)
+  const d = util.deltap(p, p1)
   return {
     dRA: constant.RTS * d.dr / 15,
     dDec: constant.RTS * d.dd
@@ -165,7 +165,7 @@ util.showcor = function (p, dp) {
  * Output vector pol contains R.A., Dec., and radius.
  */
 util.showrd = function (p, pol) {
-  var r = Math.sqrt(p.longitude * p.longitude
+  const r = Math.sqrt(p.longitude * p.longitude
     + p.latitude * p.latitude + p.distance * p.distance
   )
 
@@ -173,7 +173,7 @@ util.showrd = function (p, pol) {
   pol.latitude = Math.asin(p.distance / r)
   pol.distance = r
 
-  var result = {}
+  const result = {}
   common.copy(result, {
     dRA: pol.longitude,
     dDec: pol.latitude,
@@ -204,28 +204,28 @@ util.showrd = function (p, pol) {
  * p1 is the vector after motion or aberration.
  */
 util.deltap = function (p0, p1) {
-  var dr
+  let dr
 
-  var P = p0.longitude * p0.longitude
+  let P = p0.longitude * p0.longitude
     + p0.latitude * p0.latitude
     + p0.distance * p0.distance
 
-  var Q = p1.longitude * p1.longitude
+  let Q = p1.longitude * p1.longitude
     + p1.latitude * p1.latitude
     + p1.distance * p1.distance
 
-  var dp = {
+  const dp = {
     longitude: p1.longitude - p0.longitude,
     latitude: p1.latitude - p0.latitude,
     distance: p1.distance - p0.distance
   }
 
-  var z = dp.longitude * dp.longitude
+  const z = dp.longitude * dp.longitude
     + dp.latitude * dp.latitude
     + dp.distance * dp.distance
 
-  var A = Math.sqrt(P)
-  var B = Math.sqrt(Q)
+  const A = Math.sqrt(P)
+  const B = Math.sqrt(Q)
 
   if (A < 1.e-7 || B < 1.e-7 || z / (P + Q) > 5.e-7) {
     P = util.zatan2(p0.longitude, p0.latitude)
@@ -242,22 +242,22 @@ util.deltap = function (p0, p1) {
     Q = Math.asin(p1.distance / B)
     return {
       dd: Q - P,
-      dr: dr
+      dr
     }
   }
 
-  var x = p0.longitude
-  var y = p0.latitude
+  let x = p0.longitude
+  const y = p0.latitude
   if (x == 0.0) {
     dr = 1.0e38
   } else {
-    var a = y / x
+    const a = y / x
     dr = (dp.latitude - dp.longitude * y / x) / (x * (1 + a * a))
   }
   x = p0.distance / A
   return {
     dd: (p1.distance / B - x) / Math.sqrt(1 - x * x),
-    dr: dr
+    dr
   }
 }
 
@@ -267,7 +267,7 @@ util.deltap = function (p0, p1) {
  * The answers are posted in the following global locations:
  */
 util.angles = function (p, q, e) {
-  var a = {
+  const a = {
     longitude: p.longitude,
     latitude: p.latitude,
     distance: p.distance

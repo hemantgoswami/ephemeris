@@ -1,6 +1,6 @@
-var constant = require('./constant')
+const constant = require('./constant')
 
-var refraction = {}
+const refraction = {}
 
 /**
  * Atmospheric refraction.
@@ -26,16 +26,16 @@ refraction.calc = function (alt) {
    */
 
   /* Start iteration assuming correction = 0 */
-  var y = alt
-  var D = 0.0
+  let y = alt
+  let D = 0.0
   /* Invert Almanac for Computers formula numerically */
-  var P = (constant.atpress - 80) / 930
-  var Q = 4.8e-3 * (constant.attemp - 10)
-  var y0 = y
-  var D0 = D
+  const P = (constant.atpress - 80) / 930
+  const Q = 4.8e-3 * (constant.attemp - 10)
+  let y0 = y
+  let D0 = D
 
-  for (var i = 0; i < 4; i++) {
-    var N = y + (7.31 / (y + 4.4))
+  for (let i = 0; i < 4; i++) {
+    let N = y + (7.31 / (y + 4.4))
     N = 1 / Math.tan(constant.DTR * N)
     D = N * P / (60 + Q * (N + 39))
     N = y - y0

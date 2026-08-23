@@ -1,4 +1,4 @@
-var jupiter = {
+const jupiter = {
   maxargs: 9,
   max_harmonic: [0, 0, 1, 0, 9, 16, 7, 5, 0],
   max_power_of_t: 6,

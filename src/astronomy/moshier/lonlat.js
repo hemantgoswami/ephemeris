@@ -1,20 +1,20 @@
-var epsilon = require('./epsilon')
-var precess = require('./precess')
-var util = require('./util')
+const epsilon = require('./epsilon')
+const precess = require('./precess')
+const util = require('./util')
 
-var lonlat = {}
+const lonlat = {}
 
 lonlat.calc = function (pp, date, ofdate) {
   /* Make local copy of position vector
    * and calculate radius.
    */
-  var s = {
+  const s = {
     longitude: pp.longitude,
     latitude: pp.latitude,
     distance: pp.distance
   }
 
-  var r = Math.sqrt(pp.longitude * pp.longitude
+  const r = Math.sqrt(pp.longitude * pp.longitude
     + pp.latitude * pp.latitude + pp.distance * pp.distance
   )
 
@@ -25,11 +25,11 @@ lonlat.calc = function (pp, date, ofdate) {
 
   /* Convert from equatorial to ecliptic coordinates */
   epsilon.calc(date)
-  var y = epsilon.coseps * s.latitude + epsilon.sineps * s.distance
-  var z = -epsilon.sineps * s.latitude + epsilon.coseps * s.distance
+  const y = epsilon.coseps * s.latitude + epsilon.sineps * s.distance
+  const z = -epsilon.sineps * s.latitude + epsilon.coseps * s.distance
 
-  var yy = util.zatan2(s.longitude, y)
-  var zz = Math.asin(z / r)
+  const yy = util.zatan2(s.longitude, y)
+  const zz = Math.asin(z / r)
 
   return {
     // longitude and latitude in decimal

@@ -1,7 +1,7 @@
 'use strict'
 
-var js = require('@eslint/js')
-var globals = require('globals')
+const js = require('@eslint/js')
+const globals = require('globals')
 
 module.exports = [
   {
@@ -14,7 +14,7 @@ module.exports = [
   js.configs.recommended,
   {
     languageOptions: {
-      ecmaVersion: 2018,
+      ecmaVersion: 2022,
       sourceType: 'commonjs',
       globals: globals.node
     },
@@ -22,8 +22,11 @@ module.exports = [
       reportUnusedDisableDirectives: true
     },
     rules: {
-      // The Moshier translation is ES5 by design; these are style choices the
-      // existing sources already follow.
+      // Modern declarations. Kept as errors so the ES5 style cannot creep
+      // back in one file at a time.
+      'no-var': 'error',
+      'prefer-const': 'error',
+      'object-shorthand': ['error', 'properties'],
       'semi': ['error', 'never'],
       'quotes': ['error', 'single', {avoidEscape: true}],
       'indent': ['error', 2, {SwitchCase: 1}],
