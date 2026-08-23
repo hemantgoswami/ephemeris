@@ -77,6 +77,14 @@ contributors should opt into that deliberately rather than by cloning.
 
 ## Known gaps
 
+`star.js` reports right ascension where the rest of the library reports
+ecliptic longitude. The backend converts radians to degrees so the units
+match, but the quantity is still wrong: Swiss Ephemeris puts Sirius at
+104.449 degrees of ecliptic longitude for 2026-01-01, and this library says
+101.455, because they are not the same measurement. Only `sirius` is
+affected, since it is the only star. Fixing it properly means running the
+star through the ecliptic reduction the planets use.
+
 `processor.test()` in `src/astronomy/moshier/processor.js` is a self check
 inherited from the original port. Its expected topocentric and refraction
 values have never matched what this code produces, so it is not part of

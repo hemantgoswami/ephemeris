@@ -44,8 +44,17 @@ const moshier = {
     constant.body = target
     processor.calcWithMotion(date, target)
 
+    // star.js stores apparentLongitude as right ascension in radians, while
+    // every other body stores ecliptic longitude in degrees. The backend
+    // contract is degrees, so convert. See the known gap in CONTRIBUTING:
+    // the underlying quantity for a star is still right ascension, not an
+    // ecliptic longitude, which is a separate and older problem.
+    const longitude = target.raMotion
+      ? target.position.apparentLongitude * constant.RTD
+      : target.position.apparentLongitude
+
     return {
-      longitude: target.position.apparentLongitude,
+      longitude,
       motion: target.position.apparentLongitudeMotion,
       distance: target.position.geocentricDistance,
       raw: target

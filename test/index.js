@@ -786,6 +786,25 @@ test('adding the nodes left the other bodies alone', function (t) {
  * present, and the conformance block runs over everything available.
  */
 
+test('a star reports degrees, like every other body', function (t) {
+  // star.js keeps apparentLongitude as right ascension in radians while
+  // everything else keeps ecliptic longitude in degrees. The backend
+  // converts, and the dms strings are the check: they were right before the
+  // backend split and have to stay right.
+  const sirius = observe('sirius', '2015-08-10T17:09:01Z')
+
+  t.equal(sirius.apparentLongitudeDms360, '101\u00B027\'17"', 'dms over the circle')
+  t.equal(sirius.apparentLongitudeDms30, '11\u00B027\'17"', 'dms within the sign')
+  t.ok(sirius.apparentLongitudeDd > 100 && sirius.apparentLongitudeDd < 102,
+    'the decimal value is degrees, ' + sirius.apparentLongitudeDd.toFixed(4) + ', not radians')
+
+  // and the decimal agrees with the string it is printed next to
+  const fromString = parseInt(sirius.apparentLongitudeDms360, 10)
+  t.equal(Math.floor(sirius.apparentLongitudeDd), fromString,
+    'the decimal and the dms string describe the same angle')
+  t.end()
+})
+
 test('the three backends are registered, whether or not their engine is here', function (t) {
   const listed = ephemeris.backends()
   const names = listed.map(function (b) { return b.name }).sort()

@@ -247,10 +247,45 @@ Backend "swisseph" is not usable: the sweph package is not installed:
 Cannot find module 'sweph'. Try: npm install sweph
 ```
 
+#### Getting the Swiss Ephemeris data files
+
 Without data files, Swiss Ephemeris runs in its own Moshier mode, which is
-the same theory the built in backend uses, so it buys nothing. Point
-`ephePath` at a directory of `.se1` files for the JPL accuracy that makes it
-worth the install. About 1.9 MB covers 1800 to 2400.
+the same theory the built in backend already uses, so it buys nothing: no
+Chiron, no fixed stars, and the same numbers you had. The data files are
+what make it worth installing.
+
+`sweph` bundles none, which is deliberate and is why it is 6 MB rather than
+30. Fetch only the ones you need from the official Swiss Ephemeris
+repository:
+
+```bash
+mkdir -p ephe && cd ephe
+BASE=https://raw.githubusercontent.com/aloistr/swisseph/master/ephe
+curl -O $BASE/sepl_18.se1     # planets,  473 kB
+curl -O $BASE/semo_18.se1     # moon,     1.2 MB
+curl -O $BASE/seas_18.se1     # asteroids incl. Chiron, 218 kB
+curl -O $BASE/sefstars.txt    # fixed stars, 133 kB
+```
+
+**2.1 MB in total**, and it downloads in about a second. Then:
+
+```javascript
+ephemeris.use(ephemeris.swisseph({ ephePath: './ephe' }));
+```
+
+The `_18` files cover 1800 to 2400. Swap the suffix for other six century
+spans, `_12` for 1200 to 1800 and so on, or take `sepl_*.se1` wholesale for
+the full range. Only add what your date range actually needs.
+
+Numbered minor planets beyond Chiron each need their own file, named after
+the number: asking for `{asteroid: 433}` without one reports
+`SwissEph file 'se00433s.se1' not found`, which tells you exactly what to
+fetch.
+
+The alternative `swisseph` package bundles data instead, but costs 30 MB and
+12 seconds, and 9.5 MB of that is `seasnam.txt`, an asteroid *name* list no
+calculation reads. `sweph` plus the four files above is the smaller and
+faster route, and it needs no compiler.
 
 #### When a body is not available
 
