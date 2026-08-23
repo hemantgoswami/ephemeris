@@ -1,3 +1,6 @@
+[![CI](https://github.com/hemantgoswami/ephemeris/actions/workflows/ci.yml/badge.svg)](https://github.com/hemantgoswami/ephemeris/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/ephemeris.svg)](https://www.npmjs.com/package/ephemeris)
+
 This source is modified version of [xerik](https://www.npmjs.com/package/ephemeris-moshier). Thank you for such a brilliant piece of work.
 
 This is basically JavaScript implementation of [Moshier's ephemeris](http://www.moshier.net) calculations for sun, planets, comets, asteroids and stars.
@@ -142,6 +145,9 @@ yarn run test      # tape, runs lint first
 
 With [mise](https://mise.jdx.dev) installed, `mise run test`, `mise run lint`
 and `mise run lintfix` do the same.
+
+`.github/workflows/ci.yml` runs the same lint and tests on every pull
+request and every push to `master`, across Node 20, 22 and 24.
 
 ### Releasing
 
