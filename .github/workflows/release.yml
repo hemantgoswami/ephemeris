@@ -35,14 +35,13 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          # npm trusted publishing needs npm 11.5.1 or newer, which in turn
-          # needs Node 20.17 or 22.9 and up.
-          node-version: 22
+          # Active LTS. It ships npm 11.17 and up, comfortably past the
+          # 11.5.1 that npm trusted publishing needs, so there is nothing to
+          # upgrade here. Lowering this below Node 24 would bring back that
+          # requirement.
+          node-version: 24
           registry-url: https://registry.npmjs.org
           cache: yarn
-
-      - name: Use an npm that can do trusted publishing
-        run: npm install --global npm@^11.5.1
 
       - name: Decide whether this commit is a release
         id: check

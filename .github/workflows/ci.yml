@@ -27,7 +27,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: yarn
 
       # --frozen-lockfile also fails when package.json and yarn.lock have
@@ -47,10 +47,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Current LTS lines plus the one after. The library itself is ES5 and
-        # package.json claims Node 14 and up, but ESLint 9 needs 18.18 and
-        # up, so the matrix starts at the oldest line still getting fixes.
-        node: [20, 22, 24]
+        # 22 is maintenance LTS until April 2027, 24 is active LTS until
+        # April 2028, and 26 becomes LTS in October 2026. Node 20 was dropped
+        # when it went end of life on 30 April 2026.
+        node: [22, 24, 26]
 
     name: test on node ${{ matrix.node }}
 

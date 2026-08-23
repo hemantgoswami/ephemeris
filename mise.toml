@@ -1,5 +1,5 @@
 [tools]
-node = "20"
+node = "24"
 
 [env]
 # Use the project name derived from the current directory

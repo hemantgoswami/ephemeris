@@ -1,6 +1,6 @@
 {
   "name": "ephemeris",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "description": "JavaScript implementation of Moshier's ephemeris calculations for sun, planets, comets, asteroids and stars.",
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
     "tape": "^4.13.3"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=22"
   },
   "files": [
     "index.js",
