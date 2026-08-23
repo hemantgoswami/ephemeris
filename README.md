@@ -147,7 +147,8 @@ With [mise](https://mise.jdx.dev) installed, `mise run test`, `mise run lint`
 and `mise run lintfix` do the same.
 
 `.github/workflows/ci.yml` runs the same lint and tests on every pull
-request and every push to `main`, across Node 20, 22 and 24.
+request and every push to `main`, across Node 22, 24 and 26. Node 24 is
+the version the dev toolchain pins in `mise.toml`.
 
 ### Releasing
 
@@ -193,6 +194,16 @@ part of `yarn run test`. The apparent geocentric positions it checks do
 match.
 
 ### Changelog
+
+#### 3.0.0 Breaking Changes - Please read carefully
+* Requires Node 22 or newer. The calculation code is untouched and still
+  produces byte identical results on older versions, but `engines` now
+  states what is actually tested and supported. This matters because Yarn
+  refuses to install a package whose `engines` it does not satisfy, where
+  npm only warns.
+* Node 20 went end of life on 30 April 2026, which is what prompted this.
+  Continuous integration now covers Node 22, 24 and 26, and the toolchain in
+  `mise.toml` moves to Node 24, the active LTS.
 
 #### 2.3.0
 * Fixes `is_retrograde`, which was previously wrong for most bodies. It
