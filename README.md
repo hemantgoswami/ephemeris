@@ -283,13 +283,31 @@ programmatically:
 await ephemeris.fetchEphemeris({ ephePath: './ephe' });
 ```
 
-**It is never automatic, and that is deliberate.** There is no postinstall
-hook, and nothing downloads while you are asking for a planet. A library
-that reaches the network mid-calculation breaks in CI, behind a corporate
-proxy, and on an airgapped machine, and does it at the least convenient
-moment. This package dropped a postinstall script back in 2.1.0 and is not
-getting another one. The data files are also Swiss Ephemeris licensed, so
-fetching them should be something you chose.
+If you would rather be asked than run a command, `prompt` does that at setup
+time:
+
+```javascript
+await ephemeris.fetchEphemeris({ ephePath: './ephe', prompt: true });
+// Download 4 Swiss Ephemeris data file(s), 2.0 MB, from https://raw.github...?
+// They are licensed AGPL-3.0 or commercially by Astrodienst. [y/N]
+```
+
+It only asks when something is actually missing, and off a terminal it
+refuses rather than hanging or assuming yes, so it cannot wedge a build.
+Hosts with their own interface can answer for it by passing `confirm`.
+
+**Nothing downloads on install, or during a calculation.** There is no
+postinstall hook, and the calculation path never touches the network. Two
+reasons, and they are practical rather than principled. `getAllPlanets` is
+synchronous, so asking mid-calculation would mean blocking the event loop or
+making every signature async. And there is no terminal to ask on in CI, in a
+server, or in a spawned process, so the honest answer there is to fail with
+a message, which is what happens. Setup is where a question can be answered,
+so that is where the question is.
+
+This package also dropped a postinstall script back in 2.1.0, and the data
+files carry Swiss Ephemeris licensing, so fetching them should be something
+you chose.
 
 When a body needs a file you do not have, the reason says so and names the
 command:
