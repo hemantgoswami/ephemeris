@@ -1,18 +1,11 @@
 [![CI](https://github.com/hemantgoswami/ephemeris/actions/workflows/ci.yml/badge.svg)](https://github.com/hemantgoswami/ephemeris/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/ephemeris.svg)](https://www.npmjs.com/package/ephemeris)
 
-This source is modified version of [xerik](https://www.npmjs.com/package/ephemeris-moshier). Thank you for such a brilliant piece of work.
+Apparent geocentric positions for the sun, moon, planets, Chiron, Sirius and
+the lunar nodes, from [Moshier's ephemeris](http://www.moshier.net).
 
-This is basically JavaScript implementation of [Moshier's ephemeris](http://www.moshier.net) calculations for sun, planets, comets, asteroids and stars.
-
-Which, initially written by [mivion](https://github.com/mivion/ephemeris), xerik converted it into a node module. This is a slight customized version with following changes:
-
-1. Changes the transit method to get standard sun/moon rise/set times as well as a custom horizon based
-1. Takes in JavaScript date object as opposed to a date time string
-1. Implements a method to just fetch in single planet as opposed to all of it
-1. Reports apparent daily motion and a retrograde flag
-1. Removes html, css bit to keep it focused to one task
-1. Reformats the code
+Pure JavaScript, no dependencies, no data files. The calculation engine is
+[pluggable](#backends) if you want Swiss Ephemeris accuracy instead.
 
 ### Installation
 
@@ -425,11 +418,11 @@ carries its own entry.
 that can actually be retrograde. Read the 3.0.0 entry before upgrading from
 2.x.
 
-### Contributors
+### Credits
 
-This implementation based on code by [Steve Moshier](http://www.moshier.net).
-
-The initial JavaScript code has been written by [xerik](https://github.com/xErik/ephemeris-moshier).
+Algorithms by [Steve Moshier](http://www.moshier.net), ported to JavaScript
+by [mivion](https://github.com/mivion/ephemeris) and packaged for node by
+xerik, whose `ephemeris-moshier` is no longer published.
 
 ### License
 
