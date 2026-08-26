@@ -274,6 +274,17 @@ declare const ephemeris: {
     ephePath?: string
     /** Which to fetch. Defaults to all of them, about 2 MB. */
     files?: string[]
+    /**
+     * Ask before downloading anything that is missing. On a terminal this
+     * prints what it is about to fetch, from where, and under what licence.
+     * Off a terminal it refuses rather than hanging or assuming yes.
+     */
+    prompt?: boolean
+    /**
+     * Answer the question yourself, for hosts with their own interface.
+     * Only called when something is actually missing.
+     */
+    confirm?: (question: string) => Promise<boolean>
     onProgress?: (event: {
       file: string
       status: 'present' | 'fetching' | 'fetched'

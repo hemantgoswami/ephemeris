@@ -988,6 +988,50 @@ test('fetching refuses an unknown file before doing anything', function (t) {
     })
 })
 
+test('asking before downloading', function (t) {
+  const fs = require('fs')
+  const scratch = path.join(__dirname, '..', 'test-ephe-scratch')
+  fs.rmSync(scratch, {recursive: true, force: true})
+
+  // Declining must leave nothing behind, and must say how to do it by hand.
+  ephemeris.fetchEphemeris({
+    ephePath: scratch,
+    files: ['sefstars.txt'],
+    prompt: true,
+    confirm: function () { return Promise.resolve(false) }
+  }).then(function () {
+    t.fail('it downloaded despite being refused')
+    t.end()
+  }).catch(function (error) {
+    t.ok(/Not downloading/.test(error.message), 'refused')
+    t.ok(/ephemeris-fetch-ephe/.test(error.message), 'and names the command instead')
+    t.equal(fs.existsSync(scratch), false, 'creating no directory')
+    t.end()
+  })
+})
+
+test('with no terminal it refuses rather than hanging or assuming yes', function (t) {
+  const fs = require('fs')
+  const scratch = path.join(__dirname, '..', 'test-ephe-scratch-tty')
+  fs.rmSync(scratch, {recursive: true, force: true})
+
+  // The default confirm returns false without a tty, which is the case in
+  // CI, in a server, and in any spawned process. Anything else would hang a
+  // build. Tests run without a tty, so this is that path.
+  t.equal(!!process.stdin.isTTY, false, 'the suite itself has no terminal')
+
+  ephemeris.fetchEphemeris({ephePath: scratch, files: ['sefstars.txt'], prompt: true})
+    .then(function () {
+      t.fail('it downloaded without anyone agreeing')
+      t.end()
+    })
+    .catch(function (error) {
+      t.ok(/Not downloading/.test(error.message), 'refused with: ' + error.message.slice(0, 34))
+      t.equal(fs.existsSync(scratch), false, 'and downloaded nothing')
+      t.end()
+    })
+})
+
 test('the fetch command ships and is wired up', function (t) {
   const fs = require('fs')
   const pkg = require('../package.json')

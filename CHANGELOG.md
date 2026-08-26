@@ -38,11 +38,15 @@
   against a recorded SHA-256, so the same bytes arrive every time and a
   substituted or truncated file is refused rather than written. Running it
   again leaves good files alone.
-  Neither is automatic. There is no postinstall hook and nothing downloads
-  during a calculation, because a library that reaches the network mid
-  calculation fails in CI, behind a proxy and on an airgapped machine. A
-  Swiss Ephemeris body that needs a missing file now names the command in
-  its `unavailableReason`.
+  `fetchEphemeris({prompt: true})` asks first, naming what it will fetch,
+  from where, and under what licence. It only asks when something is
+  missing, and off a terminal it refuses rather than hanging or assuming
+  yes. Pass `confirm` to answer from your own interface.
+  Nothing downloads on install or during a calculation. `getAllPlanets` is
+  synchronous, so asking mid calculation would mean blocking the event loop
+  or making every signature async, and there is no terminal to ask on in CI
+  or in a server anyway. A Swiss Ephemeris body that needs a missing file
+  names the command in its `unavailableReason`.
 
 ## 3.1.1
 * Restores the `3.0.1` changelog entry, which was lost when the lunar node
