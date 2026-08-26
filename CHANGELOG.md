@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.2.1
+* Trims the README preamble. The old one led with thanks to a package that
+  has since been unpublished, and described this one as a slightly modified
+  version of it, which stopped being true several releases ago.
+* Drops two dead links. `ephemeris-moshier` was unpublished from npm in May
+  2026 and `github.com/xErik/ephemeris-moshier` now 404s.
+* Keeps attribution, in one line rather than three paragraphs. The licence
+  file is unmodified GPL-3.0 boilerplate with the author placeholders never
+  filled in, and the ported sources carry no headers, so the README is the
+  only place anyone is credited for work this is derived from.
+* Documentation only.
+
 ## 3.2.0
 * Makes the calculation engine pluggable. The built in Moshier engine stays
   the default and nothing about a plain install changes: still no
